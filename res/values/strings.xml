@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">DAP</string>
+    <string name="content_description">Content</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="author">Author:</string>
+    <string name="title">Title:</string>
+    <string name="track">Track:</string>
+    <string name="progress">%1$s:%2$s</string>
+    <string name="_progress">00:00</string>
+    <string name="title_activity_file_browser">FileBrowserActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
