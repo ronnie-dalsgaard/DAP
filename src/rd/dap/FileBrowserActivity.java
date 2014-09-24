@@ -20,7 +20,7 @@ public class FileBrowserActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_file_browser);
+		setContentView(R.layout.file_browser);
 		Log.d(TAG, "onCreate");
 		
 		String state = Environment.getExternalStorageState();

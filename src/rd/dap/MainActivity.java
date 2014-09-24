@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -28,7 +29,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.main);
 		Log.d(TAG, "onCreate");
 		
 		FragmentManager fm = getFragmentManager();
@@ -46,7 +47,18 @@ public class MainActivity extends Activity {
 				player.setAudiobook(audiobook, audiobook.getPlaylist().get(0));
 			}
 		});
-
+		list.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				Audiobook audiobook = audiobooks.get(position);
+				System.out.println("LONG CLICK...");
+				System.out.println(audiobook);
+				Intent intent = new Intent(MainActivity.this, AudiobookActivity.class);
+				intent.putExtra("audiobook", audiobook);
+				startActivity(intent);
+				return true; //consume click
+			}
+		});
 		Log.d(TAG, "Detect audiobooks");
 		new AsyncTask<Void, Void, Void>(){
 			@Override

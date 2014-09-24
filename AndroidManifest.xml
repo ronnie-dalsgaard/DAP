@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="rd.dap.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,13 +25,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="rd.dap.FileBrowserActivity"
+            android:name=".FileBrowserActivity"
             android:label="@string/title_activity_file_browser" >
         </activity>
-        
-        <service 
-            android:name="rd.dap.PlayerService" >
+
+        <service android:name=".PlayerService" >
         </service>
+
+        <activity
+            android:name=".AudiobookActivity"
+            android:label="@string/title_activity_audiobook" >
+        </activity>
     </application>
 
 </manifest>

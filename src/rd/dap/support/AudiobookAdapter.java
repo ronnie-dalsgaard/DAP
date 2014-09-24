@@ -8,6 +8,7 @@ import rd.dap.model.Audiobook;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class AudiobookAdapter extends ArrayAdapter<Audiobook> {
+	private Context context;
 	private List<Audiobook> audiobooks;
 	
 	public AudiobookAdapter(Context context, int resource, List<Audiobook> audiobooks) {
 		super(context, resource, audiobooks);
+		this.context = context;
 		this.audiobooks = audiobooks;
 	}
 
@@ -49,6 +52,9 @@ public class AudiobookAdapter extends ArrayAdapter<Audiobook> {
 			File cover = audiobook.getCover();
 			Bitmap bm = BitmapFactory.decodeFile(cover.getAbsolutePath());
 			holder.cover_iv.setImageBitmap(bm);
+		} else {
+			Drawable drw = context.getResources().getDrawable(R.drawable.ic_action_help);
+			holder.cover_iv.setImageDrawable(drw);
 		}
 		
 		

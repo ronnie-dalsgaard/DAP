@@ -14,6 +14,7 @@
         android:src="@drawable/ic_action_help" />
 
     <LinearLayout
+        android:id="@+id/audiobook_item_info_layout"
         android:layout_width="0dp"
         android:layout_height="@dimen/cover_height"
         android:layout_weight="5"
