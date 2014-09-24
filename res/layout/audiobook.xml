@@ -52,6 +52,15 @@
             android:layout_centerHorizontal="true"
             android:contentDescription="@string/content_description"
             android:src="@drawable/ic_action_help" />
+        
+        <ImageView
+            android:id="@+id/audiobook_cover_edit_btn"
+            android:layout_width="@dimen/icon_width_tiny"
+            android:layout_height="@dimen/icon_height_tiny"
+            android:layout_alignTop="@+id/audiobook_cover_iv"
+            android:layout_toRightOf="@+id/audiobook_cover_iv"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_edit" />
 
         <ListView
             android:id="@+id/audiobook_tracklist_lv"
