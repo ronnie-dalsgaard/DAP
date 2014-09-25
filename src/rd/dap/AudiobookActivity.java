@@ -3,6 +3,7 @@ package rd.dap;
 import rd.dap.model.Audiobook;
 import rd.dap.support.AudiobookDetailsAdapter;
 import android.app.Activity;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,13 +22,16 @@ public class AudiobookActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.audiobook);
 
 		Audiobook audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
 		if(audiobook == null) return;
 
 		//detailslist
-		ListView list = (ListView) findViewById(R.id.audiobook_details_list_lv);
+		ListView list = new ListView(AudiobookActivity.this);
+		ColorDrawable colorDrawable = new ColorDrawable(getResources().getColor(R.color.light_gray));
+		list.setDivider(colorDrawable);
+		list.setDividerHeight(1);
+		setContentView(list);
 		adapter = new AudiobookDetailsAdapter(this, R.layout.track_item, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);
@@ -45,6 +49,7 @@ public class AudiobookActivity extends Activity {
 					Toast.makeText(AudiobookActivity.this, "Track "+(position-NUMBER_OF_ELEMENTS_NOT_OF_TYPE_TRACK), Toast.LENGTH_SHORT).show();
 				}
 				
+//				ListView list = new ListView(AudiobookActivity.this);
 			}
 		});
 
