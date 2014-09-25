@@ -4,71 +4,12 @@
     android:layout_height="match_parent"
     tools:context="rd.dap.AudiobookActivity" >
 
-    
-
-        <TextView
-            android:id="@+id/audiobook_author_tv"
-            android:layout_width="@dimen/mini_player_width"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:layout_toLeftOf="@+id/audiobook_author_edit_btn"
-            android:text="TextView"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <ImageView
-            android:id="@+id/audiobook_author_edit_btn"
-            android:layout_width="@dimen/icon_width_tiny"
-            android:layout_height="@dimen/icon_height_tiny"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/audiobook_author_tv"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_edit" />
-
-        <TextView
-            android:id="@+id/audiobook_album_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/audiobook_author_tv"
-            android:layout_centerHorizontal="true"
-            android:layout_toLeftOf="@+id/audiobook_album_edit_btn"
-            android:text="TextView"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <ImageView
-            android:id="@+id/audiobook_album_edit_btn"
-            android:layout_width="@dimen/icon_width_tiny"
-            android:layout_height="@dimen/icon_height_tiny"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/audiobook_album_tv"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_edit" />
-
-        <ImageView
-            android:id="@+id/audiobook_cover_iv"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_below="@+id/audiobook_album_tv"
-            android:layout_centerHorizontal="true"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_help" />
-        
-        <ImageView
-            android:id="@+id/audiobook_cover_edit_btn"
-            android:layout_width="@dimen/icon_width_tiny"
-            android:layout_height="@dimen/icon_height_tiny"
-            android:layout_alignTop="@+id/audiobook_cover_iv"
-            android:layout_toRightOf="@+id/audiobook_cover_iv"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_edit" />
-
-        <ListView
-            android:id="@+id/audiobook_tracklist_lv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/audiobook_cover_iv"
-            android:divider="@color/light_gray"
-            android:dividerHeight="1dp" >
-        </ListView>
+    <ListView
+        android:id="@+id/audiobook_details_list_lv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@color/light_gray"
+        android:dividerHeight="1dp" >
+    </ListView>
 
 </RelativeLayout>

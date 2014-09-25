@@ -237,10 +237,10 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 				a.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if(player == null){
-							btn.setImageDrawable(null);
-						} else {
+						if(bound && audiobook != null){
 							btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
+						} else {
+							btn.setImageDrawable(null);
 						}
 					}
 				});

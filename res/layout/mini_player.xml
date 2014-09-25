@@ -23,9 +23,7 @@
             android:layout_width="@dimen/cover_width"
             android:layout_height="@dimen/cover_height"
             android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_play_over_video"
-            android:background="@color/transparent"
-            android:text="@string/play" />
+            android:background="@color/transparent" />
     </RelativeLayout>
 
     <LinearLayout
