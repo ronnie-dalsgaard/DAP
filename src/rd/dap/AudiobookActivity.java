@@ -1,8 +1,18 @@
 package rd.dap;
 
+import static rd.dap.support.AudiobookDetailsAdapter.NUMBER_OF_ELEMENTS_NOT_OF_TYPE_TRACK;
+import static rd.dap.support.AudiobookDetailsAdapter.TYPE_ALBUM;
+import static rd.dap.support.AudiobookDetailsAdapter.TYPE_AUTHOR;
+import static rd.dap.support.AudiobookDetailsAdapter.TYPE_COVER;
+
+import java.util.ArrayList;
+
 import rd.dap.model.Audiobook;
 import rd.dap.support.AudiobookDetailsAdapter;
+import rd.dap.support.AuthorAdapter;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,10 +20,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import static rd.dap.support.AudiobookDetailsAdapter.*;
 
 public class AudiobookActivity extends Activity {
 	private boolean edit_mode = false;
@@ -23,7 +32,7 @@ public class AudiobookActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Audiobook audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
+		final Audiobook audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
 		if(audiobook == null) return;
 
 		//detailslist
@@ -39,8 +48,20 @@ public class AudiobookActivity extends Activity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				if(!edit_mode) return;
 				if(position == TYPE_AUTHOR){
-					Toast.makeText(AudiobookActivity.this, "Author", Toast.LENGTH_SHORT).show();
+					final ArrayList<String> authors = new ArrayList<String>();
+					authors.add("Dennis Jürgensen"); authors.add("John G. Hemry"); authors.add("Rick Riordan");
+					
+					ListView list = new ListView(AudiobookActivity.this);
+					list.setBackground(AudiobookActivity.this.getResources().getDrawable(R.drawable.miniplayer_bg));
+					AlertDialog.Builder builder = new AlertDialog.Builder(AudiobookActivity.this);
+					final ArrayAdapter<String> adapter = new AuthorAdapter(AudiobookActivity.this, R.layout.input_item, authors);
+					list.setAdapter(adapter);
+					builder.setView(list);
+					Dialog dialog = builder.create();
+					dialog.show();
+				
 				} else if(position == TYPE_ALBUM) {
 					Toast.makeText(AudiobookActivity.this, "Album", Toast.LENGTH_SHORT).show();
 				} else if(position == TYPE_COVER) {
@@ -48,24 +69,8 @@ public class AudiobookActivity extends Activity {
 				} else {
 					Toast.makeText(AudiobookActivity.this, "Track "+(position-NUMBER_OF_ELEMENTS_NOT_OF_TYPE_TRACK), Toast.LENGTH_SHORT).show();
 				}
-				
-//				ListView list = new ListView(AudiobookActivity.this);
 			}
 		});
-
-		//edit mode
-		editMode();
-	}
-
-	private void editMode(){
-//		ImageView[] edits = new ImageView[3];
-//		edits[0] = (ImageView) findViewById(R.id.audiobook_album_edit_btn);
-//		edits[1] = (ImageView) findViewById(R.id.audiobook_author_edit_btn);
-//		edits[2] = (ImageView) findViewById(R.id.audiobook_cover_edit_btn);
-//		for(ImageView edit : edits){
-//			if(edit_mode) edit.setVisibility(View.VISIBLE);
-//			else edit.setVisibility(View.GONE);
-//		}
 	}
 
 	//Menu
@@ -82,7 +87,6 @@ public class AudiobookActivity extends Activity {
 			int string_id = edit_mode ? R.string.edit_mode_exit : R.string.edit_mode_enter;
 			String item_title = getResources().getString(string_id) ;
 			item.setTitle(item_title);
-			editMode();
 			adapter.setEditMode(edit_mode);
 			adapter.notifyDataSetChanged();
 		}

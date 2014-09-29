@@ -17,6 +17,7 @@ import android.widget.TextView;
 public class FileAdapter extends ArrayAdapter<File> {
 	private List<File> list;
 	private Context context;
+	private File root;
 	
 	public FileAdapter(Context context, int resource, List<File> list) {
 		super(context, resource, list);
@@ -45,7 +46,9 @@ public class FileAdapter extends ArrayAdapter<File> {
 		
 		File file = list.get(position);
 
-		holder.name_tv.setText(file.getName());
+		if(!file.equals(root)){
+			holder.name_tv.setText(position == 0? ".." : file.getName());
+		}
 		holder.path_tv.setText(file.getAbsolutePath());
 		Drawable ic = null;
 		if(file.isDirectory()){
@@ -70,6 +73,10 @@ public class FileAdapter extends ArrayAdapter<File> {
 	static class ViewHolder {
 		public TextView name_tv, path_tv;
 		public ImageView type_iv, selecte_iv;
+	}
+
+	public void setRoot(File root) {
+		this.root = root;
 	}
 
 }

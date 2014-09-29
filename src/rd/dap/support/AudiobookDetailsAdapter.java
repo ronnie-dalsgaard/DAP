@@ -43,7 +43,6 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		int type = getItemViewType(position);
-
 		LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		switch(type){
 		case TYPE_AUTHOR:

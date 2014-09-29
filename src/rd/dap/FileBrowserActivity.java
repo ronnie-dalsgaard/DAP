@@ -29,7 +29,7 @@ public class FileBrowserActivity extends Activity {
 			throw new RuntimeException("No external storrage!");
 		}
 
-		File root = Environment.getExternalStorageDirectory();
+		final File root = Environment.getExternalStorageDirectory();
 		final ArrayList<File> list = new ArrayList<File>();
 		for(File f : root.listFiles()){
 			list.add(f);
@@ -37,6 +37,7 @@ public class FileBrowserActivity extends Activity {
 		
 		ListView listview = (ListView) findViewById(R.id.file_browser_listview);
 		final FileAdapter adapter = new FileAdapter(this, R.layout.file_item, list);
+		adapter.setRoot(root);
 		listview.setAdapter(adapter);
 		listview.setOnItemClickListener(new OnItemClickListener() {
 
@@ -45,6 +46,9 @@ public class FileBrowserActivity extends Activity {
 				File file = list.get(position);
 				if(file.isDirectory()){
 					list.clear();
+					if(!file.equals(root)){
+						list.add(file.getParentFile());
+					}
 					for(File f : file.listFiles()){
 						list.add(f);
 					}
