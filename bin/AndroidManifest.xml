@@ -36,6 +36,10 @@
             android:name=".AudiobookActivity"
             android:label="@string/title_activity_audiobook" >
         </activity>
+        <activity
+            android:name=".EditAudiobookActivity"
+            android:label="@string/title_activity_edit_audiobook" >
+        </activity>
     </application>
 
 </manifest>

@@ -31,12 +31,4 @@
         android:text="Duration: Unknown"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <ImageView
-        android:id="@+id/track_item_edit_iv"
-        android:layout_width="@dimen/icon_width_tiny"
-        android:layout_height="@dimen/icon_height_tiny"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/ic_action_edit" />
-
 </RelativeLayout>

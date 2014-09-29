@@ -4,15 +4,13 @@ import static rd.dap.support.AudiobookDetailsAdapter.NUMBER_OF_ELEMENTS_NOT_OF_T
 import static rd.dap.support.AudiobookDetailsAdapter.TYPE_ALBUM;
 import static rd.dap.support.AudiobookDetailsAdapter.TYPE_AUTHOR;
 import static rd.dap.support.AudiobookDetailsAdapter.TYPE_COVER;
-
-import java.util.ArrayList;
-
 import rd.dap.model.Audiobook;
 import rd.dap.support.AudiobookDetailsAdapter;
-import rd.dap.support.AuthorAdapter;
+import rd.dap.support.TextInputDialog;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.FragmentManager;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,19 +18,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 public class AudiobookActivity extends Activity {
-	private boolean edit_mode = false;
 	private AudiobookDetailsAdapter adapter;
+	private Audiobook audiobook;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		final Audiobook audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
+		audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
 		if(audiobook == null) return;
 
 		//detailslist
@@ -41,27 +38,31 @@ public class AudiobookActivity extends Activity {
 		list.setDivider(colorDrawable);
 		list.setDividerHeight(1);
 		setContentView(list);
-		adapter = new AudiobookDetailsAdapter(this, R.layout.track_item, audiobook.getPlaylist());
+		adapter = new AudiobookDetailsAdapter(this, R.layout.audiobook_item_track, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if(!edit_mode) return;
 				if(position == TYPE_AUTHOR){
-					final ArrayList<String> authors = new ArrayList<String>();
-					authors.add("Dennis Jürgensen"); authors.add("John G. Hemry"); authors.add("Rick Riordan");
+//					EditText et = new EditText(AudiobookActivity.this);
+////					et.setBackground(AudiobookActivity.this.getResources().getDrawable(R.drawable.miniplayer_bg));
+////					et.setBackgroundColor(AudiobookActivity.this.getResources().getColor(R.color.black));
+////					et.setTextColor(AudiobookActivity.this.getResources().getColor(R.color.white));
+//					AlertDialog.Builder builder = new AlertDialog.Builder(AudiobookActivity.this);
+//					builder.setView(et);
+//					builder.setPositiveButton("OK", null);
+//					builder.setNegativeButton("Cancel", null);
+//					Dialog d = builder.create();
+//					d.getWindow().set
+//					d.getWindow().setBackgroundDrawable(AudiobookActivity.this.getResources().getDrawable(R.drawable.miniplayer_bg));
+//					d.show();
+					FragmentManager manager = getFragmentManager();
+					DialogFragment dialog = new TextInputDialog();
+					dialog.show(manager, "TextInputDialog");
 					
-					ListView list = new ListView(AudiobookActivity.this);
-					list.setBackground(AudiobookActivity.this.getResources().getDrawable(R.drawable.miniplayer_bg));
-					AlertDialog.Builder builder = new AlertDialog.Builder(AudiobookActivity.this);
-					final ArrayAdapter<String> adapter = new AuthorAdapter(AudiobookActivity.this, R.layout.input_item, authors);
-					list.setAdapter(adapter);
-					builder.setView(list);
-					Dialog dialog = builder.create();
-					dialog.show();
-				
+//					Toast.makeText(AudiobookActivity.this, "Author", Toast.LENGTH_SHORT).show();
 				} else if(position == TYPE_ALBUM) {
 					Toast.makeText(AudiobookActivity.this, "Album", Toast.LENGTH_SHORT).show();
 				} else if(position == TYPE_COVER) {
@@ -83,12 +84,9 @@ public class AudiobookActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == R.id.menu_item_edit_mode) {
-			edit_mode = !edit_mode;
-			int string_id = edit_mode ? R.string.edit_mode_exit : R.string.edit_mode_enter;
-			String item_title = getResources().getString(string_id) ;
-			item.setTitle(item_title);
-			adapter.setEditMode(edit_mode);
-			adapter.notifyDataSetChanged();
+			Intent intent = new Intent(this, EditAudiobookActivity.class);
+			intent.putExtra("audiobook", audiobook);
+			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
 	}

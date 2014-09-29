@@ -24,7 +24,6 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 	private Context context;
 	private Audiobook audiobook;
 	private List<Track> tracks;
-	private boolean edit_mode;
 
 	public AudiobookDetailsAdapter(Context context, int resource, List<Track> tracks) {
 		super(context, resource, tracks);
@@ -36,10 +35,6 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 		this.audiobook = audiobook;
 	}
 
-	public void setEditMode(boolean edit_mode) {
-		this.edit_mode = edit_mode;
-	}
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		int type = getItemViewType(position);
@@ -49,43 +44,34 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 			AuthorViewHolder authorHolder;
 			if(convertView == null){
 				authorHolder = new AuthorViewHolder();
-				convertView = inflater.inflate(R.layout.author_item, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_item_author, parent, false);
 				authorHolder.author_item_tv = (TextView) convertView.findViewById(R.id.author_item_tv);
-				authorHolder.author_item_edit = (ImageView) convertView.findViewById(R.id.author_item_edit);
 				convertView.setTag(authorHolder);
 			} else {
 				authorHolder = (AuthorViewHolder) convertView.getTag();
 			}
 			authorHolder.author_item_tv.setText(audiobook.getAuthor());
-			
-			//edit mode
-			authorHolder.author_item_edit.setVisibility(edit_mode ? View.VISIBLE : View.GONE);
 			break;
 
 		case TYPE_ALBUM:
 			AlbumViewHolder albumHolder;
 			if(convertView == null){
 				albumHolder = new AlbumViewHolder();
-				convertView = inflater.inflate(R.layout.album_item, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_item_album, parent, false);
 				albumHolder.album_item_tv = (TextView) convertView.findViewById(R.id.album_item_tv);
-				albumHolder.album_item_edit = (ImageView) convertView.findViewById(R.id.album_item_edit);
 				convertView.setTag(albumHolder);
 			} else {
 				albumHolder = (AlbumViewHolder) convertView.getTag();
 			}
 			albumHolder.album_item_tv.setText(audiobook.getAlbum());
-			
-			//edit mode
-			albumHolder.album_item_edit.setVisibility(edit_mode ? View.VISIBLE : View.GONE);
 			break;
 
 		case TYPE_COVER:
 			CoverViewHolder coverHolder;
 			if(convertView == null){
 				coverHolder = new CoverViewHolder();
-				convertView = inflater.inflate(R.layout.cover_item, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_item_cover, parent, false);
 				coverHolder.cover_item_iv = (ImageView) convertView.findViewById(R.id.cover_item_iv);
-				coverHolder.cover_item_edit = (ImageView) convertView.findViewById(R.id.cover_item_edit);
 				convertView.setTag(coverHolder);
 			} else {
 				coverHolder = (CoverViewHolder) convertView.getTag();
@@ -98,22 +84,18 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 				Drawable drw = context.getResources().getDrawable(R.drawable.ic_action_help);
 				coverHolder.cover_item_iv.setImageDrawable(drw);
 			}
-			
-			//edit mode
-			coverHolder.cover_item_edit.setVisibility(edit_mode ? View.VISIBLE : View.GONE);
 			break;
 
 		case TYPE_TRACK:
 			TrackViewHolder trackHolder;
 			if(convertView == null){
 				trackHolder = new TrackViewHolder();
-				convertView = inflater.inflate(R.layout.track_item, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_item_track, parent, false);
 				//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 
 				trackHolder.track_item_title_tv = (TextView) convertView.findViewById(R.id.track_item_title);
 				trackHolder.track_item_duration_tv = (TextView) convertView.findViewById(R.id.track_item_duration);
 				trackHolder.track_item_cover_iv = (ImageView) convertView.findViewById(R.id.track_item_cover);
-				trackHolder.track_item_edit = (ImageView) convertView.findViewById(R.id.track_item_edit_iv);
 				convertView.setTag(trackHolder);
 			} else {
 				trackHolder = (TrackViewHolder) convertView.getTag();
@@ -141,10 +123,6 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 			} else {
 				trackHolder.track_item_duration_tv.setVisibility(View.GONE);
 			}
-
-			//edit mode
-			trackHolder.track_item_edit.setVisibility(edit_mode ? View.VISIBLE : View.GONE);
-
 			break;
 		}
 
@@ -165,20 +143,18 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 
 	static class AuthorViewHolder {
 		public TextView author_item_tv;
-		public ImageView author_item_edit;
 	}
 
 	static class AlbumViewHolder {
 		public TextView album_item_tv;
-		public ImageView album_item_edit;
 	}
 
 	static class CoverViewHolder {
-		public ImageView cover_item_iv, cover_item_edit;
+		public ImageView cover_item_iv;
 	}
 
 	static class TrackViewHolder {
 		public TextView track_item_title_tv, track_item_duration_tv;
-		public ImageView track_item_cover_iv, track_item_edit;
+		public ImageView track_item_cover_iv;
 	}
 }
