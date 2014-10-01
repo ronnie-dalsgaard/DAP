@@ -12,31 +12,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class TextInputDialog extends DialogFragment {
-	private ArrayList<String> authors = new ArrayList<String>();
+public abstract class TextInputDialog extends DialogFragment {
+	private ArrayList<String> list = new ArrayList<String>();
+	private Dialog dialog;
+	private String title, message, value;
 	
-	public TextInputDialog(){
-		for(int i = 0; i < 10; i++){
-		authors.add("Dennis Jürgensen");
-		authors.add("Rick Riordan");
-		authors.add("John G. Hemry");
-		}
+	public TextInputDialog(String title, String message, String value, ArrayList<String> list){
+		this.title = title;
+		this.message = message;
+		this.value = value;
+		this.list.addAll(list); //Defensice copy
 	}
 	
 	@Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-		LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
+//		LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = getActivity().getLayoutInflater();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), android.R.style.Theme_Translucent);
-        builder.setTitle("Title");
+        if(title != null) builder.setTitle(title);
+        if(message != null) builder.setMessage(message);
         View v = inflater.inflate(R.layout.edittext_and_list, null, false);
-        LinearLayout layout = (LinearLayout) v.findViewById(R.id.et_list);
+        final LinearLayout layout = (LinearLayout) v.findViewById(R.id.et_list);
         final EditText et = (EditText) v.findViewById(R.id.et_list_et);
+        if(value != null && !value.isEmpty()) et.setText(value);
         
-        for(final String author : authors){
+        for(final String author : list){
         	TextView child = new TextView(getActivity());
         	child.setTextAppearance(getActivity(), android.R.style.TextAppearance_Large);
         	int small = Math.round(getActivity().getResources().getDimension(R.dimen.margin_small));
@@ -52,7 +56,21 @@ public class TextInputDialog extends DialogFragment {
         	child.setText(author);
         	layout.addView(child);
         }
+        
         builder.setView(v);
-        return builder.create();
+        dialog = builder.create();
+        
+        ImageButton btn = (ImageButton) v.findViewById(R.id.et_list_btn);
+        btn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+				setResult(et.getText().toString());
+			}
+		});
+        
+        return dialog;
 	}
+	
+	public abstract void setResult(String result);
 }
