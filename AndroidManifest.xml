@@ -37,8 +37,12 @@
             android:label="@string/title_activity_audiobook" >
         </activity>
         <activity
-            android:name=".EditAudiobookActivity"
+            android:name="rd.dap.junk.EditAudiobookActivity"
             android:label="@string/title_activity_edit_audiobook" >
+        </activity>
+        <activity
+            android:name=".InputActivity"
+            android:label="@string/title_activity_input" >
         </activity>
     </application>
 

@@ -341,69 +341,60 @@ public final class R {
         public static final int red_tape=0x7f020093;
     }
     public static final class id {
-        public static final int action_settings=0x7f090029;
-        public static final int album_item_label=0x7f090005;
-        public static final int album_item_tv=0x7f090006;
-        public static final int audiobook_item_author_tv=0x7f090002;
-        public static final int audiobook_item_cover_iv=0x7f090000;
-        public static final int audiobook_item_info_layout=0x7f090001;
-        public static final int audiobook_item_title_tv=0x7f090003;
-        public static final int audiobook_item_track_tv=0x7f090004;
-        public static final int author_item_edit=0x7f09000b;
-        public static final int author_item_edit_et=0x7f09000a;
-        public static final int author_item_edit_label=0x7f090009;
-        public static final int author_item_label=0x7f090007;
-        public static final int author_item_tv=0x7f090008;
-        public static final int cover_item_iv=0x7f09000c;
-        public static final int dialog_text_input_et=0x7f090011;
-        public static final int et_list=0x7f090012;
-        public static final int et_list_btn=0x7f090014;
-        public static final int et_list_et=0x7f090013;
-        public static final int file_browser_breadcrumbs=0x7f090015;
-        public static final int file_browser_listview=0x7f090016;
-        public static final int file_browser_mini_player=0x7f090017;
-        public static final int file_item_name_tv=0x7f09001a;
-        public static final int file_item_path_tv=0x7f09001b;
-        public static final int file_item_select_iv=0x7f090019;
-        public static final int file_item_type_iv=0x7f090018;
-        public static final int input_item_btn=0x7f09001d;
-        public static final int input_item_et=0x7f09001c;
-        public static final int main_audiobook_list=0x7f09001e;
-        public static final int main_mini_player=0x7f09001f;
-        public static final int menu_item_edit_mode=0x7f090028;
-        public static final int menu_item_file_browser=0x7f09002a;
-        public static final int miniplayer_album_tv=0x7f090024;
-        public static final int miniplayer_author_tv=0x7f090023;
-        public static final int miniplayer_cover_iv=0x7f090020;
-        public static final int miniplayer_info=0x7f090022;
-        public static final int miniplayer_play_btn=0x7f090021;
-        public static final int miniplayer_progress_tv=0x7f090027;
-        public static final int miniplayer_time=0x7f090026;
-        public static final int miniplayer_track_tv=0x7f090025;
-        public static final int track_item_cover=0x7f09000d;
-        public static final int track_item_duration=0x7f090010;
-        public static final int track_item_edit_iv=0x7f09000f;
-        public static final int track_item_title=0x7f09000e;
+        public static final int album_item_label=0x7f090000;
+        public static final int album_item_tv=0x7f090001;
+        public static final int audiobook_item_author_tv=0x7f09000b;
+        public static final int audiobook_item_cover_iv=0x7f090009;
+        public static final int audiobook_item_info_layout=0x7f09000a;
+        public static final int audiobook_item_title_tv=0x7f09000c;
+        public static final int audiobook_item_track_tv=0x7f09000d;
+        public static final int author_item_label=0x7f090002;
+        public static final int author_item_tv=0x7f090003;
+        public static final int cover_item_iv=0x7f090004;
+        public static final int file_browser_breadcrumbs=0x7f09000e;
+        public static final int file_browser_listview=0x7f09000f;
+        public static final int file_browser_mini_player=0x7f090010;
+        public static final int file_item_name_tv=0x7f090013;
+        public static final int file_item_path_tv=0x7f090014;
+        public static final int file_item_select_iv=0x7f090012;
+        public static final int file_item_type_iv=0x7f090011;
+        public static final int input_btn=0x7f090016;
+        public static final int input_et=0x7f090015;
+        public static final int input_item_tv=0x7f090018;
+        public static final int input_lv=0x7f090017;
+        public static final int main_audiobook_list=0x7f090019;
+        public static final int main_mini_player=0x7f09001a;
+        public static final int menu_item_edit_mode=0x7f090023;
+        public static final int menu_item_file_browser=0x7f090024;
+        public static final int miniplayer_album_tv=0x7f09001f;
+        public static final int miniplayer_author_tv=0x7f09001e;
+        public static final int miniplayer_cover_iv=0x7f09001b;
+        public static final int miniplayer_info=0x7f09001d;
+        public static final int miniplayer_play_btn=0x7f09001c;
+        public static final int miniplayer_progress_tv=0x7f090022;
+        public static final int miniplayer_time=0x7f090021;
+        public static final int miniplayer_track_tv=0x7f090020;
+        public static final int track_item_cover=0x7f090005;
+        public static final int track_item_duration=0x7f090008;
+        public static final int track_item_edit_iv=0x7f090007;
+        public static final int track_item_title=0x7f090006;
     }
     public static final class layout {
-        public static final int audiobook_item=0x7f030000;
-        public static final int audiobook_item_album=0x7f030001;
-        public static final int audiobook_item_author=0x7f030002;
-        public static final int audiobook_item_author_edit=0x7f030003;
-        public static final int audiobook_item_cover=0x7f030004;
-        public static final int audiobook_item_track=0x7f030005;
-        public static final int dialog_text_select=0x7f030006;
-        public static final int edittext_and_list=0x7f030007;
-        public static final int file_browser=0x7f030008;
-        public static final int file_item=0x7f030009;
-        public static final int input_item=0x7f03000a;
-        public static final int main=0x7f03000b;
-        public static final int mini_player=0x7f03000c;
+        public static final int audiobook_details_item_album=0x7f030000;
+        public static final int audiobook_details_item_author=0x7f030001;
+        public static final int audiobook_details_item_cover=0x7f030002;
+        public static final int audiobook_details_item_track=0x7f030003;
+        public static final int audiobook_item=0x7f030004;
+        public static final int file_browser=0x7f030005;
+        public static final int file_browser_file_item=0x7f030006;
+        public static final int input=0x7f030007;
+        public static final int input_item=0x7f030008;
+        public static final int main=0x7f030009;
+        public static final int mini_player=0x7f03000a;
     }
     public static final class menu {
         public static final int audiobook=0x7f080000;
-        public static final int edit_audiobook=0x7f080001;
-        public static final int main=0x7f080002;
+        public static final int main=0x7f080001;
     }
     public static final class string {
         public static final int _progress=0x7f060008;
@@ -421,6 +412,7 @@ public final class R {
         public static final int title_activity_audiobook=0x7f06000c;
         public static final int title_activity_edit_audiobook=0x7f06000f;
         public static final int title_activity_file_browser=0x7f060009;
+        public static final int title_activity_input=0x7f060010;
         public static final int track=0x7f060006;
     }
     public static final class style {

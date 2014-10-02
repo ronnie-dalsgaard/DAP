@@ -16,7 +16,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/file_type_height"
         android:layout_toLeftOf="@+id/file_item_select_iv"
         android:layout_toRightOf="@+id/file_item_type_iv"
         android:gravity="center_vertical"
@@ -33,6 +33,7 @@
             android:id="@+id/file_item_path_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:text="absolute path" />
     </LinearLayout>
 

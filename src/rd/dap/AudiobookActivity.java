@@ -5,29 +5,29 @@ import static rd.dap.support.AudiobookDetailsAdapter.TYPE_ALBUM;
 import static rd.dap.support.AudiobookDetailsAdapter.TYPE_AUTHOR;
 import static rd.dap.support.AudiobookDetailsAdapter.TYPE_COVER;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import rd.dap.model.Audiobook;
 import rd.dap.model.Track;
 import rd.dap.support.AudiobookDetailsAdapter;
-import rd.dap.support.TextInputDialog;
 import android.app.Activity;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class AudiobookActivity extends Activity {
+	private static final int REQUEST_EDIT_AUTHOR = 1000;
+	private static final int REQUEST_EDIT_ALBUM = 1001;
+	private static final int REQUEST_EDIT_COVER = 1002;
+	private static final int REQUEST_EDIT_TRACK = 1003;
 	private AudiobookDetailsAdapter adapter;
 	private Audiobook audiobook;
+	private int selectedPosition;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +42,7 @@ public class AudiobookActivity extends Activity {
 		list.setDivider(colorDrawable);
 		list.setDividerHeight(1);
 		setContentView(list);
-		adapter = new AudiobookDetailsAdapter(this, R.layout.audiobook_item_track, audiobook.getPlaylist());
+		adapter = new AudiobookDetailsAdapter(this, R.layout.audiobook_details_item_track, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -50,103 +50,69 @@ public class AudiobookActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if(position == TYPE_AUTHOR){
-					FragmentManager manager = getFragmentManager();
 					ArrayList<String> list = new ArrayList<String>();
 					list.add("Dennis Jürgensen");
 					list.add("Rick Riordan");
 					list.add("John G. Hemry");
-					String title = "Author";
-					String message = "Enter an author name or select from list";
-					String value = audiobook.getAuthor();
-					DialogFragment dialog = new TextInputDialog(title, message, value, list) {
-						@Override 
-						public void setResult(String result) {
-							audiobook.setAuthor(result);
-							adapter.notifyDataSetChanged();
-						}
-					};
-					dialog.show(manager, "TextInputDialog");
+					Intent intent = new Intent(AudiobookActivity.this, InputActivity.class);
+					intent.putExtra("list", list);
+					intent.putExtra("requestcode", REQUEST_EDIT_AUTHOR);
+					startActivityForResult(intent, REQUEST_EDIT_AUTHOR);
 				} else if(position == TYPE_ALBUM) {
-					FragmentManager manager = getFragmentManager();
 					ArrayList<String> list = new ArrayList<String>();
-					String title = "Album";
-					String message = "Enter an album name";
-					String value = audiobook.getAlbum();
-					DialogFragment dialog = new TextInputDialog(title, message, value, list) {
-						@Override 
-						public void setResult(String result) {
-							audiobook.setAlbum(result);
-							adapter.notifyDataSetChanged();
-						}
-					};
-					dialog.show(manager, "TextInputDialog");
+//					list.add("Dennis Jürgensen");
+//					list.add("Rick Riordan");
+//					list.add("John G. Hemry");
+					Intent intent = new Intent(AudiobookActivity.this, InputActivity.class);
+					intent.putExtra("list", list);
+					intent.putExtra("requestcode", REQUEST_EDIT_ALBUM);
+					startActivityForResult(intent, REQUEST_EDIT_ALBUM);
 				} else if(position == TYPE_COVER) {
-					Toast.makeText(AudiobookActivity.this, "Cover", Toast.LENGTH_SHORT).show();
+					Intent intent = new Intent(AudiobookActivity.this, FileBrowserActivity.class);
+					intent.putExtra("requestcode", REQUEST_EDIT_COVER);
+					startActivityForResult(intent, REQUEST_EDIT_COVER);
 				} else {
-					final Track track = audiobook.getPlaylist().get(position-NUMBER_OF_ELEMENTS_NOT_OF_TYPE_TRACK);					
-					FragmentManager manager = getFragmentManager();
 					ArrayList<String> list = new ArrayList<String>();
-					String title = "Track";
-					String message = "Enter a track name";
-					String value = track.getTitle();
-					DialogFragment dialog = new TextInputDialog(title, message, value, list) {
-						@Override 
-						public void setResult(String result) {
-							track.setTitle(result);
-							adapter.notifyDataSetChanged();
-						}
-					};
-					dialog.show(manager, "TextInputDialog");
+//					list.add("Dennis Jürgensen");
+//					list.add("Rick Riordan");
+//					list.add("John G. Hemry");
+					Intent intent = new Intent(AudiobookActivity.this, InputActivity.class);
+					intent.putExtra("list", list);
+					selectedPosition = position-NUMBER_OF_ELEMENTS_NOT_OF_TYPE_TRACK;
+					intent.putExtra("requestcode", REQUEST_EDIT_TRACK);
+					startActivityForResult(intent, REQUEST_EDIT_TRACK);
 				}
 			}
 		});
-		
-//		list.setOnItemLongClickListener(new OnItemLongClickListener() {
-//			@Override
-//			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//				if(position == TYPE_AUTHOR){
-//					// Do nothing
-//				} else if(position == TYPE_ALBUM) {
-//					// Do nothing
-//				} else if(position == TYPE_COVER) {
-//					// Do nothing
-//				} else {
-//					final Track track = audiobook.getPlaylist().get(position-NUMBER_OF_ELEMENTS_NOT_OF_TYPE_TRACK);					
-//					FragmentManager manager = getFragmentManager();
-//					ArrayList<String> list = new ArrayList<String>();
-//					String title = "File name";
-//					String message = "Enter a file name";
-//					String value = track.getFile().getName();
-//					DialogFragment dialog = new TextInputDialog(title, message, value, list) {
-//						@Override 
-//						public void setResult(String result) {
-//							String path = track.getFile().getParentFile().getAbsolutePath();
-//							track.getFile().renameTo(new File(path, result));
-//							adapter.notifyDataSetChanged();
-//						}
-//					};
-//					dialog.show(manager, "TextInputDialog");
-//				}
-//				return true;
-//			}
-//		});
-
 	}
-
-	//Menu
+	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.audiobook, menu);
-		return true;
-	}
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
-		if (id == R.id.menu_item_edit_mode) {
-			Intent intent = new Intent(this, EditAudiobookActivity.class);
-			intent.putExtra("audiobook", audiobook);
-			startActivity(intent);
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		if(data == null) return;
+		String result;
+		switch(requestCode){
+		case REQUEST_EDIT_AUTHOR:
+			result = data.getStringExtra("result");
+			audiobook.setAuthor(result);
+			adapter.notifyDataSetChanged();
+			break;
+		case REQUEST_EDIT_ALBUM:
+			result = data.getStringExtra("result");
+			audiobook.setAlbum(result);
+			adapter.notifyDataSetChanged();
+			break;
+		case REQUEST_EDIT_COVER:
+			result = data.getStringExtra("result");
+			File cover = new File(result);
+			audiobook.setCover(cover);
+			adapter.notifyDataSetChanged();
+			break;
+		case REQUEST_EDIT_TRACK:
+			result = data.getStringExtra("result");
+			Track track = audiobook.getPlaylist().get(selectedPosition);
+			track.setTitle(result);
+			adapter.notifyDataSetChanged();
+			break;
 		}
-		return super.onOptionsItemSelected(item);
 	}
 }

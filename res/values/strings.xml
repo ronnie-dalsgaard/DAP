@@ -17,5 +17,6 @@
     <string name="edit_mode_enter">Enter edit mode</string>
     <string name="edit_mode_exit">Exit edit mode</string>
     <string name="title_activity_edit_audiobook">EditAudiobookActivity</string>
+    <string name="title_activity_input">InputActivity</string>
 
 </resources>

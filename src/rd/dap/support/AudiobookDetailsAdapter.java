@@ -44,7 +44,7 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 			AuthorViewHolder authorHolder;
 			if(convertView == null){
 				authorHolder = new AuthorViewHolder();
-				convertView = inflater.inflate(R.layout.audiobook_item_author, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_details_item_author, parent, false);
 				authorHolder.author_item_tv = (TextView) convertView.findViewById(R.id.author_item_tv);
 				convertView.setTag(authorHolder);
 			} else {
@@ -57,7 +57,7 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 			AlbumViewHolder albumHolder;
 			if(convertView == null){
 				albumHolder = new AlbumViewHolder();
-				convertView = inflater.inflate(R.layout.audiobook_item_album, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_details_item_album, parent, false);
 				albumHolder.album_item_tv = (TextView) convertView.findViewById(R.id.album_item_tv);
 				convertView.setTag(albumHolder);
 			} else {
@@ -70,7 +70,7 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 			CoverViewHolder coverHolder;
 			if(convertView == null){
 				coverHolder = new CoverViewHolder();
-				convertView = inflater.inflate(R.layout.audiobook_item_cover, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_details_item_cover, parent, false);
 				coverHolder.cover_item_iv = (ImageView) convertView.findViewById(R.id.cover_item_iv);
 				convertView.setTag(coverHolder);
 			} else {
@@ -90,7 +90,7 @@ public class AudiobookDetailsAdapter extends ArrayAdapter<Track>{
 			TrackViewHolder trackHolder;
 			if(convertView == null){
 				trackHolder = new TrackViewHolder();
-				convertView = inflater.inflate(R.layout.audiobook_item_track, parent, false);
+				convertView = inflater.inflate(R.layout.audiobook_details_item_track, parent, false);
 				//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 
 				trackHolder.track_item_title_tv = (TextView) convertView.findViewById(R.id.track_item_title);

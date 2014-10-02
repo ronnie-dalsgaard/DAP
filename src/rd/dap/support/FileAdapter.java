@@ -17,7 +17,7 @@ import android.widget.TextView;
 public class FileAdapter extends ArrayAdapter<File> {
 	private List<File> list;
 	private Context context;
-	private File root;
+	private File root, current;
 	
 	public FileAdapter(Context context, int resource, List<File> list) {
 		super(context, resource, list);
@@ -30,7 +30,7 @@ public class FileAdapter extends ArrayAdapter<File> {
 		ViewHolder holder;
 		if(convertView == null){
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(R.layout.file_item, parent, false);
+			convertView = inflater.inflate(R.layout.file_browser_file_item, parent, false);
 			//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 			
 			holder = new ViewHolder();
@@ -46,15 +46,21 @@ public class FileAdapter extends ArrayAdapter<File> {
 		
 		File file = list.get(position);
 
-		if(!file.equals(root)){
+		if(!current.equals(root)){
 			holder.name_tv.setText(position == 0? ".." : file.getName());
+		} else {
+			holder.name_tv.setText(file.getName());
 		}
 		holder.path_tv.setText(file.getAbsolutePath());
 		Drawable ic = null;
-		if(file.isDirectory()){
-			ic = context.getResources().getDrawable(R.drawable.ic_action_collection);
-		} else if(file.getName().endsWith(".mp3")){
+		
+		System.out.println(file.getPath() + " ::: " + file.isDirectory());
+		if(file.getPath().endsWith(".mp3")){
 			ic = context.getResources().getDrawable(R.drawable.ic_action_headphones);
+		} else if(file.getPath().endsWith(".jpg")){
+			ic = context.getResources().getDrawable(R.drawable.ic_action_picture);
+		} else if(file.isDirectory()){
+			ic = context.getResources().getDrawable(R.drawable.ic_action_collection);
 		}
 		if(ic != null) 	holder.type_iv.setImageDrawable(ic);
 		
@@ -73,6 +79,10 @@ public class FileAdapter extends ArrayAdapter<File> {
 	static class ViewHolder {
 		public TextView name_tv, path_tv;
 		public ImageView type_iv, selecte_iv;
+	}
+	
+	public void setCurent(File current){
+		this.current = current;
 	}
 
 	public void setRoot(File root) {
