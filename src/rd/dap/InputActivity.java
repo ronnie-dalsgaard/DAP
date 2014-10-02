@@ -20,6 +20,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class InputActivity extends Activity {
+	public static final int REQUEST_EDIT_AUTHOR = 1200;
+	public static final int REQUEST_EDIT_ALBUM = 1201;
+	public static final int REQUEST_EDIT_COVER = 1202;
+	public static final int REQUEST_EDIT_TRACK_TITLE = 1203;
+	public static final int REQUEST_EDIT_TRACK_FILE = 1204;
+	
 	private int requestCode;
 	private ArrayList<String> list; 
 	private EditText et;
@@ -36,8 +42,12 @@ public class InputActivity extends Activity {
 		
 		list = (ArrayList<String>) getIntent().getSerializableExtra("list");
 		if(list == null) throw new RuntimeException("InputActivity - No list supplied");
-
+		
 		et = (EditText) findViewById(R.id.input_et);
+
+		String value = getIntent().getStringExtra("value");
+		if(value != null && !value.isEmpty())
+			et.setText(value);
 		
 		adapter = new InputAdapter(this, R.id.input_item_tv, list);
 		

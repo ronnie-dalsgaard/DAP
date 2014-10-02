@@ -13,23 +13,28 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class FileBrowserActivity extends Activity {
 	private static final String TAG = "FileBrowserActivity";
-
+	private static final String[] TYPE_IMAGE = {".jpg", ".png"};
+	private static final String[] TYPE_AUDIO = {".mp3"};
+	private String type;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.file_browser);
 		Log.d(TAG, "onCreate");
+		
+		type = getIntent().getStringExtra("type");
 		
 		String state = Environment.getExternalStorageState();
 		if(!Environment.MEDIA_MOUNTED.equals(state) && !Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){
@@ -54,7 +59,18 @@ public class FileBrowserActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				File file = list.get(position);
-				if(file.getPath().endsWith("jpg")){
+				
+				//Validate file
+				boolean accept = false;
+				String[] accepted = {};
+				if("image".equalsIgnoreCase(type)) accepted = TYPE_IMAGE;
+				if("audio".equalsIgnoreCase(type)) accepted = TYPE_AUDIO;
+				for(String type : accepted){
+					if(file.getPath().endsWith(type)) {
+						accept = true; break;
+					}
+				}
+				if(accept){
 					int requestcode = getIntent().getIntExtra("requestcode", -1);
 					if(requestcode > 0){
 						Intent intent = new Intent();
@@ -62,6 +78,8 @@ public class FileBrowserActivity extends Activity {
 						setResult(requestcode, intent);
 						finish();
 					}
+					
+				//Go into folder
 				} else if(file.isDirectory()){
 					list.clear();
 					if(!file.equals(root)){

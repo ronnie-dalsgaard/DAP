@@ -45,6 +45,9 @@ public class MainActivity extends Activity {
 		player = (MiniPlayer) fm.findFragmentById(R.id.main_mini_player);
 
 		ListView list = (ListView) findViewById(R.id.main_audiobook_list);
+		Drawable divider = getResources().getDrawable(R.drawable.horizontal_divider);
+		list.setDivider(divider);
+		list.setDividerHeight(1);
 		adapter = new AudiobookAdapter(this, R.layout.audiobook_item, audiobooks);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(new OnItemClickListener() {

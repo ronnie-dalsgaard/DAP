@@ -7,14 +7,18 @@
         android:id="@+id/album_item_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="3dp"
         android:text="Album:" />
 
     <TextView
         android:id="@+id/album_item_tv"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/album_item_label"
         android:gravity="center_horizontal"
+        android:paddingBottom="@dimen/margin_big"
+        android:paddingLeft="@dimen/margin_small"
+        android:paddingRight="@dimen/margin_small"
+        android:paddingTop="@dimen/margin_big"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>

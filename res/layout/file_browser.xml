@@ -18,7 +18,7 @@
         android:layout_above="@+id/file_browser_mini_player"
         android:layout_below="@+id/file_browser_breadcrumbs"
         android:layout_centerHorizontal="true"
-        android:divider="@color/light_gray"
+        android:divider="@drawable/horizontal_divider"
         android:dividerHeight="1dp" >
     </ListView>
 
