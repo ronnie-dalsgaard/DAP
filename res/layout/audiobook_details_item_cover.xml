@@ -5,8 +5,8 @@
 
     <ImageView
         android:id="@+id/cover_item_iv"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
         android:layout_centerHorizontal="true"
         android:contentDescription="@string/content_description"
         android:src="@drawable/ic_action_help" />
