@@ -1,8 +1,7 @@
 package rd.dap;
 
-import static rd.dap.InputActivity.REQUEST_EDIT_COVER;
-import static rd.dap.InputActivity.REQUEST_EDIT_TRACK_TITLE;
 import static rd.dap.InputActivity.REQUEST_EDIT_TRACK_FILE;
+import static rd.dap.InputActivity.REQUEST_EDIT_TRACK_TITLE;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,13 +18,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class TrackActivity extends Activity {
 	private Audiobook audiobook;
 	private int position;
 	private TextView position_tv, title_tv, duration_tv, file_tv;
-	private ImageView cover_iv;
+	private ImageView cover_iv; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +41,11 @@ public class TrackActivity extends Activity {
 		final Track track = audiobook.getPlaylist().get(position);
 
 		//Position
-		position_tv = (TextView) findViewById(R.id.track_position);
+		position_tv = (TextView) findViewById(R.id.details_item_track_position);
 		position_tv.setText(String.format("%02d", position+1));
 
 		//Title
-		title_tv = (TextView) findViewById(R.id.track_title);
+		title_tv = (TextView) findViewById(R.id.details_item_track_title);
 		title_tv.setText(track.getTitle());
 		title_tv.setOnClickListener(new OnClickListener() {
 			@Override
@@ -75,7 +73,7 @@ public class TrackActivity extends Activity {
 		}
 
 		//File
-		file_tv = (TextView) findViewById(R.id.track_file);
+		file_tv = (TextView) findViewById(R.id.details_item_file_tv);
 		file_tv.setText(track.getFile().getPath());
 		file_tv.setOnClickListener(new OnClickListener() {
 			@Override
@@ -88,7 +86,7 @@ public class TrackActivity extends Activity {
 		});
 
 		//Cover
-		cover_iv = (ImageView) findViewById(R.id.track_cover);
+		cover_iv = (ImageView) findViewById(R.id.details_item_cover_iv);
 		if(track.getCover() != null){
 			Bitmap bm = BitmapFactory.decodeFile(track.getCover().getAbsolutePath());
 			cover_iv.setImageBitmap(bm);

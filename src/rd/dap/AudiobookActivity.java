@@ -43,17 +43,20 @@ public class AudiobookActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 
 		audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
 		if(audiobook == null) throw new RuntimeException("No audiobook supplied");
 
 		//detailslist
-		ListView list = new ListView(this);
-		Drawable divider = getResources().getDrawable(R.drawable.horizontal_divider);
-		list.setDivider(divider);
-		list.setDividerHeight(1);
-		setContentView(list);
-		adapter = new AudiobookDetailsAdapter(this, R.layout.audiobook_details_item_track, audiobook.getPlaylist());
+//		ListView list = new ListView(this);
+//		Drawable divider = getResources().getDrawable(R.drawable.horizontal_divider);
+//		list.setDivider(divider);
+//		list.setDividerHeight(1);
+//		setContentView(list);
+		
+		ListView list = (ListView) findViewById(R.id.main_list);
+		adapter = new AudiobookDetailsAdapter(this, R.layout.details_item_track, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -145,8 +148,8 @@ public class AudiobookActivity extends Activity {
 				AuthorViewHolder authorHolder;
 				if(convertView == null){
 					authorHolder = new AuthorViewHolder();
-					convertView = inflater.inflate(R.layout.audiobook_details_item_author, parent, false);
-					authorHolder.author_item_tv = (TextView) convertView.findViewById(R.id.author_item_tv);
+					convertView = inflater.inflate(R.layout.details_item_author, parent, false);
+					authorHolder.author_item_tv = (TextView) convertView.findViewById(R.id.detail_item_author_tv);
 					convertView.setTag(authorHolder);
 				} else {
 					authorHolder = (AuthorViewHolder) convertView.getTag();
@@ -158,8 +161,8 @@ public class AudiobookActivity extends Activity {
 				AlbumViewHolder albumHolder;
 				if(convertView == null){
 					albumHolder = new AlbumViewHolder();
-					convertView = inflater.inflate(R.layout.audiobook_details_item_album, parent, false);
-					albumHolder.album_item_tv = (TextView) convertView.findViewById(R.id.album_item_tv);
+					convertView = inflater.inflate(R.layout.details_item_album, parent, false);
+					albumHolder.album_item_tv = (TextView) convertView.findViewById(R.id.details_item_album_tv);
 					convertView.setTag(albumHolder);
 				} else {
 					albumHolder = (AlbumViewHolder) convertView.getTag();
@@ -171,8 +174,8 @@ public class AudiobookActivity extends Activity {
 				CoverViewHolder coverHolder;
 				if(convertView == null){
 					coverHolder = new CoverViewHolder();
-					convertView = inflater.inflate(R.layout.audiobook_details_item_cover, parent, false);
-					coverHolder.cover_item_iv = (ImageView) convertView.findViewById(R.id.cover_item_iv);
+					convertView = inflater.inflate(R.layout.details_item_cover_large, parent, false);
+					coverHolder.cover_item_iv = (ImageView) convertView.findViewById(R.id.details_item_cover_iv);
 					convertView.setTag(coverHolder);
 				} else {
 					coverHolder = (CoverViewHolder) convertView.getTag();
@@ -191,12 +194,12 @@ public class AudiobookActivity extends Activity {
 				TrackViewHolder trackHolder;
 				if(convertView == null){
 					trackHolder = new TrackViewHolder();
-					convertView = inflater.inflate(R.layout.audiobook_details_item_track, parent, false);
+					convertView = inflater.inflate(R.layout.details_item_track, parent, false);
 					//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 
-					trackHolder.track_item_title_tv = (TextView) convertView.findViewById(R.id.track_item_title);
-					trackHolder.track_item_duration_tv = (TextView) convertView.findViewById(R.id.track_item_duration);
-					trackHolder.track_item_cover_iv = (ImageView) convertView.findViewById(R.id.track_item_cover);
+					trackHolder.track_item_title_tv = (TextView) convertView.findViewById(R.id.details_item_audiobook_track_title);
+					trackHolder.track_item_duration_tv = (TextView) convertView.findViewById(R.id.details_item_audiobook_track_duration);
+					trackHolder.track_item_cover_iv = (ImageView) convertView.findViewById(R.id.details_item_audiobook_track_cover);
 					convertView.setTag(trackHolder);
 				} else {
 					trackHolder = (TrackViewHolder) convertView.getTag();

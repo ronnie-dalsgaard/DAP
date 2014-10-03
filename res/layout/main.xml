@@ -5,14 +5,16 @@
     tools:context="rd.dap.MainActivity" >
 
     <ListView
-        android:id="@+id/main_audiobook_list"
+        android:id="@+id/main_list"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="match_parent"
         android:layout_above="@+id/main_mini_player"
-        android:layout_centerHorizontal="true" >
+        android:layout_centerHorizontal="true"
+        android:divider="@drawable/horizontal_divider"
+        android:dividerHeight="1dp" >
     </ListView>
 
-     <fragment
+    <fragment
         android:id="@+id/main_mini_player"
         android:name="rd.dap.MiniPlayer"
         android:layout_width="@dimen/mini_player_width"

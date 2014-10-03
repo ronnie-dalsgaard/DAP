@@ -4,81 +4,47 @@
     android:layout_height="match_parent"
     tools:context="rd.dap.TrackActivity" >
 
-    <LinearLayout
-        android:id="@+id/track_pos_title_layout"
+    <ScrollView
+        android:id="@+id/scrollView1"
         android:layout_width="@dimen/mini_player_width"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="@dimen/margin_small"
-        android:gravity="center" >
+        android:layout_height="match_parent"
+        android:layout_above="@+id/track_mini_player"
+        android:layout_centerHorizontal="true" >
 
-        <TextView
-            android:id="@+id/track_position"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_small"
-            android:layout_marginRight="@dimen/margin_small"
-            android:background="@drawable/circle"
-            android:gravity="center"
-            android:text="POS"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_margin="2dp"
-            android:background="@drawable/vertical_divider"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/track_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/margin_small"
-            android:text="Title"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-    </LinearLayout>
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/track_duration"
+            <include layout="@layout/details_item_pos_title" />
+
+            <TextView
+                android:id="@+id/track_duration"
+                android:layout_width="@dimen/mini_player_width"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="@dimen/margin_small"
+                android:text="Duration: Unknown" />
+
+            <include layout="@layout/horizontal_divider"/>
+
+            <include layout="@layout/details_item_cover_medium" />
+
+            <include layout="@layout/horizontal_divider"/>
+
+            <include layout="@layout/details_item_file" />
+            
+        </LinearLayout>
+    </ScrollView>
+
+    <fragment
+        android:id="@+id/track_mini_player"
+        android:name="rd.dap.MiniPlayer"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/track_pos_title_layout"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:gravity="right"
-        android:padding="@dimen/margin_small"
-        android:text="Duration: Unknown" />
-
-    <View
-        android:id="@+id/track_divider_1"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@+id/track_duration"
-        android:background="@drawable/horizontal_divider" />
-        
-    <ImageView
-        android:id="@+id/track_cover"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_below="@+id/track_divider_1"
-        android:layout_centerHorizontal="true"
-        android:contentDescription="@string/content_description"
-        android:src="@drawable/ic_action_help" />
-    
-    <View
-        android:id="@+id/track_divider_2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@+id/track_cover"
-        android:background="@drawable/horizontal_divider" />
-
-    <TextView
-        android:id="@+id/track_file"
-        android:layout_width="@dimen/mini_player_width"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/track_divider_2"
-        android:layout_centerHorizontal="true"
-        android:padding="@dimen/margin_small"
-        android:text="filename" />
+        tools:layout="@layout/mini_player" />
 
 </RelativeLayout>

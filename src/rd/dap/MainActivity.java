@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
 		FragmentManager fm = getFragmentManager();
 		player = (MiniPlayer) fm.findFragmentById(R.id.main_mini_player);
 
-		ListView list = (ListView) findViewById(R.id.main_audiobook_list);
+		ListView list = (ListView) findViewById(R.id.main_list);
 		Drawable divider = getResources().getDrawable(R.drawable.horizontal_divider);
 		list.setDivider(divider);
 		list.setDividerHeight(1);

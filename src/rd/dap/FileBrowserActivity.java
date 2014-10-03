@@ -31,7 +31,7 @@ public class FileBrowserActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.file_browser);
+		setContentView(R.layout.main);
 		Log.d(TAG, "onCreate");
 		
 		type = getIntent().getStringExtra("type");
@@ -49,7 +49,7 @@ public class FileBrowserActivity extends Activity {
 			list.add(f);
 		}
 		
-		ListView listview = (ListView) findViewById(R.id.file_browser_listview);
+		ListView listview = (ListView) findViewById(R.id.main_list);
 		final FileAdapter adapter = new FileAdapter(this, R.layout.file_browser_file_item, list);
 		adapter.setRoot(root);
 		adapter.setCurent(root);

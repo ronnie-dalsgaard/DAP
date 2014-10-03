@@ -4,14 +4,14 @@
     android:layout_height="match_parent" >
 
     <TextView
-        android:id="@+id/album_item_label"
+        android:id="@+id/details_item_album_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="3dp"
         android:text="Album:" />
 
     <TextView
-        android:id="@+id/album_item_tv"
+        android:id="@+id/details_item_album_tv"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
