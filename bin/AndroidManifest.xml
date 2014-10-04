@@ -18,27 +18,14 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".FileBrowserActivity"
             android:label="@string/title_activity_file_browser" >
         </activity>
-
-        <service android:name=".PlayerService" >
-        </service>
-
         <activity
             android:name=".AudiobookActivity"
             android:label="@string/title_activity_audiobook" >
-        </activity>
-        <activity
-            android:name=".junk.EditAudiobookActivity"
-            android:label="@string/title_activity_edit_audiobook" >
         </activity>
         <activity
             android:name=".InputActivity"
@@ -47,6 +34,23 @@
         <activity
             android:name=".TrackActivity"
             android:label="@string/title_activity_track" >
+        </activity>
+        <activity
+            android:name=".ControllerActivity"
+            android:label="@string/title_activity_controller" >
+        </activity>
+
+        <service android:name=".PlayerService" >
+        </service>
+
+        <activity
+            android:name=".AudiobookListActivity"
+            android:label="@string/title_activity_audiobook_list" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

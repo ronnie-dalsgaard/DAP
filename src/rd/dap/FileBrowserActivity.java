@@ -31,7 +31,7 @@ public class FileBrowserActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.list_with_miniplayer);
 		Log.d(TAG, "onCreate");
 		
 		type = getIntent().getStringExtra("type");

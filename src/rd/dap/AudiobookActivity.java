@@ -43,7 +43,7 @@ public class AudiobookActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.list_with_miniplayer);
 
 		audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
 		if(audiobook == null) throw new RuntimeException("No audiobook supplied");

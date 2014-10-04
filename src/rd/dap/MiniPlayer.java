@@ -5,7 +5,6 @@ import java.io.File;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Track;
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,6 +30,7 @@ import android.widget.Toast;
 
 public class MiniPlayer extends Fragment implements OnClickListener, OnLongClickListener, ServiceConnection {
 	private static final String TAG = "MiniPlayer";
+	public static final int DELAY = 1000;
 	private boolean bound = false;
 	private PlayerService player;
 	private TextView author_tv, album_tv, track_tv;
@@ -38,7 +38,7 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 	private ImageView iv;
 	private ImageButton btn;
 	private static Drawable noCover = null, drw_play = null, drw_pause = null;
-	private static Audiobook audiobook;
+	public static Audiobook audiobook;
 	private static Track track;
 	private Monitor monitor;
 
@@ -46,7 +46,7 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
-		if(noCover == null){
+		if(noCover == null || drw_play == null || drw_pause == null){
 			Resources res = getActivity().getResources();
 			noCover = res.getDrawable(R.drawable.ic_action_help);
 			drw_play = res.getDrawable(R.drawable.ic_action_play_over_video);
@@ -81,7 +81,6 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 			getActivity().unbindService(this);
 			bound = false;
 		}
-
 	}
 
 	@Override
@@ -233,8 +232,7 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 				if(player != null) isPlaying = player.isPlaying();
 				else Log.d(TAG, "player is null");
 				
-				Activity a = MiniPlayer.this.getActivity();
-				a.runOnUiThread(new Runnable() {
+				MiniPlayer.this.getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						if(bound && audiobook != null){
@@ -247,7 +245,7 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 				
 				//Delay with error handling
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(DELAY);
 				} catch (InterruptedException e) {
 					//Ignored - just insomnia
 					insomnicEpisodes++;

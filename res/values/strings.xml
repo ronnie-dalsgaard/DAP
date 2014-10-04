@@ -19,5 +19,7 @@
     <string name="title_activity_edit_audiobook">EditAudiobookActivity</string>
     <string name="title_activity_input">InputActivity</string>
     <string name="title_activity_track">TrackActivity</string>
+    <string name="title_activity_controller">ControllerActivity</string>
+    <string name="title_activity_audiobook_list">AudiobookListActivity</string>
 
 </resources>

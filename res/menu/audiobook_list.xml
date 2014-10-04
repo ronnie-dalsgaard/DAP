@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="rd.dap.FileBrowserActivity" >
+    tools:context="rd.dap.AudiobookListActivity" >
 
     <item
         android:id="@+id/menu_item_file_browser"
@@ -11,4 +11,5 @@
         android:id="@+id/menu_item_controller"
         android:showAsAction="never"
         android:title="Controller"/>
+
 </menu>
