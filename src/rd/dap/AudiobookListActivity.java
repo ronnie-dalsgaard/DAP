@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static rd.dap.PlayerService.*;
+
+import rd.dap.fragments.MiniPlayer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import android.app.Activity;
@@ -31,7 +34,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 public class AudiobookListActivity extends Activity {
 	public static ArrayAdapter<Audiobook> adapter;
 	public static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
-	public static MiniPlayer player = null;
+	public static MiniPlayer miniplayer = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +42,7 @@ public class AudiobookListActivity extends Activity {
 		setContentView(R.layout.list_with_miniplayer);
 		
 		FragmentManager fm = getFragmentManager();
-		player = (MiniPlayer) fm.findFragmentById(R.id.main_mini_player);
+		miniplayer = (MiniPlayer) fm.findFragmentById(R.id.main_mini_player);
 		
 		adapter = new AudiobookAdapter(this, R.layout.audiobook_item, audiobooks);
 		
@@ -48,18 +51,19 @@ public class AudiobookListActivity extends Activity {
 		list.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 				//In this case position and id is the same
-				Audiobook audiobook = audiobooks.get(position);
-				player.setAudiobook(audiobook, audiobook.getPlaylist().get(0));
+				audiobook = audiobooks.get(index);
+				position = 0;
+				track = audiobook.getPlaylist().get(position);
+				miniplayer.updateView();
+				miniplayer.reload();
 			}
 		});
 		list.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				Audiobook audiobook = audiobooks.get(position);
-				System.out.println("LONG CLICK...");
-				System.out.println(audiobook);
 				Intent intent = new Intent(AudiobookListActivity.this, AudiobookActivity.class);
 				intent.putExtra("audiobook", audiobook);
 				startActivity(intent);

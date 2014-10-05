@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/track_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <ImageButton
+                    android:id="@+id/track_previous"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/btn_height"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/content_description"
+                    android:src="@drawable/ic_action_previous" />
+
+                <TextView
+                    android:id="@+id/track_position"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/btn_height"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/margin_small"
+                    android:text="00"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:id="@+id/track_title"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4"
+                    android:gravity="center_vertical"
+                    android:maxLines="2"
+                    android:paddingLeft="@dimen/margin_small"
+                    android:text="Title"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <ImageButton
+                    android:id="@+id/track_next"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/btn_height"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/content_description"
+                    android:src="@drawable/ic_action_next" />
+            </LinearLayout>
+
+            <include
+                android:id="@+id/track_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/track_row"
+                layout="@layout/horizontal_divider" />
+
+            <LinearLayout
+                android:id="@+id/tracks_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/track_divider"
+                android:orientation="vertical" />
+        </RelativeLayout>

@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:gravity="start"
+    android:padding="2dp" >
 
     <ScrollView
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/mini_player_width"
         android:layout_height="match_parent"
-        android:layout_above="@+id/controller_buttons" >
+        android:layout_above="@+id/controller_buttons"
+        android:layout_centerHorizontal="true" >
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -20,6 +24,13 @@
                 android:contentDescription="@string/content_description"
                 android:src="@drawable/ic_action_help" />
 
+            <ImageButton
+                android:id="@+id/controller_cover_btn"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@color/transparent"
+                android:contentDescription="@string/content_description" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -30,7 +41,7 @@
                 <TextView
                     android:id="@+id/controller_author_tv"
                     android:layout_width="match_parent"
-                    android:layout_height="49dp"
+                    android:layout_height="34dp"
                     android:gravity="center_vertical"
                     android:paddingLeft="@dimen/margin_big"
                     android:text="Author"
@@ -41,11 +52,11 @@
                 <TextView
                     android:id="@+id/controller_album_tv"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="65dp"
                     android:gravity="center_vertical"
                     android:paddingLeft="@dimen/margin_big"
                     android:text="Album"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
             </LinearLayout>
 
             <include
@@ -54,93 +65,66 @@
                 android:layout_height="1dp"
                 android:layout_below="@+id/controller_cover_iv"
                 layout="@layout/horizontal_divider" />
-
-            <GridView
-                android:id="@+id/controller_grid"
-                android:layout_width="match_parent"
+            
+            <fragment
+                android:id="@+id/controller_track"
+                android:name="rd.dap.fragments.Track_fragment"
+                android:layout_width="@dimen/mini_player_width"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/controller_divider_1"
-                android:numColumns="10" />
+                android:layout_centerHorizontal="true"
+                tools:layout="@layout/track_fragment" />
+
+            <include 
+                android:id="@+id/controller_divider_2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/controller_track"
+                layout="@layout/horizontal_divider" />
+
+            <fragment
+                android:id="@+id/controller_seeker"
+                android:name="rd.dap.fragments.Seeker_fragment"
+                android:layout_width="@dimen/mini_player_width"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/controller_divider_2"
+                android:layout_centerHorizontal="true"
+                tools:layout="@layout/seeker_fragment" />
         </RelativeLayout>
     </ScrollView>
 
     <LinearLayout
         android:id="@+id/controller_buttons"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/miniplayer_bg"
-        android:orientation="vertical" >
+        android:orientation="horizontal" >
 
-        <LinearLayout
-            android:id="@+id/controller_row1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+        <ImageButton
+            android:id="@+id/controller_upload"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_upload" />
 
-            <ImageButton
-                android:id="@+id/controller_upload"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_upload" />
+        <ImageButton
+            android:id="@+id/controller_play"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="2"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_play" />
 
-            <ImageButton
-                android:id="@+id/controller_play"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_play" />
-
-            <ImageButton
-                android:id="@+id/controller_download"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_download" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/controller_row2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <ImageButton
-                android:id="@+id/controller_previous"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_previous" />
-
-            <ImageButton
-                android:id="@+id/controller_rewind"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_rewind" />
-
-            <ImageButton
-                android:id="@+id/controller_forward"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_fast_forward" />
-
-            <ImageButton
-                android:id="@+id/controller_next"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_next" />
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/controller_download"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_download" />
     </LinearLayout>
 
 </RelativeLayout>

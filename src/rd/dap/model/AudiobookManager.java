@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import rd.dap.support.AlbumFolderFilter;
 import rd.dap.support.Mp3FileFilter;
+import rd.dap.support.TrackList;
 import android.os.Environment;
 
 public class AudiobookManager {
@@ -43,7 +44,7 @@ public class AudiobookManager {
 			if(cover != null) { audiobook.setCover(cover); }
 
 			ArrayList<File> filelist = new ArrayList<File>(Arrays.asList(album.listFiles(new Mp3FileFilter())));
-			ArrayList<Track> playlist = new ArrayList<Track>();
+			TrackList playlist = new TrackList();
 			//TODO sort by filename
 			for(File file : filelist){
 				Track track = new Track();

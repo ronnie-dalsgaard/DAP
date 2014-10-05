@@ -28,7 +28,7 @@ public class TrackActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.track);
+		setContentView(R.layout.track_details);
 
 		//Verify input
 		audiobook = (Audiobook) getIntent().getSerializableExtra("audiobook");

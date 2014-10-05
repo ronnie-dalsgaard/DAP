@@ -142,7 +142,6 @@ public class FileBrowserActivity extends Activity {
 			holder.path_tv.setText(file.getAbsolutePath());
 			Drawable ic = null;
 			
-			System.out.println(file.getPath() + " ::: " + file.isDirectory());
 			if(file.getPath().endsWith(".mp3")){
 				ic = context.getResources().getDrawable(R.drawable.ic_action_headphones);
 			} else if(file.getPath().endsWith(".jpg")){

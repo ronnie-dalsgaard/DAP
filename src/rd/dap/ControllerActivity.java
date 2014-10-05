@@ -1,11 +1,19 @@
 package rd.dap;
 
+import static rd.dap.PlayerService.audiobook;
+import static rd.dap.PlayerService.track;
+
+import java.io.File;
+
 import rd.dap.PlayerService.DAPBinder;
+import rd.dap.support.Monitor;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -13,47 +21,79 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public class ControllerActivity extends Activity implements ServiceConnection, OnClickListener {
 	private boolean bound = false;
 	private PlayerService player;
-	private static Drawable noCover = null, drw_play = null, drw_pause = null;
-	private ImageButton play_btn;
-	
+	private static Drawable noCover = null, drw_play = null, drw_pause = null,
+			drw_play_on_cover = null, drw_pause_on_cover;
+	private ControllerMonitor monitor;
+	private ImageView cover_iv;
+	private TextView author_tv, album_tv;
+	private ImageButton cover_btn, play_btn;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.controller);
-		
+
 		if(noCover == null || drw_play == null || drw_pause == null){
 			noCover = getResources().getDrawable(R.drawable.ic_action_help);
 			drw_play = getResources().getDrawable(R.drawable.ic_action_play);
 			drw_pause = getResources().getDrawable(R.drawable.ic_action_pause);
+			drw_play_on_cover = getResources().getDrawable(R.drawable.ic_action_play_over_video);
+			drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
 		}
+
+		cover_iv = (ImageView) findViewById(R.id.controller_cover_iv);
+		author_tv = (TextView) findViewById(R.id.controller_author_tv);
+		album_tv = (TextView) findViewById(R.id.controller_album_tv);
+
+		if(audiobook != null){
+			//Cover
+			File cover = track.getCover();
+			if(cover == null) cover = audiobook.getCover();
+			if(cover != null) {
+				Bitmap bitmap = BitmapFactory.decodeFile(cover.getPath());
+				cover_iv.setImageBitmap(bitmap);
+			} else {
+				cover_iv.setImageDrawable(noCover);
+			}
+
+			//Author
+			author_tv.setText(audiobook.getAuthor());
+
+			//Album
+			album_tv.setText(audiobook.getAlbum());
+		}
+		cover_btn = (ImageButton) findViewById(R.id.controller_cover_btn);
+		cover_btn.setOnClickListener(this);
 
 		play_btn = (ImageButton) findViewById(R.id.controller_play);
 		play_btn.setImageDrawable(null);
 		play_btn.setOnClickListener(this);
+
+		monitor = new ControllerMonitor();
+		monitor.start();
 	}
 
 	@Override
 	public void onClick(View v) {
 		switch(v.getId()){
+		case R.id.controller_cover_btn:
 		case R.id.controller_play:
-			if(MiniPlayer.audiobook != null){
-				boolean isPlaying = false;
-				if(player != null) isPlaying = player.isPlaying();
-				play_btn.setImageDrawable(!isPlaying ? drw_pause : drw_play);
-				//Toggle play/pause
-				Intent intent = new Intent(this, PlayerService.class);
-				intent.setAction(PlayerService.PLAY_PAUSE);
-				startService(intent);
-			} else
-				Toast.makeText(this, "No audiobook", Toast.LENGTH_SHORT).show();
+			if(audiobook == null) break;
+			boolean isPlaying = false;
+			if(player != null) isPlaying = player.isPlaying();
+			//Fix view
+			play_btn.setImageDrawable(!isPlaying ? drw_pause : drw_play);
+			cover_btn.setImageDrawable(!isPlaying ? drw_pause_on_cover : drw_play_on_cover);
+			//Toggle play/pause
+			player.toggle();
 			break;
 		}
-
 	}
 
 	@Override
@@ -84,52 +124,27 @@ public class ControllerActivity extends Activity implements ServiceConnection, O
 		bound = false;
 	}
 
-
-	class Monitor extends Thread {
+	class ControllerMonitor extends Monitor {
 		private static final String TAG = "ControllerActivity.Monitor";
-		private boolean alive = true;
 		private boolean isPlaying = false;
-		
-		public void kill(){
-			this.alive = false;
-		}
 
 		@Override
-		public void run() {
-			int insomnicEpisodes = 0;
-			long t0 = System.currentTimeMillis();
-			double errorFrequency = 0.0;
-			while(alive){
-				if(player != null) isPlaying = player.isPlaying();
-				else Log.d(TAG, "player is null");
-				
-				ControllerActivity.this.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if(bound && MiniPlayer.audiobook != null){
-							play_btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
-						} else {
-							play_btn.setImageDrawable(null);
-						}
-					}
-				});
-				
-				//Delay with error handling
-				try {
-					Thread.sleep(MiniPlayer.DELAY);
-				} catch (InterruptedException e) {
-					//Ignored - just insomnia
-					insomnicEpisodes++;
-					long t = System.currentTimeMillis();
-					//error / sec.
-					errorFrequency = insomnicEpisodes / ((t - t0) / 1000);
-					Log.d(TAG, "insomnia frequency="+errorFrequency);
-					if(errorFrequency > 1.0){
-						System.err.println("Too insomnic! - system exited");
-						System.exit(-1);
+		public void execute() {
+			if(player != null) isPlaying = player.isPlaying();
+			else Log.d(TAG, "player is null");
+
+			ControllerActivity.this.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if(bound && audiobook != null){
+						play_btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
+						cover_btn.setImageDrawable(isPlaying ? drw_pause_on_cover : drw_play_on_cover);
+					} else {
+						play_btn.setImageDrawable(null);
+						cover_btn.setImageDrawable(null);
 					}
 				}
-			}
+			});
 		}
 	}
 }

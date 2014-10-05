@@ -23,16 +23,16 @@
         <TextView
             android:id="@+id/audiobook_item_author_tv"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="Author" />
+        
+        <include layout="@layout/horizontal_divider"/>
 
         <TextView
             android:id="@+id/audiobook_item_title_tv"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="Title" />
 

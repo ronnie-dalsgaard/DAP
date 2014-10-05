@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/controller_track_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+    <ImageButton
+        android:id="@+id/seeker_rewind"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/btn_height"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_rewind" />
+
+    <TextView
+        android:id="@+id/seeker_progress_tv"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:gravity="center_vertical"
+        android:maxLines="2"
+        android:paddingLeft="@dimen/margin_small"
+        android:text="Title"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ImageButton
+        android:id="@+id/seeker_fast_forward"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/btn_height"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_fast_forward" />
+
+</LinearLayout>
