@@ -14,12 +14,12 @@ import android.util.Log;
 
 public class PlayerService extends Service implements OnErrorListener {
 	private static final String TAG = "PlayerService";
+	private static MediaPlayer mp = null;
 	public static Audiobook audiobook;
 	public static int position;
 	public static Track track;
 
 	private final IBinder binder = new DAPBinder();
-	private MediaPlayer mp = null;
 	private long laststart = 0;
 		
 	public void toggle(){
@@ -82,13 +82,19 @@ public class PlayerService extends Service implements OnErrorListener {
 		mp = MediaPlayer.create(this, Uri.fromFile(track.getFile()));		
 	}
 	public boolean isPlaying(){ 
-		if(mp == null) return false;
+		if(mp == null) {
+			Log.d(TAG, "mp is null -> isPlaying is false");
+			return false;
+		}
 		if(System.currentTimeMillis() - laststart < Monitor.DELAY * 1.5){
+			Log.d(TAG, "debounce -> isPlaying is true");
 			return true;
 		}
 		try{
+			Log.d(TAG, "mp.isPlaying() -> isPlaying is "+mp.isPlaying());
 			return mp.isPlaying();
 		} catch(IllegalStateException e){
+			Log.d(TAG, "exception occured -> isPlaying is false");
 			return false;
 		}
 	}

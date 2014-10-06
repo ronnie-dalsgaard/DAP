@@ -3,6 +3,9 @@ package rd.dap.fragments;
 import static rd.dap.PlayerService.audiobook;
 import static rd.dap.PlayerService.position;
 import static rd.dap.PlayerService.track;
+
+import java.util.ArrayList;
+
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
@@ -25,7 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
-public class Track_fragment extends Fragment implements OnClickListener, ServiceConnection{
+public class TrackFragment extends Fragment implements OnClickListener, ServiceConnection{
 	private final String TAG = "Track_Fragment";
 	private static final int CELL = 1111;
 	private boolean bound = false;
@@ -34,6 +37,15 @@ public class Track_fragment extends Fragment implements OnClickListener, Service
 	private ImageButton next_btn, prev_btn;
 	private TextView position_tv, title_tv;
 	private LinearLayout tracks_gv;
+	
+	private ArrayList<Track_Fragment_Observer> observers = new ArrayList<Track_Fragment_Observer>();
+	public interface Track_Fragment_Observer{
+		public void track_fragment_next();
+		public void track_fragment_previous();
+		public void track_fragment_click();
+		public void track_fragment_select(int position);
+	}
+	public void addObserver(Track_Fragment_Observer observer) { observers.add(observer); }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -131,8 +143,13 @@ public class Track_fragment extends Fragment implements OnClickListener, Service
 			track = audiobook.getPlaylist().get(position);
 			//Fix view
 			displayTracks();
-//			play_btn.setImageDrawable(drw_play);
-//			cover_btn.setImageDrawable(drw_play_on_cover);
+
+			for(Track_Fragment_Observer observer : observers){
+				observer.track_fragment_next();
+			}
+			
+			player.reload();
+			
 			break;
 
 		case R.id.track_previous:
@@ -141,8 +158,13 @@ public class Track_fragment extends Fragment implements OnClickListener, Service
 			track = audiobook.getPlaylist().get(position);
 			//Fix view
 			displayTracks();
-//			play_btn.setImageDrawable(drw_play);
-//			cover_btn.setImageDrawable(drw_play_on_cover);
+
+			for(Track_Fragment_Observer observer : observers){
+				observer.track_fragment_previous();
+			}
+			
+			player.reload();
+			
 			break;
 
 		case CELL:
@@ -154,13 +176,16 @@ public class Track_fragment extends Fragment implements OnClickListener, Service
 					track = audiobook.getPlaylist().get(position);
 					//Fix view
 					displayTracks();
-//					play_btn.setImageDrawable(drw_play);
-//					cover_btn.setImageDrawable(drw_play_on_cover);
+
+					for(Track_Fragment_Observer observer : observers){
+						observer.track_fragment_select(i);
+					}
+					
+					player.reload();
 				}
 			} catch (Exception e) { break; }
 			break;
 		}
-		player.reload();
 	}
 
 	@Override

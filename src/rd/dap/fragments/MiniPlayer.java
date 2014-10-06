@@ -5,6 +5,7 @@ import static rd.dap.PlayerService.position;
 import static rd.dap.PlayerService.track;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
@@ -44,6 +45,15 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 	private ImageButton btn;
 	private static Drawable noCover = null, drw_play = null, drw_pause = null;
 	private MiniPlayerMonitor monitor;
+	
+	private ArrayList<MiniPlayerObserver> observers = new ArrayList<MiniPlayerObserver>();
+	public interface MiniPlayerObserver{
+		public void miniplayer_play();
+		public void miniplayer_pause();
+		public void miniplayer_click();
+		public void miniplayer_longClick();
+	}
+	public void addObserver(MiniPlayerObserver observer) { observers.add(observer); }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -155,6 +165,11 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 			if(player != null) isPlaying = player.isPlaying();
 			btn.setImageDrawable(!isPlaying ? drw_pause : drw_play);
 			player.toggle();
+			
+			for(MiniPlayerObserver observer : observers){
+				if(!isPlaying) observer.miniplayer_play();
+				else observer.miniplayer_pause();
+			}
 			break;
 
 		case R.id.miniplayer_info:
@@ -163,6 +178,11 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 			if(player != null){
 				String txt = player.isPlaying() ? "is playing" : "is NOT playing";
 				Toast.makeText(getActivity(), txt, Toast.LENGTH_SHORT).show();
+				
+				for(MiniPlayerObserver observer : observers){
+					observer.miniplayer_click();
+				}
+			
 				Log.d(TAG, txt);
 			} else {
 				Log.d(TAG, "PLAYER IS NULL");
@@ -174,8 +194,13 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 	public boolean onLongClick(View v) {
 		switch(v.getId()){
 		case R.id.miniplayer_play_btn:
-			Log.d(TAG, "Play/Pause long pressed (Kill mp)");
 			player.kill();
+
+			for(MiniPlayerObserver observer : observers){
+				observer.miniplayer_longClick();
+			}
+
+			Log.d(TAG, "Play/Pause long pressed (Kill mp)");
 			break;
 		}
 
@@ -205,8 +230,6 @@ public class MiniPlayer extends Fragment implements OnClickListener, OnLongClick
 				progress = player.getCurrentProgress();
 			}
 			else Log.d(TAG, "player is null");
-			
-			
 			
 			getActivity().runOnUiThread(new Runnable() {
 				@Override

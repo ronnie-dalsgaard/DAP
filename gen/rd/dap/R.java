@@ -354,8 +354,8 @@ public final class R {
         public static final int controller_divider_2=0x7f09000b;
         public static final int controller_download=0x7f09000f;
         public static final int controller_play=0x7f09000e;
-        public static final int controller_seeker=0x7f09000c;
-        public static final int controller_track=0x7f09000a;
+        public static final int controller_seeker_fragment=0x7f09000c;
+        public static final int controller_track_fragment=0x7f09000a;
         public static final int controller_track_row=0x7f090030;
         public static final int controller_upload=0x7f09000d;
         public static final int detail_item_author_tv=0x7f090013;

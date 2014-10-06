@@ -1,12 +1,15 @@
 package rd.dap;
 
+import static rd.dap.PlayerService.audiobook;
+import static rd.dap.PlayerService.position;
+import static rd.dap.PlayerService.track;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static rd.dap.PlayerService.*;
-
 import rd.dap.fragments.MiniPlayer;
+import rd.dap.fragments.MiniPlayer.MiniPlayerObserver;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import android.app.Activity;
@@ -24,14 +27,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 
-public class AudiobookListActivity extends Activity {
+public class AudiobookListActivity extends Activity implements MiniPlayerObserver {
 	public static ArrayAdapter<Audiobook> adapter;
 	public static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 	public static MiniPlayer miniplayer = null;
@@ -43,6 +46,7 @@ public class AudiobookListActivity extends Activity {
 		
 		FragmentManager fm = getFragmentManager();
 		miniplayer = (MiniPlayer) fm.findFragmentById(R.id.main_mini_player);
+		miniplayer.addObserver(this);
 		
 		adapter = new AudiobookAdapter(this, R.layout.audiobook_item, audiobooks);
 		
@@ -156,5 +160,18 @@ public class AudiobookListActivity extends Activity {
 	static class ViewHolder {
 		public TextView author_tv, album_tv;
 		public ImageView cover_iv;
+	}
+	
+	@Override public void miniplayer_play() {
+//		Toast.makeText(AudiobookListActivity.this, "Play on miniplayer", Toast.LENGTH_SHORT).show();
+	}
+	@Override public void miniplayer_pause() {
+//		Toast.makeText(AudiobookListActivity.this, "Pause on miniplayer", Toast.LENGTH_SHORT).show();
+	}
+	@Override public void miniplayer_longClick() {
+//		Toast.makeText(AudiobookListActivity.this, "Long click on miniplayer", Toast.LENGTH_SHORT).show();
+	}
+	@Override public void miniplayer_click() {
+//		Toast.makeText(AudiobookListActivity.this, "Click on miniplayer", Toast.LENGTH_SHORT).show();
 	}
 }

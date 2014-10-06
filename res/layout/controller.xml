@@ -67,8 +67,8 @@
                 layout="@layout/horizontal_divider" />
             
             <fragment
-                android:id="@+id/controller_track"
-                android:name="rd.dap.fragments.Track_fragment"
+                android:id="@+id/controller_track_fragment"
+                android:name="rd.dap.fragments.TrackFragment"
                 android:layout_width="@dimen/mini_player_width"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/controller_divider_1"
@@ -79,12 +79,12 @@
                 android:id="@+id/controller_divider_2"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_below="@+id/controller_track"
+                android:layout_below="@+id/controller_track_fragment"
                 layout="@layout/horizontal_divider" />
 
             <fragment
-                android:id="@+id/controller_seeker"
-                android:name="rd.dap.fragments.Seeker_fragment"
+                android:id="@+id/controller_seeker_fragment"
+                android:name="rd.dap.fragments.SeekerFragment"
                 android:layout_width="@dimen/mini_player_width"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/controller_divider_2"

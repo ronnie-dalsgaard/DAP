@@ -1,5 +1,7 @@
 package rd.dap.fragments;
 
+import java.util.ArrayList;
+
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
@@ -20,13 +22,21 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import rd.dap.support.Time;
 
-public class Seeker_fragment extends Fragment implements OnClickListener, ServiceConnection{
+public class SeekerFragment extends Fragment implements OnClickListener, ServiceConnection{
 	private final String TAG = "Seeker";
 	private boolean bound = false;
 	private PlayerService player;
 	private Monitor monitor;
 	private ImageButton forward_btn, rewind_btn;
 	private TextView progress_tv;
+	
+	private ArrayList<Seeker_Fragment_Observer> observers = new ArrayList<Seeker_Fragment_Observer>();
+	public interface Seeker_Fragment_Observer{
+		public void seeker_fragment_forward();
+		public void seeker_fragment_rewind();
+		public void seeker_fragment_click();
+	}
+	public void addObserver(Seeker_Fragment_Observer observer) { observers.add(observer); }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -56,6 +66,7 @@ public class Seeker_fragment extends Fragment implements OnClickListener, Servic
 		
 		progress_tv = (TextView) v.findViewById(R.id.seeker_progress_tv);
 		progress_tv.setText(Time.toString(0));
+		progress_tv.setOnClickListener(this);
 		
 		return v;
 	}
@@ -68,14 +79,32 @@ public class Seeker_fragment extends Fragment implements OnClickListener, Servic
 		switch(v.getId()){
 		case R.id.seeker_fast_forward:
 			newPos = Math.min(position + (60 * 1000), duration);
+			if(position == -1 || duration == -1) return; 
+			player.seekTo(newPos);
+			progress_tv.setText(Time.toString(newPos));
+			
+			for(Seeker_Fragment_Observer observer : observers){
+				observer.seeker_fragment_forward();
+			}
 			break;
+			
 		case R.id.seeker_rewind:
 			newPos = Math.max(position - (60 * 1000), 0);
+			if(position == -1 || duration == -1) return; 
+			player.seekTo(newPos);
+			progress_tv.setText(Time.toString(newPos));
+			
+			for(Seeker_Fragment_Observer observer : observers){
+				observer.seeker_fragment_rewind();
+			}
+			break;
+			
+		case R.id.seeker_progress_tv:
+			for(Seeker_Fragment_Observer observer : observers){
+				observer.seeker_fragment_click();
+			}
 			break;
 		}
-		if(position == -1 || duration == -1) return; 
-		player.seekTo(newPos);
-		progress_tv.setText(Time.toString(newPos));
 	}
 
 	@Override
