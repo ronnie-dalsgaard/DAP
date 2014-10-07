@@ -91,7 +91,6 @@ public class PlayerService extends Service implements OnErrorListener {
 			return true;
 		}
 		try{
-			Log.d(TAG, "mp.isPlaying() -> isPlaying is "+mp.isPlaying());
 			return mp.isPlaying();
 		} catch(IllegalStateException e){
 			Log.d(TAG, "exception occured -> isPlaying is false");

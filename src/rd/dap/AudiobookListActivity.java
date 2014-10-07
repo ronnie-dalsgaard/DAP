@@ -80,6 +80,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 			@Override
 			protected Void doInBackground(Void... params) {
 				AudiobookManager am = new AudiobookManager();
+				audiobooks.clear();
 				audiobooks.addAll(am.autodetect());
 				return null;
 			}
@@ -97,7 +98,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.audiobook_list, menu);
+		getMenuInflater().inflate(R.menu.menu_audiobook_list, menu);
 		return true;
 	}
 	@Override
@@ -105,10 +106,6 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		int id = item.getItemId();
 		Intent intent;
 		switch(id){
-		case R.id.menu_item_file_browser:
-			intent = new Intent(this, FileBrowserActivity.class);
-			startActivity(intent);
-			break;
 		case R.id.menu_item_controller:
 			intent = new Intent(this, ControllerActivity.class);
 			startActivity(intent);
