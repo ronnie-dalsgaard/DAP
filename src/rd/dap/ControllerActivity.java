@@ -10,6 +10,7 @@ import rd.dap.fragments.SeekerFragment;
 import rd.dap.fragments.SeekerFragment.Seeker_Fragment_Observer;
 import rd.dap.fragments.TrackFragment;
 import rd.dap.fragments.TrackFragment.Track_Fragment_Observer;
+import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -41,11 +42,12 @@ public class ControllerActivity extends Activity
 	private static Drawable noCover = null, drw_play = null, drw_pause = null,
 			drw_play_on_cover = null, drw_pause_on_cover;
 	private ControllerMonitor monitor;
+	private DriveHandler driveHandler;
 	private TrackFragment track_frag;
 	private SeekerFragment seeker_frag;
 	private ImageView cover_iv;
 	private TextView author_tv, album_tv;
-	private ImageButton cover_btn, play_btn;
+	private ImageButton cover_btn, play_btn, upload_btn, download_btn;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +91,12 @@ public class ControllerActivity extends Activity
 		play_btn = (ImageButton) findViewById(R.id.controller_play);
 		play_btn.setImageDrawable(null);
 		play_btn.setOnClickListener(this);
+		
+		upload_btn = (ImageButton) findViewById(R.id.controller_upload);
+		upload_btn.setOnClickListener(this);
+		
+		download_btn = (ImageButton) findViewById(R.id.controller_download);
+		download_btn.setOnClickListener(this);
 		
 		FragmentManager fm = getFragmentManager();
 		track_frag = (TrackFragment) fm.findFragmentById(R.id.controller_track_fragment);
@@ -134,6 +142,10 @@ public class ControllerActivity extends Activity
 			//Toggle play/pause
 			player.toggle();
 			break;
+			
+		case R.id.controller_upload:
+			driveHandler = new DriveHandler(this);
+			driveHandler.connect();
 		}
 	}
 
@@ -154,6 +166,8 @@ public class ControllerActivity extends Activity
 			this.unbindService(this);
 			bound = false;
 		}
+		
+		if(driveHandler != null) driveHandler.disconnect();
 	}
 
 	@Override
@@ -231,4 +245,13 @@ public class ControllerActivity extends Activity
 	@Override public void seeker_fragment_click() {
 		
 	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    if (requestCode == DriveHandler.REQUESTCODE_RESOLVE_ERROR
+	    		&& driveHandler != null) {
+	        driveHandler.onActivityResult(requestCode, resultCode, data); 
+	    }
+	}
+	
 }
