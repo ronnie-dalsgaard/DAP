@@ -45,8 +45,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".PlayerService" >
-        </service>
+        <service android:name=".PlayerService" />
+        <service
+            android:name="rd.dap.support.DriveHandler$DriveService"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.gms.version"

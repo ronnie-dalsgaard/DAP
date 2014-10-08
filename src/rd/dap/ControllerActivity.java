@@ -12,7 +12,6 @@ import rd.dap.fragments.TrackFragment;
 import rd.dap.fragments.TrackFragment.Track_Fragment_Observer;
 import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,7 +32,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ControllerActivity extends Activity 
+public class ControllerActivity extends DriveHandler 
 	implements ServiceConnection, OnClickListener, Track_Fragment_Observer, Seeker_Fragment_Observer {
 	
 	private final String TAG = "ControllerActivity";
@@ -42,7 +41,7 @@ public class ControllerActivity extends Activity
 	private static Drawable noCover = null, drw_play = null, drw_pause = null,
 			drw_play_on_cover = null, drw_pause_on_cover;
 	private ControllerMonitor monitor;
-	private DriveHandler driveHandler;
+//	private DriveHandler driveHandler;
 	private TrackFragment track_frag;
 	private SeekerFragment seeker_frag;
 	private ImageView cover_iv;
@@ -144,8 +143,13 @@ public class ControllerActivity extends Activity
 			break;
 			
 		case R.id.controller_upload:
-			driveHandler = new DriveHandler(this);
-			driveHandler.connect();
+//			super.connect();
+			super.test();
+//			super.upload("THIS IS A TEST!!!");
+			break;
+		case R.id.controller_download:
+			super.find(DRIVE_FILENAME);
+			break;
 		}
 	}
 
@@ -155,7 +159,10 @@ public class ControllerActivity extends Activity
 		super.onStart();
 		//Bind to PlayerService
 		Intent intent = new Intent(this, PlayerService.class);
-		bindService(intent, this, Context.BIND_AUTO_CREATE);	
+		bindService(intent, this, Context.BIND_AUTO_CREATE);
+
+		//connect to Google Drive
+		super.connect();
 	}
 	@Override
 	public void onStop(){
@@ -163,11 +170,13 @@ public class ControllerActivity extends Activity
 		super.onStop();
 		//Unbind from PlayerService
 		if(bound){
-			this.unbindService(this);
+			unbindService(this);
 			bound = false;
 		}
 		
-		if(driveHandler != null) driveHandler.disconnect();
+		//disconnet from Google Drive
+		super.disconnect();
+//		if(driveHandler != null) driveHandler.disconnect();
 	}
 
 	@Override
@@ -247,11 +256,9 @@ public class ControllerActivity extends Activity
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	    if (requestCode == DriveHandler.REQUESTCODE_RESOLVE_ERROR
-	    		&& driveHandler != null) {
-	        driveHandler.onActivityResult(requestCode, resultCode, data); 
-	    }
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+	    
 	}
 	
 }
