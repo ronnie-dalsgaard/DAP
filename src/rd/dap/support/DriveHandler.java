@@ -2,8 +2,9 @@ package rd.dap.support;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -55,12 +56,14 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 	private static final int DH_REQUEST_CODE_RESOLVE_ERROR = 11001;
 	private static final int DH_REQUEST_CODE_UPLOAD = 11011;
 	private static final int DH_REQUEST_CODE_DOWNLOAD = 11012;
+	private static final int DH_REQUEST_CODE_UPDATE = 11013;
 	private static final String DH_ERROR_DIALOG_TAG = "DriveHandler.ErrorDialogFragment";
 	private static final String DH_DRIVE_FILENAME = "bookmarks.dap";
 	public static final int SUCCESS = 0;
 	public static final int FAILURE = -1;
 	private int download_requestCode = -1;
 	private int upload_requestCode = -1;
+	private int update_requestCode = -1;
 
 	protected void download(int requestCode){
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
@@ -93,7 +96,6 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 				OutputStreamWriter writer = new OutputStreamWriter(stream);
 				BufferedWriter out = new BufferedWriter(writer);
 				//Write the data
-				System.out.println("Data = "+data);
 				try {
 					out.write(data);
 					out.flush();
@@ -115,7 +117,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 						.build(client);
 				try {
 					startIntentSenderForResult(
-							intentSender, DH_REQUEST_CODE_UPLOAD, 
+							intentSender, DH_REQUEST_CODE_UPDATE, 
 							/*fillInIntent = */ null, 
 							/*flagsMask = */ 0, 
 							/*flagsValue = */ 0,
@@ -132,24 +134,24 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 	}
 	protected void query(final int requestCode, String title){
 		Query query = new Query.Builder()
-		.addFilter(Filters.eq(SearchableField.TITLE, title))
+		.addFilter(Filters.contains(SearchableField.TITLE, title))
 		.build();
 		Drive.DriveApi.query(client, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
 			@Override
 			public void onResult(MetadataBufferResult result) {
-				System.out.println("Got a result!");
 				MetadataBuffer buffer = result.getMetadataBuffer();
-				System.out.println("Buffer count = "+buffer.getCount());
 				Toast.makeText(DriveHandler.this, "Files found: "+buffer.getCount(), Toast.LENGTH_SHORT).show();
+				Log.d(TAG, "Files found: "+buffer.getCount());
 				if(buffer.getCount() > 0){
 					ArrayList<Metadata> list = new ArrayList<Metadata>();
 					Iterator<Metadata> iterator = buffer.iterator();
 					while(iterator.hasNext()){
 						Metadata metadata = iterator.next();
-						list.add(metadata);
-						System.out.println(metadata.getTitle());
-						onDriveResult(requestCode, SUCCESS, list);
+						if(!metadata.isTrashed()){
+							list.add(metadata);
+						}
 					}
+					onDriveResult(requestCode, SUCCESS, list);
 				} else {
 					Log.d(TAG, "No files found");
 					onDriveResult(requestCode, SUCCESS, new ArrayList<Metadata>());
@@ -158,7 +160,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 		});
 	}
 	protected void getContents(final int requestCode, DriveFile df){
-		df.openContents(client, DriveFile.MODE_READ_ONLY, new DownloadProgressListener() {
+		df.openContents(client, DriveFile.MODE_READ_WRITE, new DownloadProgressListener() {
 			@Override
 			public void onProgress(long bytesDownloaded, long bytesExpected) {
 				System.out.println(bytesDownloaded + " / " + bytesExpected);
@@ -171,8 +173,17 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 					Log.d(TAG, "Failure to download");
 					return;
 				}
+				
 				Contents contents = result.getContents();
-				InputStream stream = contents.getInputStream();
+				
+				//This can be used with MODE_READ_WRITE
+				FileDescriptor descriptor = contents.getParcelFileDescriptor().getFileDescriptor();
+				FileInputStream stream = new FileInputStream(descriptor);
+				
+				//This can be used with MODE_READ_ONLY
+				//(an outputStream can be used with MODE_WRITE_ONLY)
+//				InputStream stream = contents.getInputStream();
+				
 				InputStreamReader reader = new InputStreamReader(stream);
 				BufferedReader in = new BufferedReader(reader);
 				StringBuilder stringbuilder = new StringBuilder();
@@ -192,12 +203,45 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 			}
 		});
 	}
-//	protected void getBookmark_dap(int requestCode){
-//		String id = "DriveId:CAESHDBCMGI3ZkhZN0JtX21SMWh2VlhnNE9ITTBWREEY3gYg8PDwtqhR";
-//		DriveId driveId = DriveId.decodeFromString(id);
-//		DriveFile df = Drive.DriveApi.getFile(client, driveId);
-//		onDriveResult(requestCode, SUCCESS, df);
-//	}
+	protected void update(final int requestCode, DriveFile currentBookmarkFile, final String data){
+		currentBookmarkFile.openContents(client, DriveFile.MODE_READ_ONLY, new DownloadProgressListener() {
+			@Override
+			public void onProgress(long bytesDownloaded, long bytesExpected) {
+				System.out.println(bytesDownloaded + " / " + bytesExpected);
+			}
+		}).setResultCallback(new ResultCallback<DriveApi.ContentsResult>() {
+			@Override
+			public void onResult(ContentsResult result) {
+				if(!result.getStatus().isSuccess()){
+					Toast.makeText(DriveHandler.this, "Failure to download", Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "Failure to download");
+					return;
+				}
+				
+				//Create a writer from the content-result
+				Contents contents = result.getContents();
+				OutputStream stream = contents.getOutputStream();
+				OutputStreamWriter writer = new OutputStreamWriter(stream);
+				BufferedWriter out = new BufferedWriter(writer);
+				//Write the data
+				try {
+					out.write(data);
+					out.flush();
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+					Log.d(TAG, "Unable to write data");
+				}
+			}
+		});
+	}
+
+	//	protected void getBookmark_dap(int requestCode){
+	//		String id = "DriveId:CAESHDBCMGI3ZkhZN0JtX21SMWh2VlhnNE9ITTBWREEY3gYg8PDwtqhR";
+	//		DriveId driveId = DriveId.decodeFromString(id);
+	//		DriveFile df = Drive.DriveApi.getFile(client, driveId);
+	//		onDriveResult(requestCode, SUCCESS, df);
+	//	}
 
 	public abstract void onDriveResult(int requestCode, int result, Object... data);
 
@@ -242,6 +286,18 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 				onDriveResult(download_requestCode, FAILURE);
 			}
 			download_requestCode = -1;
+			break;
+			
+		case DH_REQUEST_CODE_UPDATE:
+			if(resultCode == Activity.RESULT_OK){
+				Toast.makeText(this, "Bookmarks uploaded", Toast.LENGTH_SHORT).show();
+				Log.d(TAG, "File saved successfully");
+				onDriveResult(update_requestCode, DriveHandler.SUCCESS);
+			} else {
+				Log.d(TAG, "File NOT saved");
+				onDriveResult(update_requestCode, DriveHandler.FAILURE);
+			}
+			update_requestCode = -1;
 			break;
 		}
 	} 

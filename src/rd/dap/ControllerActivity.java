@@ -4,6 +4,7 @@ import static rd.dap.PlayerService.audiobook;
 import static rd.dap.PlayerService.track;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.fragments.SeekerFragment;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.Metadata;
 
 public class ControllerActivity extends DriveHandler 
 	implements ServiceConnection, OnClickListener, Track_Fragment_Observer, Seeker_Fragment_Observer {
@@ -53,6 +55,10 @@ public class ControllerActivity extends DriveHandler
 	private static final int REQUEST_CODE_UPLOAD = 13001;
 	private static final int REQUEST_CODE_DOWNLOAD = 13002;
 	private static final int REQUEST_CODE_GET_CONTENTS = 13003;
+	private static final int REQUEST_CODE_QUERY = 13004;
+	private static final int REQUEST_CODE_UPDATE = 13005;
+	
+	DriveFile currentBookmarkFile = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -149,10 +155,15 @@ public class ControllerActivity extends DriveHandler
 			break;
 			
 		case R.id.controller_upload:
-			upload(REQUEST_CODE_UPLOAD, "THIS IS A TEST!!!");
+			if(this.currentBookmarkFile == null){
+				upload(REQUEST_CODE_UPLOAD, "THIS IS A TEST!!!");
+			} else {
+				update(REQUEST_CODE_UPDATE, currentBookmarkFile, "New test");
+			}
 			break;
 		case R.id.controller_download:
 			super.download(REQUEST_CODE_DOWNLOAD);
+//			super.query(REQUEST_CODE_QUERY, ".dap");
 			break;
 		}
 	}
@@ -163,12 +174,22 @@ public class ControllerActivity extends DriveHandler
 			Toast.makeText(this, "Upload successfull", Toast.LENGTH_SHORT).show();
 			break;
 		case REQUEST_CODE_DOWNLOAD: 
-			DriveFile df = (DriveFile) data[0];
-			getContents(REQUEST_CODE_GET_CONTENTS, df);
+			//This is a passthrough
+			currentBookmarkFile = (DriveFile) data[0];
+			getContents(REQUEST_CODE_GET_CONTENTS, currentBookmarkFile);
 			break;
 		case REQUEST_CODE_GET_CONTENTS:
 			String str = (String) data[0];
 			Toast.makeText(this, ":::"+str, Toast.LENGTH_SHORT).show();
+			break;
+		case REQUEST_CODE_QUERY:
+			@SuppressWarnings("unchecked")
+			ArrayList<Metadata> list = (ArrayList<Metadata>) data[0];
+			for(Metadata m : list){
+				System.out.println("--->"+m.getTitle());
+			}
+		case REQUEST_CODE_UPDATE:
+			Toast.makeText(this, "Update successfull", Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
