@@ -109,6 +109,11 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		case R.id.menu_item_controller:
 			intent = new Intent(this, ControllerActivity.class);
 			startActivity(intent);
+			break;
+		case R.id.menu_item_new_audiobook:
+			intent = new Intent(this, NewAudiobookActivity.class);
+			startActivity(intent);
+			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}

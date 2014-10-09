@@ -21,5 +21,6 @@
     <string name="title_activity_track">TrackActivity</string>
     <string name="title_activity_controller">ControllerActivity</string>
     <string name="title_activity_audiobook_list">AudiobookListActivity</string>
+    <string name="title_activity_new_audiobook">NewAudiobookActivity</string>
 
 </resources>

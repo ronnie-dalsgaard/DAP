@@ -17,25 +17,28 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FileBrowserActivity extends Activity {
 	private static final String TAG = "FileBrowserActivity";
 	private static final String[] TYPE_IMAGE = {".jpg", ".png"};
 	private static final String[] TYPE_AUDIO = {".mp3"};
+	public static final String TYPE_FOLDER = "folder";
 	private String type;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.list_with_miniplayer);
 		Log.d(TAG, "onCreate");
-		
+
 		type = getIntent().getStringExtra("type");
-		
+
 		String state = Environment.getExternalStorageState();
 		if(!Environment.MEDIA_MOUNTED.equals(state) && !Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){
 			//MEDIA_MOUNTED => read/write access, MEDIA_MOUNTED_READ_ONLY => read access
@@ -43,23 +46,22 @@ public class FileBrowserActivity extends Activity {
 		}
 
 		final File root = Environment.getExternalStorageDirectory();
-		
+
 		final ArrayList<File> list = new ArrayList<File>();
 		for(File f : root.listFiles()){
 			list.add(f);
 		}
-		
+
 		ListView listview = (ListView) findViewById(R.id.main_list);
 		final FileAdapter adapter = new FileAdapter(this, R.layout.file_browser_file_item, list);
 		adapter.setRoot(root);
 		adapter.setCurent(root);
 		listview.setAdapter(adapter);
 		listview.setOnItemClickListener(new OnItemClickListener() {
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				File file = list.get(position);
-				
+
 				//Validate file
 				boolean accept = false;
 				String[] accepted = {};
@@ -78,8 +80,8 @@ public class FileBrowserActivity extends Activity {
 						setResult(requestcode, intent);
 						finish();
 					}
-					
-				//Go into folder
+
+					//Go into folder
 				} else if(file.isDirectory()){
 					list.clear();
 					if(!file.equals(root)){
@@ -93,7 +95,26 @@ public class FileBrowserActivity extends Activity {
 				}
 			}
 		});
-		
+		listview.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				Toast.makeText(FileBrowserActivity.this, "LongClick", Toast.LENGTH_SHORT).show();
+				if(TYPE_FOLDER.equalsIgnoreCase(type)){
+					File file = list.get(position);
+					int requestcode = getIntent().getIntExtra("requestcode", -1);
+					if(requestcode > 0){
+						Toast.makeText(FileBrowserActivity.this, file.getName(), Toast.LENGTH_SHORT).show();
+						Intent intent = new Intent();
+						intent.putExtra("result", file.getAbsolutePath());
+						setResult(requestcode, intent);
+						finish();
+					}
+				}
+				return true;
+			}
+		});
+
 		Log.d(TAG, "created");
 	}
 
@@ -101,18 +122,18 @@ public class FileBrowserActivity extends Activity {
 		super.onDestroy();
 		Log.d(TAG, "onDestroy");
 	}
-	
+
 	class FileAdapter extends ArrayAdapter<File> {
 		private List<File> list;
 		private Context context;
 		private File root, current;
-		
+
 		public FileAdapter(Context context, int resource, List<File> list) {
 			super(context, resource, list);
 			this.list = list;
 			this.context = context;
 		}
-		
+
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent){
 			ViewHolder holder;
@@ -120,18 +141,18 @@ public class FileBrowserActivity extends Activity {
 				LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				convertView = inflater.inflate(R.layout.file_browser_file_item, parent, false);
 				//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
-				
+
 				holder = new ViewHolder();
 				holder.name_tv = (TextView) convertView.findViewById(R.id.file_item_name_tv);
 				holder.path_tv = (TextView) convertView.findViewById(R.id.file_item_path_tv);
 				holder.type_iv = (ImageView) convertView.findViewById(R.id.file_item_type_iv);
 				holder.selecte_iv = (ImageView) convertView.findViewById(R.id.file_item_select_iv);
-				
+
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
-			
+
 			File file = list.get(position);
 
 			if(!current.equals(root)){
@@ -141,7 +162,7 @@ public class FileBrowserActivity extends Activity {
 			}
 			holder.path_tv.setText(file.getAbsolutePath());
 			Drawable ic = null;
-			
+
 			if(file.getPath().endsWith(".mp3")){
 				ic = context.getResources().getDrawable(R.drawable.ic_action_headphones);
 			} else if(file.getPath().endsWith(".jpg")){
@@ -150,19 +171,19 @@ public class FileBrowserActivity extends Activity {
 				ic = context.getResources().getDrawable(R.drawable.ic_action_collection);
 			}
 			if(ic != null) 	holder.type_iv.setImageDrawable(ic);
-			
+
 			holder.selecte_iv.setOnClickListener(new OnClickListener() {
-				
+
 				@Override
 				public void onClick(View v) {
 					System.out.println("Click on "+position);
-					
+
 				}
 			});
-			
+
 			return convertView;
 		}
-		
+
 		public void setCurent(File current){
 			this.current = current;
 		}

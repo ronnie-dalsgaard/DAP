@@ -6,6 +6,12 @@
         android:id="@+id/menu_item_controller"
         android:showAsAction="ifRoom"
         android:icon="@drawable/ic_action_control"
-        android:title="Controller"/>
+        android:title="Controller" />
+    
+    <item
+        android:id="@+id/menu_item_new_audiobook"
+        android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_new"
+        android:title="New Audiobook" />
 
 </menu>

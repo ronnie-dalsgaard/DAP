@@ -20,7 +20,6 @@
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        tools:layout="@layout/mini_player" />
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
