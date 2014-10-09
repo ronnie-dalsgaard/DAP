@@ -32,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.drive.DriveFile;
+
 public class ControllerActivity extends DriveHandler 
 	implements ServiceConnection, OnClickListener, Track_Fragment_Observer, Seeker_Fragment_Observer {
 	
@@ -47,6 +49,10 @@ public class ControllerActivity extends DriveHandler
 	private ImageView cover_iv;
 	private TextView author_tv, album_tv;
 	private ImageButton cover_btn, play_btn, upload_btn, download_btn;
+	
+	private static final int REQUEST_CODE_UPLOAD = 13001;
+	private static final int REQUEST_CODE_DOWNLOAD = 13002;
+	private static final int REQUEST_CODE_GET_CONTENTS = 13003;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -143,12 +149,26 @@ public class ControllerActivity extends DriveHandler
 			break;
 			
 		case R.id.controller_upload:
-//			super.connect();
-			super.test();
-//			super.upload("THIS IS A TEST!!!");
+			upload(REQUEST_CODE_UPLOAD, "THIS IS A TEST!!!");
 			break;
 		case R.id.controller_download:
-			super.find(DRIVE_FILENAME);
+			super.download(REQUEST_CODE_DOWNLOAD);
+			break;
+		}
+	}
+	public void onDriveResult(int requestCode, int result, Object... data){
+		if(result != DriveHandler.SUCCESS) return;
+		switch(requestCode){
+		case REQUEST_CODE_UPLOAD: 
+			Toast.makeText(this, "Upload successfull", Toast.LENGTH_SHORT).show();
+			break;
+		case REQUEST_CODE_DOWNLOAD: 
+			DriveFile df = (DriveFile) data[0];
+			getContents(REQUEST_CODE_GET_CONTENTS, df);
+			break;
+		case REQUEST_CODE_GET_CONTENTS:
+			String str = (String) data[0];
+			Toast.makeText(this, ":::"+str, Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
