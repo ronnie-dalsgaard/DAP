@@ -7,10 +7,12 @@ import java.io.File;
 import java.util.ArrayList;
 
 import rd.dap.PlayerService.DAPBinder;
-import rd.dap.fragments.SeekerFragment;
-import rd.dap.fragments.SeekerFragment.Seeker_Fragment_Observer;
-import rd.dap.fragments.TrackFragment;
-import rd.dap.fragments.TrackFragment.Track_Fragment_Observer;
+import rd.dap.fragments.FragmentAudiobookBasics;
+import rd.dap.fragments.FragmentSeeker;
+import rd.dap.fragments.FragmentAudiobookBasics.Fragment_Audiobooks_Basics_Observer;
+import rd.dap.fragments.FragmentSeeker.Seeker_Fragment_Observer;
+import rd.dap.fragments.FragmentTrack;
+import rd.dap.fragments.FragmentTrack.Fragment_Track_Observer;
 import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
 import android.app.FragmentManager;
@@ -36,8 +38,8 @@ import android.widget.Toast;
 import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.Metadata;
 
-public class ControllerActivity extends DriveHandler 
-	implements ServiceConnection, OnClickListener, Track_Fragment_Observer, Seeker_Fragment_Observer {
+public class ControllerActivity extends DriveHandler implements ServiceConnection, OnClickListener, 
+	Fragment_Track_Observer, Seeker_Fragment_Observer, Fragment_Audiobooks_Basics_Observer {
 	
 	private final String TAG = "ControllerActivity";
 	private boolean bound = false;
@@ -45,12 +47,10 @@ public class ControllerActivity extends DriveHandler
 	private static Drawable noCover = null, drw_play = null, drw_pause = null,
 			drw_play_on_cover = null, drw_pause_on_cover;
 	private ControllerMonitor monitor;
-//	private DriveHandler driveHandler;
-	private TrackFragment track_frag;
-	private SeekerFragment seeker_frag;
-	private ImageView cover_iv;
-	private TextView author_tv, album_tv;
-	private ImageButton cover_btn, play_btn, upload_btn, download_btn;
+	private FragmentAudiobookBasics audiobook_basics_frag;
+	private FragmentTrack track_frag;
+	private FragmentSeeker seeker_frag;
+	private ImageButton play_btn, upload_btn, download_btn;
 	
 	private static final int REQUEST_CODE_UPLOAD = 13001;
 	private static final int REQUEST_CODE_DOWNLOAD = 13002;
@@ -75,30 +75,6 @@ public class ControllerActivity extends DriveHandler
 			drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
 		}
 
-		cover_iv = (ImageView) findViewById(R.id.controller_cover_iv);
-		author_tv = (TextView) findViewById(R.id.controller_author_tv);
-		album_tv = (TextView) findViewById(R.id.controller_album_tv);
-
-		if(audiobook != null){
-			//Cover
-			File cover = track.getCover();
-			if(cover == null) cover = audiobook.getCover();
-			if(cover != null) {
-				Bitmap bitmap = BitmapFactory.decodeFile(cover.getPath());
-				cover_iv.setImageBitmap(bitmap);
-			} else {
-				cover_iv.setImageDrawable(noCover);
-			}
-
-			//Author
-			author_tv.setText(audiobook.getAuthor());
-
-			//Album
-			album_tv.setText(audiobook.getAlbum());
-		}
-		cover_btn = (ImageButton) findViewById(R.id.controller_cover_btn);
-		cover_btn.setOnClickListener(this);
-
 		play_btn = (ImageButton) findViewById(R.id.controller_play);
 		play_btn.setImageDrawable(null);
 		play_btn.setOnClickListener(this);
@@ -110,10 +86,13 @@ public class ControllerActivity extends DriveHandler
 		download_btn.setOnClickListener(this);
 		
 		FragmentManager fm = getFragmentManager();
-		track_frag = (TrackFragment) fm.findFragmentById(R.id.controller_track_fragment);
+		audiobook_basics_frag = (FragmentAudiobookBasics) fm.findFragmentById(R.id.controller_fragment_audiobooks_basics);
+		audiobook_basics_frag.addObserver(this);
+		
+		track_frag = (FragmentTrack) fm.findFragmentById(R.id.controller_track_fragment);
 		track_frag.addObserver(this);
 		
-		seeker_frag = (SeekerFragment) fm.findFragmentById(R.id.controller_seeker_fragment);
+		seeker_frag = (FragmentSeeker) fm.findFragmentById(R.id.controller_seeker_fragment);
 		seeker_frag.addObserver(this);
 
 		monitor = new ControllerMonitor();
@@ -142,14 +121,13 @@ public class ControllerActivity extends DriveHandler
 	public void onClick(View v) {
 		Log.d(TAG, "onClick");
 		switch(v.getId()){
-		case R.id.controller_cover_btn:
 		case R.id.controller_play:
 			if(audiobook == null) break;
 			boolean isPlaying = false;
 			if(player != null) isPlaying = player.isPlaying();
 			//Fix view
 			play_btn.setImageDrawable(!isPlaying ? drw_pause : drw_play);
-			cover_btn.setImageDrawable(!isPlaying ? drw_pause_on_cover : drw_play_on_cover);
+			audiobook_basics_frag.setActionDrawabel(!isPlaying ? drw_pause_on_cover : drw_play_on_cover);
 			//Toggle play/pause
 			player.toggle();
 			break;
@@ -217,7 +195,6 @@ public class ControllerActivity extends DriveHandler
 		
 		//disconnet from Google Drive
 		super.disconnect();
-//		if(driveHandler != null) driveHandler.disconnect();
 	}
 
 	@Override
@@ -234,7 +211,7 @@ public class ControllerActivity extends DriveHandler
 	}
 
 	class ControllerMonitor extends Monitor {
-//		private static final String TAG = "ControllerActivity.Monitor";
+		private static final String TAG = "ControllerActivity.Monitor";
 		private boolean isPlaying = false;
 
 		@Override
@@ -246,7 +223,7 @@ public class ControllerActivity extends DriveHandler
 				public void run() {
 					if(bound && audiobook != null){
 						play_btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
-						cover_btn.setImageDrawable(isPlaying ? drw_pause_on_cover : drw_play_on_cover);
+						audiobook_basics_frag.setActionDrawabel(isPlaying ? drw_pause_on_cover : drw_play_on_cover);
 						
 //						System.out.println("Set to : " + (isPlaying ? "pause" : "play"));
 //						if(!isPlaying){
@@ -257,7 +234,7 @@ public class ControllerActivity extends DriveHandler
 //						}
 					} else {
 						play_btn.setImageDrawable(null);
-						cover_btn.setImageDrawable(null);
+						audiobook_basics_frag.setActionDrawabel(null);
 					}
 				}
 			});
@@ -265,23 +242,23 @@ public class ControllerActivity extends DriveHandler
 	}
 
 	@Override
-	public void track_fragment_next() {
+	public void fragment_track_next() {
 		play_btn.setImageDrawable(drw_play);
-		cover_btn.setImageDrawable(drw_play_on_cover);
+		audiobook_basics_frag.setActionDrawabel(drw_play_on_cover);
 	}
 	@Override
-	public void track_fragment_previous() {
+	public void fragment_track_previous() {
 		play_btn.setImageDrawable(drw_play);
-		cover_btn.setImageDrawable(drw_play_on_cover);
+		audiobook_basics_frag.setActionDrawabel(drw_play_on_cover);
 	}
 	@Override
-	public void track_fragment_click() {
+	public void fragment_track_click() {
 		Toast.makeText(this, "Click on track_fragment", Toast.LENGTH_SHORT).show();
 	}
 	@Override
-	public void track_fragment_select(int position) {
+	public void fragment_track_select(int position) {
 		play_btn.setImageDrawable(drw_play);
-		cover_btn.setImageDrawable(drw_play_on_cover);
+		audiobook_basics_frag.setActionDrawabel(drw_play_on_cover);
 	}
 
 	@Override public void seeker_fragment_forward() {
@@ -297,9 +274,23 @@ public class ControllerActivity extends DriveHandler
 	}
 
 	@Override
+	public void fragment_audiobooks_basics_click() {
+		if(audiobook == null) return;;
+		boolean isPlaying = false;
+		if(player != null) isPlaying = player.isPlaying();
+		//Fix view
+		play_btn.setImageDrawable(!isPlaying ? drw_pause : drw_play);
+		audiobook_basics_frag.setActionDrawabel(!isPlaying ? drw_pause_on_cover : drw_play_on_cover);
+		//Toggle play/pause
+		player.toggle();
+	}
+	
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 	    
 	}
+
+	
 	
 }

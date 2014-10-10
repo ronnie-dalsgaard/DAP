@@ -22,7 +22,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import rd.dap.support.Time;
 
-public class SeekerFragment extends Fragment implements OnClickListener, ServiceConnection{
+public class FragmentSeeker extends Fragment implements OnClickListener, ServiceConnection{
 	private final String TAG = "Seeker";
 	private boolean bound = false;
 	private PlayerService player;
@@ -56,7 +56,7 @@ public class SeekerFragment extends Fragment implements OnClickListener, Service
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
-		View v = (ViewGroup) inflater.inflate(R.layout.seeker_fragment, container, false);
+		View v = (ViewGroup) inflater.inflate(R.layout.fragment_seeker, container, false);
 		
 		forward_btn = (ImageButton) v.findViewById(R.id.seeker_fast_forward);
 		forward_btn.setOnClickListener(this);

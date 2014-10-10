@@ -8,8 +8,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import rd.dap.fragments.MiniPlayer;
-import rd.dap.fragments.MiniPlayer.MiniPlayerObserver;
+import rd.dap.fragments.FragmentMiniPlayer;
+import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import android.app.Activity;
@@ -37,7 +37,7 @@ import android.widget.TextView;
 public class AudiobookListActivity extends Activity implements MiniPlayerObserver {
 	public static ArrayAdapter<Audiobook> adapter;
 	public static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
-	public static MiniPlayer miniplayer = null;
+	public static FragmentMiniPlayer miniplayer = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +45,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		setContentView(R.layout.list_with_miniplayer);
 		
 		FragmentManager fm = getFragmentManager();
-		miniplayer = (MiniPlayer) fm.findFragmentById(R.id.main_mini_player);
+		miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.main_mini_player);
 		miniplayer.addObserver(this);
 		
 		adapter = new AudiobookAdapter(this, R.layout.audiobook_item, audiobooks);

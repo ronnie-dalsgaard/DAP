@@ -56,7 +56,7 @@ public class AudiobookActivity extends Activity {
 //		setContentView(list);
 		
 		ListView list = (ListView) findViewById(R.id.main_list);
-		adapter = new AudiobookDetailsAdapter(this, R.layout.details_item_track, audiobook.getPlaylist());
+		adapter = new AudiobookDetailsAdapter(this, R.layout.item_track, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -194,7 +194,7 @@ public class AudiobookActivity extends Activity {
 				TrackViewHolder trackHolder;
 				if(convertView == null){
 					trackHolder = new TrackViewHolder();
-					convertView = inflater.inflate(R.layout.details_item_track, parent, false);
+					convertView = inflater.inflate(R.layout.item_track, parent, false);
 					//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 
 					trackHolder.track_item_title_tv = (TextView) convertView.findViewById(R.id.details_item_audiobook_track_title);

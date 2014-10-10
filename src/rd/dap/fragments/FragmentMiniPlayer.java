@@ -35,7 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MiniPlayer extends Fragment implements OnClickListener, OnLongClickListener, ServiceConnection {
+public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnLongClickListener, ServiceConnection {
 	private static final String TAG = "MiniPlayer";
 	private boolean bound = false;
 	private PlayerService player;

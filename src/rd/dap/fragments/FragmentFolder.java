@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class FolderFragment extends Fragment implements OnClickListener {
+public class FragmentFolder extends Fragment implements OnClickListener {
 	private final String TAG = "Folder_Fragment";
 	private static final int REQUEST_CODE = 20001;
 	private TextView folder_tv;
@@ -31,7 +31,7 @@ public class FolderFragment extends Fragment implements OnClickListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
-		View v = (ViewGroup) inflater.inflate(R.layout.folder_fragment, container, false);
+		View v = (ViewGroup) inflater.inflate(R.layout.fragment_folder, container, false);
 
 		RelativeLayout layout = (RelativeLayout) v.findViewById(R.id.folder_fragment_layout);
 		layout.setOnClickListener(this);

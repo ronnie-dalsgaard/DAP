@@ -17,64 +17,29 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <ImageView
-                android:id="@+id/controller_cover_iv"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/ic_action_help" />
-
-            <ImageButton
-                android:id="@+id/controller_cover_btn"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:background="@color/transparent"
-                android:contentDescription="@string/content_description" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignBottom="@+id/controller_cover_iv"
-                android:layout_toRightOf="@+id/controller_cover_iv"
-                android:gravity="center_vertical"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/controller_author_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:paddingLeft="@dimen/margin_big"
-                    android:text="Author"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-                <include layout="@layout/horizontal_divider" />
-
-                <TextView
-                    android:id="@+id/controller_album_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:paddingLeft="@dimen/margin_big"
-                    android:text="Album"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-            </LinearLayout>
+            <fragment
+                android:id="@+id/controller_fragment_audiobooks_basics"
+                android:name="rd.dap.fragments.FragmentAudiobookBasics"
+                android:layout_width="@dimen/mini_player_width"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                tools:layout="@layout/fragment_audiobook_basics" />
 
             <include
                 android:id="@+id/controller_divider_1"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_below="@+id/controller_cover_iv"
+                android:layout_below="@+id/controller_fragment_audiobooks_basics"
                 layout="@layout/horizontal_divider" />
             
             <fragment
                 android:id="@+id/controller_track_fragment"
-                android:name="rd.dap.fragments.TrackFragment"
+                android:name="rd.dap.fragments.FragmentTrack"
                 android:layout_width="@dimen/mini_player_width"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/controller_divider_1"
                 android:layout_centerHorizontal="true"
-                tools:layout="@layout/track_fragment" />
+                tools:layout="@layout/fragment_track" />
 
             <include 
                 android:id="@+id/controller_divider_2"
@@ -85,12 +50,12 @@
 
             <fragment
                 android:id="@+id/controller_seeker_fragment"
-                android:name="rd.dap.fragments.SeekerFragment"
+                android:name="rd.dap.fragments.FragmentSeeker"
                 android:layout_width="@dimen/mini_player_width"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/controller_divider_2"
                 android:layout_centerHorizontal="true"
-                tools:layout="@layout/seeker_fragment" />
+                tools:layout="@layout/fragment_seeker" />
         </RelativeLayout>
     </ScrollView>
 

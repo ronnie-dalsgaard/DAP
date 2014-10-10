@@ -40,7 +40,7 @@
 
     <fragment
         android:id="@+id/track_mini_player"
-        android:name="rd.dap.fragments.MiniPlayer"
+        android:name="rd.dap.fragments.FragmentMiniPlayer"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

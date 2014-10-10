@@ -28,8 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
-public class TrackFragment extends Fragment implements OnClickListener, ServiceConnection{
-	private final String TAG = "Track_Fragment";
+public class FragmentTrack extends Fragment implements OnClickListener, ServiceConnection{
+	private final String TAG = "Fragment_Track";
 	private static final int CELL = 1111;
 	private boolean bound = false;
 	private PlayerService player;
@@ -38,14 +38,14 @@ public class TrackFragment extends Fragment implements OnClickListener, ServiceC
 	private TextView position_tv, title_tv;
 	private LinearLayout tracks_gv;
 	
-	private ArrayList<Track_Fragment_Observer> observers = new ArrayList<Track_Fragment_Observer>();
-	public interface Track_Fragment_Observer{
-		public void track_fragment_next();
-		public void track_fragment_previous();
-		public void track_fragment_click();
-		public void track_fragment_select(int position);
+	private ArrayList<Fragment_Track_Observer> observers = new ArrayList<Fragment_Track_Observer>();
+	public interface Fragment_Track_Observer{
+		public void fragment_track_next();
+		public void fragment_track_previous();
+		public void fragment_track_click();
+		public void fragment_track_select(int position);
 	}
-	public void addObserver(Track_Fragment_Observer observer) { observers.add(observer); }
+	public void addObserver(Fragment_Track_Observer observer) { observers.add(observer); }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -65,7 +65,7 @@ public class TrackFragment extends Fragment implements OnClickListener, ServiceC
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
-		View v = (ViewGroup) inflater.inflate(R.layout.track_fragment, container, false);
+		View v = (ViewGroup) inflater.inflate(R.layout.fragment_track, container, false);
 
 		next_btn = (ImageButton) v.findViewById(R.id.track_next);
 		next_btn.setOnClickListener(this);
@@ -144,8 +144,8 @@ public class TrackFragment extends Fragment implements OnClickListener, ServiceC
 			//Fix view
 			displayTracks();
 
-			for(Track_Fragment_Observer observer : observers){
-				observer.track_fragment_next();
+			for(Fragment_Track_Observer observer : observers){
+				observer.fragment_track_next();
 			}
 			
 			player.reload();
@@ -159,8 +159,8 @@ public class TrackFragment extends Fragment implements OnClickListener, ServiceC
 			//Fix view
 			displayTracks();
 
-			for(Track_Fragment_Observer observer : observers){
-				observer.track_fragment_previous();
+			for(Fragment_Track_Observer observer : observers){
+				observer.fragment_track_previous();
 			}
 			
 			player.reload();
@@ -177,8 +177,8 @@ public class TrackFragment extends Fragment implements OnClickListener, ServiceC
 					//Fix view
 					displayTracks();
 
-					for(Track_Fragment_Observer observer : observers){
-						observer.track_fragment_select(i);
+					for(Fragment_Track_Observer observer : observers){
+						observer.fragment_track_select(i);
 					}
 					
 					player.reload();

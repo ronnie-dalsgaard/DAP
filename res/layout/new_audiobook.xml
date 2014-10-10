@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/new_audiobook_folder_fragment"
-        android:name="rd.dap.fragments.FolderFragment"
+        android:name="rd.dap.fragments.FragmentFolder"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
