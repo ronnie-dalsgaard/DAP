@@ -760,9 +760,9 @@ containing a value of this type.
         public static final int details_item_track_pos_title_divider=0x7f070029;
         public static final int details_item_track_position=0x7f070028;
         public static final int details_item_track_title=0x7f07002a;
+        public static final int file_item_cb=0x7f07002c;
         public static final int file_item_name_tv=0x7f07002d;
         public static final int file_item_path_tv=0x7f07002e;
-        public static final int file_item_select_iv=0x7f07002c;
         public static final int file_item_type_iv=0x7f07002b;
         public static final int folder_fragment_label=0x7f070035;
         public static final int folder_fragment_layout=0x7f070034;

@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,6 +31,7 @@ public class FileBrowserActivity extends Activity {
 	private static final String[] TYPE_AUDIO = {".mp3"};
 	public static final String TYPE_FOLDER = "folder";
 	private String type;
+	private ArrayList<File> list;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class FileBrowserActivity extends Activity {
 		Log.d(TAG, "onCreate");
 
 		type = getIntent().getStringExtra("type");
+		if(type == null || type.isEmpty()) throw new RuntimeException("No type set");
 
 		String state = Environment.getExternalStorageState();
 		if(!Environment.MEDIA_MOUNTED.equals(state) && !Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){
@@ -47,7 +50,7 @@ public class FileBrowserActivity extends Activity {
 
 		final File root = Environment.getExternalStorageDirectory();
 
-		final ArrayList<File> list = new ArrayList<File>();
+		list = new ArrayList<File>();
 		for(File f : root.listFiles()){
 			list.add(f);
 		}
@@ -100,22 +103,26 @@ public class FileBrowserActivity extends Activity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				Toast.makeText(FileBrowserActivity.this, "LongClick", Toast.LENGTH_SHORT).show();
-				if(TYPE_FOLDER.equalsIgnoreCase(type)){
-					File file = list.get(position);
-					int requestcode = getIntent().getIntExtra("requestcode", -1);
-					if(requestcode > 0){
-						Toast.makeText(FileBrowserActivity.this, file.getName(), Toast.LENGTH_SHORT).show();
-						Intent intent = new Intent();
-						intent.putExtra("result", file.getAbsolutePath());
-						setResult(requestcode, intent);
-						finish();
-					}
-				}
+				selectFolder(position);
 				return true;
 			}
 		});
 
 		Log.d(TAG, "created");
+	}
+	
+	private void selectFolder(int position){
+		if(TYPE_FOLDER.equalsIgnoreCase(type)){
+			File file = list.get(position);
+			int requestcode = getIntent().getIntExtra("requestcode", -1);
+			if(requestcode > 0){
+				Toast.makeText(FileBrowserActivity.this, file.getName(), Toast.LENGTH_SHORT).show();
+				Intent intent = new Intent();
+				intent.putExtra("result", file.getAbsolutePath());
+				setResult(requestcode, intent);
+				finish();
+			}
+		}
 	}
 
 	public void onDestroy(){
@@ -146,7 +153,7 @@ public class FileBrowserActivity extends Activity {
 				holder.name_tv = (TextView) convertView.findViewById(R.id.file_item_name_tv);
 				holder.path_tv = (TextView) convertView.findViewById(R.id.file_item_path_tv);
 				holder.type_iv = (ImageView) convertView.findViewById(R.id.file_item_type_iv);
-				holder.selecte_iv = (ImageView) convertView.findViewById(R.id.file_item_select_iv);
+				holder.cb = (CheckBox) convertView.findViewById(R.id.file_item_cb);
 
 				convertView.setTag(holder);
 			} else {
@@ -172,14 +179,18 @@ public class FileBrowserActivity extends Activity {
 			}
 			if(ic != null) 	holder.type_iv.setImageDrawable(ic);
 
-			holder.selecte_iv.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					System.out.println("Click on "+position);
-
-				}
-			});
+			if(TYPE_FOLDER.equalsIgnoreCase(type)){
+				holder.cb.setVisibility(View.VISIBLE);
+				holder.cb.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						selectFolder(position);
+					}
+				});
+			} else {
+				holder.cb.setVisibility(View.GONE);
+			}
+			
 
 			return convertView;
 		}
@@ -195,6 +206,7 @@ public class FileBrowserActivity extends Activity {
 	}
 	static class ViewHolder {
 		public TextView name_tv, path_tv;
-		public ImageView type_iv, selecte_iv;
+		public ImageView type_iv;
+		public CheckBox cb;
 	}
 }

@@ -1,0 +1,155 @@
+[33mcommit 7b8a487eb723ba0732601373f67080e3a23876b1[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Fri Oct 10 09:21:16 2014 +0200
+
+    Audiobook basics as fragment
+
+[33mcommit 6868dd3eec72c348e4dcb7a8f44b0e8b32df39d7[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Oct 9 22:58:50 2014 +0200
+
+    create  new audiobook - folder fragment
+
+[33mcommit da34e9b1b9b1c823c892e76374a76a1004e9f9d4[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Oct 9 17:59:24 2014 +0200
+
+    Working on update
+
+[33mcommit 46a04ae342ce9344aea33338217462baff0d9854[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Oct 9 16:27:56 2014 +0200
+
+    leftovers
+
+[33mcommit f70dbe33ff6cec247b87ffc141c0044e6eabb399[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Oct 9 16:22:12 2014 +0200
+
+    DriveHandler callback to ControlActivity - upload and download + contents
+
+[33mcommit 6bc13ce1a1c20809b74b193000074b1b87ca87ae[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Wed Oct 8 18:23:47 2014 +0200
+
+    Drive API comming along
+
+[33mcommit ad9ca5b3063451e2c59a8114b318a7fce0a05505[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Tue Oct 7 22:26:09 2014 +0200
+
+    Drive API is beginning to work
+
+[33mcommit 8069472a8975c1a34d5c5b240acf94397e1a9b44[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Tue Oct 7 11:43:23 2014 +0200
+
+    just before Drive
+
+[33mcommit 83d87086c59e8e0983bf62c819114619db70adec[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Mon Oct 6 14:50:30 2014 +0200
+
+    leftovers
+
+[33mcommit 8b1c899277a8cb2bd5365b85112b75ef3d0fb68d[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Mon Oct 6 14:11:40 2014 +0200
+
+    minor bugfix - multiple mp instances when screen is rotated
+
+[33mcommit 03a0f27a31f0499a1c809da58e17ec3fc54536a6[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Sun Oct 5 23:23:42 2014 +0200
+
+    controller ok, tracks + seeker are fragments, NO OBSERVERS YET
+
+[33mcommit 35da614818969da381664df8cdcf5470b8f1b288[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Sat Oct 4 09:38:42 2014 +0200
+
+    Before new Eclipse
+
+[33mcommit a4f3d0c99a8dabfe8c5b737df604dbf47eb62c83[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Fri Oct 3 11:45:26 2014 +0200
+
+    cleanup track + audiobook layouts
+
+[33mcommit a3e8e5fbe9a1ab70bed53f81a71444729ed73c7f[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Oct 2 19:36:48 2014 +0200
+
+    edit tracks
+
+[33mcommit 62bd1415f6a8ad5e2e2ff0e2286500a3f44c462c[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Oct 2 15:12:42 2014 +0200
+
+    more cleanup
+
+[33mcommit e9047501057fd1aa240a20f2afb45dc19c83ac09[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Oct 2 14:03:53 2014 +0200
+
+    filebrowser + cleanup
+
+[33mcommit 28d06d3ab497571bb9d220dcfd395a7cc0573af7[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Wed Oct 1 14:29:03 2014 +0200
+
+    editable audiobook - except for cover
+
+[33mcommit 53e3f63777829f3f4755810c4de34bb5d11435c7[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Mon Sep 29 22:00:01 2014 +0200
+
+    Dialog almost done
+
+[33mcommit 9753cf1fef2855172d9a8d1c9fdb8a6aabdf484d[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Mon Sep 29 10:41:50 2014 +0200
+
+    ...
+
+[33mcommit f3ca4e8665cea082ca0324f2f3c44f3ec94b8612[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Sep 25 16:34:31 2014 +0200
+
+    End of workday backup - thursday 25-9
+
+[33mcommit 0be97510d5166607ee1684ea0e603179a6e37c31[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Sep 25 16:07:56 2014 +0200
+
+    Eclipse' git client sucks
+
+[33mcommit 7dc08e032254d00d4efe8e2b90b928e96fd4ebc8[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Thu Sep 25 16:05:47 2014 +0200
+
+    Audiobook details as list items
+
+[33mcommit a054af5c3741fb6091553be8abb3710d2a38c887[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Wed Sep 24 22:01:08 2014 +0200
+
+    edit mode fixed - incomplete
+
+[33mcommit d1e1f294d4090193395003ed16919f5facd544fa[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Wed Sep 24 14:54:49 2014 +0200
+
+    Eclipse didn't get this
+
+[33mcommit abd0b8cbbc6dc08b3cb97e139ca9f1c62ef4fd0a[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Wed Sep 24 14:53:23 2014 +0200
+
+    Add audiobook details layout
+
+[33mcommit 831e813117985e8c9d0f4e0a2cd530e2059f4097[m
+Author: Ronnie Dalsgaard <ronnie.dalsgaard@gmail.com>
+Date:   Wed Sep 24 10:12:10 2014 +0200
+
+    initial commit

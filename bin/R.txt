@@ -444,9 +444,9 @@ int id details_item_file_tv 0x7f070027
 int id details_item_track_pos_title_divider 0x7f070029
 int id details_item_track_position 0x7f070028
 int id details_item_track_title 0x7f07002a
+int id file_item_cb 0x7f07002c
 int id file_item_name_tv 0x7f07002d
 int id file_item_path_tv 0x7f07002e
-int id file_item_select_iv 0x7f07002c
 int id file_item_type_iv 0x7f07002b
 int id folder_fragment_label 0x7f070035
 int id folder_fragment_layout 0x7f070034

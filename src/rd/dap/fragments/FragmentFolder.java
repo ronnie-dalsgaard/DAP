@@ -56,6 +56,7 @@ public class FragmentFolder extends Fragment implements OnClickListener {
 	public void onActivityResult(int requestCode, int resultCode, Intent data){
 		switch(requestCode){
 		case REQUEST_CODE:
+			if(data == null) return;
 			String result = data.getStringExtra("result");
 			File folder = new File(result);
 			for(Folder_Fragment_Observer observer : observers){

@@ -17,7 +17,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/file_type_height"
-        android:layout_toLeftOf="@+id/file_item_select_iv"
+        android:layout_toLeftOf="@+id/file_item_cb"
         android:layout_toRightOf="@+id/file_item_type_iv"
         android:gravity="center_vertical"
         android:orientation="vertical" >
@@ -33,17 +33,16 @@
             android:id="@+id/file_item_path_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:text="absolute path" />
+            android:text="absolute path"
+            android:visibility="gone" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/file_item_select_iv"
+    <CheckBox
+        android:id="@+id/file_item_cb"
         android:layout_width="@dimen/file_type_width"
         android:layout_height="@dimen/file_type_height"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/margin_small"
-        android:contentDescription="@string/content_description"
-        android:src="@drawable/gray_tape" />
+        android:focusable="false" />
 
 </RelativeLayout>
