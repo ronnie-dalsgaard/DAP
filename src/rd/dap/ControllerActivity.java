@@ -224,14 +224,6 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 					if(bound && audiobook != null){
 						play_btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
 						audiobook_basics_frag.setActionDrawabel(isPlaying ? drw_pause_on_cover : drw_play_on_cover);
-						
-//						System.out.println("Set to : " + (isPlaying ? "pause" : "play"));
-//						if(!isPlaying){
-//							System.out.println("Bound = "+bound);
-//							System.out.println("Audiobook is null = " + (audiobook == null ? "true" : "false"));
-//							System.out.println("Player is null = " + (player == null ? "true" : "false"));
-//							if(player != null) System.out.println("player.isPlaying = "+player.isPlaying());
-//						}
 					} else {
 						play_btn.setImageDrawable(null);
 						audiobook_basics_frag.setActionDrawabel(null);

@@ -9,6 +9,7 @@
         android:name="rd.dap.fragments.FragmentFolder"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        tools:layout="@layout/fragment_folder" />
     
 </RelativeLayout>

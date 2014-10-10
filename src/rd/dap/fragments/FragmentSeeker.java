@@ -148,7 +148,9 @@ public class FragmentSeeker extends Fragment implements OnClickListener, Service
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					progress_tv.setText(Time.toString(player.getCurrentProgress()));
+					if(player.isPlaying()){
+						progress_tv.setText(Time.toString(player.getCurrentProgress()));
+					}
 				}
 			});
 		}
