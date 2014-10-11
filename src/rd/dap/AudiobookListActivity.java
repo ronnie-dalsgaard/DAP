@@ -1,5 +1,8 @@
 package rd.dap;
 
+import static rd.dap.AudiobookActivity.STATE_EDIT;
+import static rd.dap.AudiobookActivity.STATE_NEW;
+import static rd.dap.FileBrowserActivity.TYPE_FOLDER;
 import static rd.dap.PlayerService.audiobook;
 import static rd.dap.PlayerService.position;
 import static rd.dap.PlayerService.track;
@@ -21,6 +24,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,13 +38,17 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class AudiobookListActivity extends Activity implements MiniPlayerObserver {
+public class AudiobookListActivity extends Activity implements MiniPlayerObserver, OnItemClickListener, OnItemLongClickListener {
+	public static final String TAG = "AudiobookListActivity";
 	public static ArrayAdapter<Audiobook> adapter;
 	public static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 	public static FragmentMiniPlayer miniplayer = null;
+	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
+	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+ 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.list_with_miniplayer);
 		
@@ -52,36 +60,17 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		
 		ListView list = (ListView) findViewById(R.id.main_list);
 		list.setAdapter(adapter);
-		list.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
-				//In this case position and id is the same
-				audiobook = audiobooks.get(index);
-				position = 0;
-				track = audiobook.getPlaylist().get(position);
-				miniplayer.updateView();
-				miniplayer.reload();
-			}
-		});
-		list.setOnItemLongClickListener(new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				Audiobook audiobook = audiobooks.get(position);
-				Intent intent = new Intent(AudiobookListActivity.this, AudiobookActivity.class);
-				intent.putExtra("audiobook", audiobook);
-				startActivity(intent);
-				return true; //consume click
-			}
-		});
+		list.setOnItemClickListener(this);
+		list.setOnItemLongClickListener(this);
 
 		
 		new AsyncTask<Void, Void, Void>(){
 			@Override
 			protected Void doInBackground(Void... params) {
-				AudiobookManager am = new AudiobookManager();
+				AudiobookManager am = AudiobookManager.getInstance();
 				audiobooks.clear();
-				audiobooks.addAll(am.autodetect());
+//				audiobooks.addAll(am.autodetect());
+				audiobooks.addAll(am.getAudiobooks());
 				return null;
 			}
 			@Override 
@@ -89,11 +78,36 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 				runOnUiThread(new Runnable() {
 					@Override public void run() {
 						adapter.notifyDataSetChanged();
+						for(Audiobook a : audiobooks){
+							System.out.println("#"+a);
+						}
 					}
 				});
 			}
 		}.execute();
 	}
+	
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
+		Log.d(TAG, "onItemClick");
+		audiobook = audiobooks.get(index);
+		position = 0;
+		track = audiobook.getPlaylist().get(position);
+		miniplayer.updateView();
+		miniplayer.reload();
+	}
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+		Log.d(TAG, "onItemLongClick");
+		Audiobook audiobook = audiobooks.get(position);
+		Intent intent = new Intent(AudiobookListActivity.this, AudiobookActivity.class);
+		intent.putExtra("state", STATE_EDIT);
+		intent.putExtra("audiobook", audiobook);
+		startActivity(intent);
+		return true; //consume click
+	}
+
+	
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -107,15 +121,44 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		Intent intent;
 		switch(id){
 		case R.id.menu_item_controller:
+			Log.d(TAG, "menu_item_controller");
 			intent = new Intent(this, ControllerActivity.class);
 			startActivity(intent);
 			break;
 		case R.id.menu_item_new_audiobook:
-			intent = new Intent(this, NewAudiobookActivity.class);
-			startActivity(intent);
+			Log.d(TAG, "menu_item_new_audiobook");
+			intent = new Intent(this, FileBrowserActivity.class);
+			intent.putExtra("type", TYPE_FOLDER);
+			intent.putExtra("message", "Select folder");
+			intent.putExtra("requestcode", REQUEST_NEW_AUDIOBOOK);
+			startActivityForResult(intent, REQUEST_NEW_AUDIOBOOK);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		switch(requestCode){
+		case REQUEST_NEW_AUDIOBOOK:
+			Log.d(TAG, "onActivityResult - REQUEST_NEW_AUDIOBOOK");
+			if(data == null) throw new RuntimeException("No data provided");
+			String folder_path = data.getStringExtra("result");
+			File folder = new File(folder_path);
+			AudiobookManager manager = AudiobookManager.getInstance();
+			Audiobook audiobook = manager.autoCreateAudiobook(folder, true);
+			Intent intent = new Intent(AudiobookListActivity.this, AudiobookActivity.class);
+			intent.putExtra("state", STATE_NEW);
+			intent.putExtra("audiobook", audiobook);
+			startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK);
+			break;
+		case REQUEST_EDIT_AUDIOBOOK:
+			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUDIOBOOK");
+			audiobooks.clear();
+			audiobooks.addAll(AudiobookManager.getInstance().getAudiobooks());
+			for(Audiobook a : audiobooks) System.out.println("! "+a);
+			adapter.notifyDataSetChanged();
+		}
 	}
 	
 	class AudiobookAdapter extends ArrayAdapter<Audiobook> {
@@ -176,4 +219,6 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	@Override public void miniplayer_click() {
 //		Toast.makeText(AudiobookListActivity.this, "Click on miniplayer", Toast.LENGTH_SHORT).show();
 	}
+
+	
 }

@@ -80,6 +80,7 @@ public class TrackActivity extends Activity {
 			public void onClick(View v) {
 				Intent intent = new Intent(TrackActivity.this, FileBrowserActivity.class);
 				intent.putExtra("type", "audio");
+				intent.putExtra("message", "Select audio file");
 				intent.putExtra("requestcode", REQUEST_EDIT_TRACK_FILE);
 				startActivityForResult(intent, REQUEST_EDIT_TRACK_FILE);
 			}

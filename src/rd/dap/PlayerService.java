@@ -83,7 +83,7 @@ public class PlayerService extends Service implements OnErrorListener {
 	}
 	public boolean isPlaying(){ 
 		if(mp == null) {
-			Log.d(TAG, "mp is null -> isPlaying is false");
+//			Log.d(TAG, "mp is null -> isPlaying is false");
 			return false;
 		}
 		if(System.currentTimeMillis() - laststart < Monitor.DELAY * 1.5){

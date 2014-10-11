@@ -13,6 +13,17 @@ public class Track implements Serializable{
 	private long duration = -1; //duration in milis
 	private File cover = null;
 	
+	public Track(){} //default constructor
+	public Track(Track original){ //Copy constructor
+		setTrack(original);
+	}
+	public void setTrack(Track original){ //copy method
+		file = new File(original.getFile().getAbsolutePath());
+		title = new String(original.getTitle());
+		duration = original.getDuration();
+		cover = new File(original.getCover().getAbsolutePath());
+	}
+	
 	public String getTitle() { return title; }
 	public void setTitle(String title) { this.title = title; }
 	public File getFile() { return file; }

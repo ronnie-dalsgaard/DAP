@@ -30,7 +30,7 @@ public class FileBrowserActivity extends Activity {
 	private static final String[] TYPE_IMAGE = {".jpg", ".png"};
 	private static final String[] TYPE_AUDIO = {".mp3"};
 	public static final String TYPE_FOLDER = "folder";
-	private String type;
+	private String type, message;
 	private ArrayList<File> list;
 
 	@Override
@@ -41,6 +41,9 @@ public class FileBrowserActivity extends Activity {
 
 		type = getIntent().getStringExtra("type");
 		if(type == null || type.isEmpty()) throw new RuntimeException("No type set");
+		
+		message = getIntent().getStringExtra("message");
+		if(message == null || message.isEmpty()) throw new RuntimeException("No message set");
 
 		String state = Environment.getExternalStorageState();
 		if(!Environment.MEDIA_MOUNTED.equals(state) && !Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){
@@ -56,6 +59,10 @@ public class FileBrowserActivity extends Activity {
 		}
 
 		ListView listview = (ListView) findViewById(R.id.main_list);
+		LayoutInflater inflater = (LayoutInflater) getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+		TextView v = (TextView) inflater.inflate(R.layout.file_browser_message, listview, false);
+		v.setText(message);
+		listview.addHeaderView(v);
 		final FileAdapter adapter = new FileAdapter(this, R.layout.file_browser_file_item, list);
 		adapter.setRoot(root);
 		adapter.setCurent(root);
@@ -63,6 +70,7 @@ public class FileBrowserActivity extends Activity {
 		listview.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				position -= 1; //compensate for header
 				File file = list.get(position);
 
 				//Validate file
@@ -102,6 +110,7 @@ public class FileBrowserActivity extends Activity {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				position -= 1; //compensate for header
 				Toast.makeText(FileBrowserActivity.this, "LongClick", Toast.LENGTH_SHORT).show();
 				selectFolder(position);
 				return true;
@@ -116,7 +125,7 @@ public class FileBrowserActivity extends Activity {
 			File file = list.get(position);
 			int requestcode = getIntent().getIntExtra("requestcode", -1);
 			if(requestcode > 0){
-				Toast.makeText(FileBrowserActivity.this, file.getName(), Toast.LENGTH_SHORT).show();
+//				Toast.makeText(FileBrowserActivity.this, file.getName(), Toast.LENGTH_SHORT).show();
 				Intent intent = new Intent();
 				intent.putExtra("result", file.getAbsolutePath());
 				setResult(requestcode, intent);
@@ -151,7 +160,6 @@ public class FileBrowserActivity extends Activity {
 
 				holder = new ViewHolder();
 				holder.name_tv = (TextView) convertView.findViewById(R.id.file_item_name_tv);
-				holder.path_tv = (TextView) convertView.findViewById(R.id.file_item_path_tv);
 				holder.type_iv = (ImageView) convertView.findViewById(R.id.file_item_type_iv);
 				holder.cb = (CheckBox) convertView.findViewById(R.id.file_item_cb);
 
@@ -167,7 +175,6 @@ public class FileBrowserActivity extends Activity {
 			} else {
 				holder.name_tv.setText(file.getName());
 			}
-			holder.path_tv.setText(file.getAbsolutePath());
 			Drawable ic = null;
 
 			if(file.getPath().endsWith(".mp3")){
@@ -191,7 +198,6 @@ public class FileBrowserActivity extends Activity {
 				holder.cb.setVisibility(View.GONE);
 			}
 			
-
 			return convertView;
 		}
 
@@ -205,7 +211,7 @@ public class FileBrowserActivity extends Activity {
 
 	}
 	static class ViewHolder {
-		public TextView name_tv, path_tv;
+		public TextView name_tv;
 		public ImageView type_iv;
 		public CheckBox cb;
 	}

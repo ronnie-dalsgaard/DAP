@@ -12,7 +12,7 @@
         android:text="Author:" />
 
     <TextView
-        android:id="@+id/detail_item_author_tv"
+        android:id="@+id/details_item_author_tv"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"

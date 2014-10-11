@@ -11,11 +11,49 @@ import rd.dap.support.TrackList;
 import android.os.Environment;
 
 public class AudiobookManager {
+	private static AudiobookManager instance = new AudiobookManager();
+	private static final File root = Environment.getExternalStorageDirectory();
+	private static final File home = new File(root.getPath() + File.separator +"Audiobooks");
 	private ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 
+	public static AudiobookManager getInstance(){
+		return instance; //Eager singleton
+	}
+	
+	private AudiobookManager(){};
+	
 	public ArrayList<Audiobook> getAudiobooks(){ return audiobooks; }
 	public void addAudiobook(Audiobook audiobook){ audiobooks.add(audiobook); }
 
+	public Audiobook autoCreateAudiobook(File album_folder, boolean incl_subfolders){
+		Audiobook audiobook = new Audiobook();
+		audiobook.setAuthor(album_folder.getParentFile().getName());
+		audiobook.setAlbum(album_folder.getName());
+
+		File cover = null;
+		for(File file : album_folder.listFiles()){
+			if("albumart.jpg".equalsIgnoreCase(file.getName())){
+				cover = file;
+				break;
+			}
+		}
+		if(cover != null) { audiobook.setCover(cover); }
+
+		ArrayList<File> filelist = new ArrayList<File>(Arrays.asList(album_folder.listFiles(new Mp3FileFilter())));
+		TrackList playlist = new TrackList();
+		//TODO sort by filename
+		for(File file : filelist){
+			Track track = new Track();
+			track.setFile(file);
+			track.setTitle(file.getName().replace(".mp3", ""));
+			if(cover != null) track.setCover(cover);
+			
+			playlist.add(track);
+		}
+		audiobook.setPlaylist(playlist);
+		return audiobook;
+	}
+	
 	public ArrayList<Audiobook> autodetect(){
 		ArrayList<Audiobook> list = new ArrayList<Audiobook>();
 
@@ -25,36 +63,9 @@ public class AudiobookManager {
 			throw new RuntimeException("No external storrage!");
 		}
 
-		File root = Environment.getExternalStorageDirectory();
-		File home = new File(root.getPath() + File.separator +"Audiobooks");
-
 		ArrayList<File> albums = collectFiles(new ArrayList<File>(), home, new AlbumFolderFilter());
-		for(File album : albums){
-			Audiobook audiobook = new Audiobook();
-			audiobook.setAuthor(album.getParentFile().getName());
-			audiobook.setAlbum(album.getName());
-
-			File cover = null;
-			for(File file : album.listFiles()){
-				if("albumart.jpg".equalsIgnoreCase(file.getName())){
-					cover = file;
-					break;
-				}
-			}
-			if(cover != null) { audiobook.setCover(cover); }
-
-			ArrayList<File> filelist = new ArrayList<File>(Arrays.asList(album.listFiles(new Mp3FileFilter())));
-			TrackList playlist = new TrackList();
-			//TODO sort by filename
-			for(File file : filelist){
-				Track track = new Track();
-				track.setFile(file);
-				track.setTitle(file.getName().replace(".mp3", ""));
-				if(cover != null) track.setCover(cover);
-				
-				playlist.add(track);
-			}
-			audiobook.setPlaylist(playlist);
+		for(File album_folder : albums){
+			Audiobook audiobook = autoCreateAudiobook(album_folder, true);
 			list.add(audiobook);
 		}		
 		return list;
@@ -69,5 +80,14 @@ public class AudiobookManager {
 			if(file.isDirectory()) collectFiles(list, file, filter);
 		}
 		return list;
+	}
+
+	public void updateAudiobook(Audiobook audiobook, Audiobook original_audiobook) {
+		for(Audiobook element : getAudiobooks()){
+			if(element.equals(original_audiobook)){
+				element.setAudiobook(audiobook);
+			}
+		}
+		
 	}
 }

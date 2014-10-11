@@ -325,12 +325,8 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 	}
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+//		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
 		Log.d(TAG, "onConnected");
-
-
-		//		find("test.txt");
-		//		upload();
 	}
 	@Override
 	public void onConnectionSuspended(int result) {

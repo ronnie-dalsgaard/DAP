@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <ImageButton
+        android:id="@+id/audiobook_header_cancel_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_cancel"
+        android:text="Cancel"
+        android:textColor="@color/white" />
+
+    <ImageButton
+        android:id="@+id/audiobook_header_save_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_save"
+        android:text="Save"
+        android:textColor="@color/white" />
+
+</LinearLayout>

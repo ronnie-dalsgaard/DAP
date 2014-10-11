@@ -1,27 +1,24 @@
 package rd.dap;
 
 import static rd.dap.PlayerService.audiobook;
-import static rd.dap.PlayerService.track;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.fragments.FragmentAudiobookBasics;
-import rd.dap.fragments.FragmentSeeker;
 import rd.dap.fragments.FragmentAudiobookBasics.Fragment_Audiobooks_Basics_Observer;
+import rd.dap.fragments.FragmentSeeker;
 import rd.dap.fragments.FragmentSeeker.Seeker_Fragment_Observer;
 import rd.dap.fragments.FragmentTrack;
 import rd.dap.fragments.FragmentTrack.Fragment_Track_Observer;
 import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -31,8 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.drive.DriveFile;
@@ -50,6 +45,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 	private FragmentAudiobookBasics audiobook_basics_frag;
 	private FragmentTrack track_frag;
 	private FragmentSeeker seeker_frag;
+	private ArrayList<Fragment> fragments = new ArrayList<Fragment>();
 	private ImageButton play_btn, upload_btn, download_btn;
 	
 	private static final int REQUEST_CODE_UPLOAD = 13001;
@@ -58,7 +54,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 	private static final int REQUEST_CODE_QUERY = 13004;
 	private static final int REQUEST_CODE_UPDATE = 13005;
 	
-	DriveFile currentBookmarkFile = null;
+	private DriveFile currentBookmarkFile = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +82,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		download_btn.setOnClickListener(this);
 		
 		FragmentManager fm = getFragmentManager();
+		
 		audiobook_basics_frag = (FragmentAudiobookBasics) fm.findFragmentById(R.id.controller_fragment_audiobooks_basics);
 		audiobook_basics_frag.addObserver(this);
 		
@@ -94,6 +91,11 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		
 		seeker_frag = (FragmentSeeker) fm.findFragmentById(R.id.controller_seeker_fragment);
 		seeker_frag.addObserver(this);
+		
+		fragments.clear();
+		fragments.add(audiobook_basics_frag);
+		fragments.add(track_frag);
+		fragments.add(seeker_frag);
 
 		monitor = new ControllerMonitor();
 		monitor.start();
@@ -211,7 +213,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 	}
 
 	class ControllerMonitor extends Monitor {
-		private static final String TAG = "ControllerActivity.Monitor";
+//		private static final String TAG = "ControllerActivity.Monitor";
 		private boolean isPlaying = false;
 
 		@Override
@@ -276,11 +278,16 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		//Toggle play/pause
 		player.toggle();
 	}
+
+
 	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult :: forwarding to super and all fragments!");
 		super.onActivityResult(requestCode, resultCode, data);
-	    
+	    for(Fragment frag : fragments){
+	    	frag.onActivityResult(requestCode, resultCode, data);
+	    }
 	}
 
 	

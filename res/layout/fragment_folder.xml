@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/folder_fragment_layout"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 
     <TextView
         android:id="@+id/folder_fragment_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="3dp"
         android:paddingLeft="3dp"
+        android:paddingTop="3dp"
         android:text="Folder:" />
 
     <TextView
@@ -21,7 +21,17 @@
         android:paddingLeft="@dimen/margin_small"
         android:paddingRight="@dimen/margin_small"
         android:paddingTop="@dimen/margin_big"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Folder" />
+        android:text="Folder"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <CheckBox
+        android:id="@+id/folder_fragment_subfolder_cb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/folder_fragment_tv"
+        android:layout_centerHorizontal="true"
+        android:focusable="false"
+        android:text="Include subfolders"
+        android:textColor="@color/white" />
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package rd.dap.fragments;
 
+import static rd.dap.AudiobookActivity.STATE_EDIT;
 import static rd.dap.PlayerService.audiobook;
 import static rd.dap.PlayerService.track;
 
@@ -8,6 +9,8 @@ import java.util.ArrayList;
 
 import rd.dap.AudiobookActivity;
 import rd.dap.R;
+import rd.dap.model.Audiobook;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,6 +34,8 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 	private TextView author_tv, audiobook_basics_album_tv;
 	private ImageButton cover_btn;
 	private LinearLayout info_layout;
+	
+	private static final int REQUEST_FRAGMENT_BASICS_EDIT = 1701;
 	
 	//Observer pattern
 	private ArrayList<Fragment_Audiobooks_Basics_Observer> observers = new ArrayList<Fragment_Audiobooks_Basics_Observer>();
@@ -59,21 +64,7 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 		author_tv = (TextView) v.findViewById(R.id.audiobook_basics_author_tv);
 		audiobook_basics_album_tv = (TextView) v.findViewById(R.id.audiobook_basics_album_tv);
 		if(audiobook != null){
-			//Cover
-			File cover = track.getCover();
-			if(cover == null) cover = audiobook.getCover();
-			if(cover != null) {
-				Bitmap bitmap = BitmapFactory.decodeFile(cover.getPath());
-				cover_iv.setImageBitmap(bitmap);
-			} else {
-				cover_iv.setImageDrawable(noCover);
-			}
-
-			//Author
-			author_tv.setText(audiobook.getAuthor());
-
-			//Album
-			audiobook_basics_album_tv.setText(audiobook.getAlbum());
+			displayValues();
 		}
 		
 		cover_btn = (ImageButton) v.findViewById(R.id.audiobook_basics_cover_btn);
@@ -84,6 +75,23 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 		info_layout.setOnClickListener(this);
 		
 		return v;
+	}
+	private void displayValues(){
+		//Cover
+		File cover = track.getCover();
+		if(cover == null) cover = audiobook.getCover();
+		if(cover != null) {
+			Bitmap bitmap = BitmapFactory.decodeFile(cover.getPath());
+			cover_iv.setImageBitmap(bitmap);
+		} else {
+			cover_iv.setImageDrawable(noCover);
+		}
+
+		//Author
+		author_tv.setText(audiobook.getAuthor());
+
+		//Album
+		audiobook_basics_album_tv.setText(audiobook.getAlbum());
 	}
 
 	@Override
@@ -96,8 +104,24 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 			break;
 		case R.id.audiobook_basics_info_layout:
 			Intent intent = new Intent(getActivity(), AudiobookActivity.class);
+			intent.putExtra("state", STATE_EDIT);
 			intent.putExtra("audiobook", audiobook);
-			getActivity().startActivity(intent);
+			System.out.println("Start edit audiobook");
+			startActivityForResult(intent, REQUEST_FRAGMENT_BASICS_EDIT);
+			break;
+		}
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case REQUEST_FRAGMENT_BASICS_EDIT:
+			Log.d(TAG, "onActivityResult - REQUEST_FRAGMENT_BASICS_EDIT");
+			if(resultCode == Activity.RESULT_OK){
+				Audiobook result = (Audiobook) data.getSerializableExtra("result");
+				audiobook.setAudiobook(result);
+				displayValues();
+			}
 		}
 	}
 
