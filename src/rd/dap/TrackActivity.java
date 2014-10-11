@@ -3,7 +3,6 @@ package rd.dap;
 import static rd.dap.InputActivity.REQUEST_EDIT_TRACK_FILE;
 import static rd.dap.InputActivity.REQUEST_EDIT_TRACK_TITLE;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import rd.dap.model.Audiobook;
@@ -74,7 +73,7 @@ public class TrackActivity extends Activity {
 
 		//File
 		file_tv = (TextView) findViewById(R.id.details_item_file_tv);
-		file_tv.setText(track.getFile().getPath());
+		file_tv.setText(track.getPath());
 		file_tv.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -89,7 +88,7 @@ public class TrackActivity extends Activity {
 		//Cover
 		cover_iv = (ImageView) findViewById(R.id.details_item_cover_iv);
 		if(track.getCover() != null){
-			Bitmap bm = BitmapFactory.decodeFile(track.getCover().getAbsolutePath());
+			Bitmap bm = BitmapFactory.decodeFile(track.getCover());
 			cover_iv.setImageBitmap(bm);
 			cover_iv.setVisibility(View.VISIBLE);
 		} else {
@@ -109,9 +108,8 @@ public class TrackActivity extends Activity {
 			break;
 		case REQUEST_EDIT_TRACK_FILE:
 			result = data.getStringExtra("result");
-			File file = new File(result);
-			audiobook.getPlaylist().get(position).setFile(file);
-			file_tv.setText(file.getPath());
+			audiobook.getPlaylist().get(position).setPath(result);
+			file_tv.setText(result);
 			break;
 		}
 	}

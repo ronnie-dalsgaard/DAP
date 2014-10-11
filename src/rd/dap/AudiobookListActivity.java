@@ -16,8 +16,10 @@ import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,6 +39,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class AudiobookListActivity extends Activity implements MiniPlayerObserver, OnItemClickListener, OnItemLongClickListener {
 	public static final String TAG = "AudiobookListActivity";
@@ -99,15 +102,40 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 		Log.d(TAG, "onItemLongClick");
-		Audiobook audiobook = audiobooks.get(position);
-		Intent intent = new Intent(AudiobookListActivity.this, AudiobookActivity.class);
-		intent.putExtra("state", STATE_EDIT);
-		intent.putExtra("audiobook", audiobook);
-		startActivity(intent);
+		final Audiobook audiobook = audiobooks.get(position);
+		AlertDialog dialog = new AlertDialog.Builder(this)
+		.setMessage("Change audiobook")
+		.setPositiveButton("Edit audiobook", new DialogInterface.OnClickListener() {
+			@Override public void onClick(DialogInterface dialog, int which) {
+				Intent intent = new Intent(AudiobookListActivity.this, AudiobookActivity.class);
+				intent.putExtra("state", STATE_EDIT);
+				intent.putExtra("audiobook", audiobook);
+				startActivity(intent);
+			}
+		})
+		.setNegativeButton("Delete audiobook", new DialogInterface.OnClickListener() {
+			@Override public void onClick(DialogInterface dialog, int which) {
+				confirmDelete(audiobook);
+			}
+		})
+		.create();
+		dialog.show();
 		return true; //consume click
 	}
-
-	
+	private void confirmDelete(final Audiobook audiobook){
+		AlertDialog dialog = new AlertDialog.Builder(this)
+		.setMessage("Confirm delete "+audiobook.getAuthor() + " - " + audiobook.getAlbum())
+		.setPositiveButton("Cancel", null) //Do nothing
+		.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+			@Override public void onClick(DialogInterface dialog, int which) {
+				AudiobookManager.getInstance().removeAudiobook(audiobook);
+				audiobooks.remove(audiobook);
+				adapter.notifyDataSetChanged();
+			}
+		})
+		.create();
+		dialog.show();
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -191,8 +219,8 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 			holder.author_tv.setText(audiobook.getAuthor());
 			holder.album_tv.setText(audiobook.getAlbum());
 			if(audiobook.getCover() != null){
-				File cover = audiobook.getCover();
-				Bitmap bm = BitmapFactory.decodeFile(cover.getAbsolutePath());
+				String cover = audiobook.getCover();
+				Bitmap bm = BitmapFactory.decodeFile(cover);
 				holder.cover_iv.setImageBitmap(bm);
 			} else {
 				Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);

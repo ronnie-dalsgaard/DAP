@@ -4,7 +4,6 @@ import static rd.dap.PlayerService.audiobook;
 import static rd.dap.PlayerService.position;
 import static rd.dap.PlayerService.track;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import rd.dap.PlayerService;
@@ -127,10 +126,10 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		author_tv.setText(audiobook.getAuthor());
 		album_tv.setText(audiobook.getAlbum());
 		track_tv.setText(String.format("%02d", position) + " " + track.getTitle());
-		File cover = track.getCover();
+		String cover = track.getCover();
 		if(cover == null) cover = audiobook.getCover();
 		if(cover != null) {
-			Bitmap bitmap = BitmapFactory.decodeFile(cover.getPath());
+			Bitmap bitmap = BitmapFactory.decodeFile(cover);
 			iv.setImageBitmap(bitmap);
 		} else {
 			iv.setImageDrawable(noCover);

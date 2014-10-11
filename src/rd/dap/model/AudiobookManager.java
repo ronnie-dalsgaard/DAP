@@ -10,7 +10,7 @@ import rd.dap.support.Mp3FileFilter;
 import rd.dap.support.TrackList;
 import android.os.Environment;
 
-public class AudiobookManager {
+public final class AudiobookManager {
 	private static AudiobookManager instance = new AudiobookManager();
 	private static final File root = Environment.getExternalStorageDirectory();
 	private static final File home = new File(root.getPath() + File.separator +"Audiobooks");
@@ -22,18 +22,30 @@ public class AudiobookManager {
 	
 	private AudiobookManager(){};
 	
-	public ArrayList<Audiobook> getAudiobooks(){ return audiobooks; }
+	//create a file in internal storage
+	//File file = new File(context.getFilesDir(), filename);
+	
+	//CRUD Audiobook
 	public void addAudiobook(Audiobook audiobook){ audiobooks.add(audiobook); }
-
+	public ArrayList<Audiobook> getAudiobooks(){ return audiobooks; }
+	public void updateAudiobook(Audiobook audiobook, Audiobook original_audiobook) {
+		for(Audiobook element : getAudiobooks()){
+			if(element.equals(original_audiobook)){
+				element.setAudiobook(audiobook);
+			}
+		}	
+	}
+	public void removeAudiobook(Audiobook audiobook) { audiobooks.remove(audiobook); }
+	
 	public Audiobook autoCreateAudiobook(File album_folder, boolean incl_subfolders){
 		Audiobook audiobook = new Audiobook();
 		audiobook.setAuthor(album_folder.getParentFile().getName());
 		audiobook.setAlbum(album_folder.getName());
 
-		File cover = null;
+		String cover = null;
 		for(File file : album_folder.listFiles()){
 			if("albumart.jpg".equalsIgnoreCase(file.getName())){
-				cover = file;
+				cover = file.getAbsolutePath();
 				break;
 			}
 		}
@@ -44,7 +56,7 @@ public class AudiobookManager {
 		//TODO sort by filename
 		for(File file : filelist){
 			Track track = new Track();
-			track.setFile(file);
+			track.setPath(file.getAbsolutePath());
 			track.setTitle(file.getName().replace(".mp3", ""));
 			if(cover != null) track.setCover(cover);
 			
@@ -82,12 +94,4 @@ public class AudiobookManager {
 		return list;
 	}
 
-	public void updateAudiobook(Audiobook audiobook, Audiobook original_audiobook) {
-		for(Audiobook element : getAudiobooks()){
-			if(element.equals(original_audiobook)){
-				element.setAudiobook(audiobook);
-			}
-		}
-		
-	}
 }

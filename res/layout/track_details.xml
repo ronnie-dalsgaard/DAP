@@ -27,11 +27,11 @@
                 android:padding="@dimen/margin_small"
                 android:text="Duration: Unknown" />
 
-            <include layout="@layout/horizontal_divider"/>
+            <include layout="@layout/divider_horizontal"/>
 
             <include layout="@layout/details_item_cover_medium" />
 
-            <include layout="@layout/horizontal_divider"/>
+            <include layout="@layout/divider_horizontal"/>
 
             <include layout="@layout/details_item_file" />
             

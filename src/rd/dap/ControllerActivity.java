@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.Metadata;
+import com.google.gson.Gson;
 
 public class ControllerActivity extends DriveHandler implements ServiceConnection, OnClickListener, 
 	Fragment_Track_Observer, Seeker_Fragment_Observer, Fragment_Audiobooks_Basics_Observer {
@@ -96,6 +97,19 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		fragments.add(audiobook_basics_frag);
 		fragments.add(track_frag);
 		fragments.add(seeker_frag);
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////
+		// Just for test
+		ImageButton t1 = (ImageButton) findViewById(R.id.controller_test1);
+		t1.setOnClickListener(new OnClickListener() {
+			@Override public void onClick(View v) {
+				Gson gson = new Gson();
+				System.out.println(gson.toJson(audiobook));
+				
+			}
+		});
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		monitor = new ControllerMonitor();
 		monitor.start();

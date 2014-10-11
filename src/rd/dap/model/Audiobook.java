@@ -1,6 +1,5 @@
 package rd.dap.model;
 
-import java.io.File;
 import java.io.Serializable;
 
 import rd.dap.support.TrackList;
@@ -8,7 +7,7 @@ import rd.dap.support.TrackList;
 public class Audiobook implements Serializable{
 	private static final long serialVersionUID = 6956470301541977175L;
 	private String author, album;
-	private File cover;
+	private String cover;
 	private TrackList playlist = new TrackList();
 	
 	public Audiobook(){} //default constructor
@@ -18,7 +17,7 @@ public class Audiobook implements Serializable{
 	public void setAudiobook(Audiobook original){ //copy method
 		author = new String(original.getAuthor());
 		album = new String(original.getAlbum());
-		cover = new File(original.getCover().getAbsolutePath());
+		cover = new String(original.getCover());
 		playlist.clear();
 		for(Track track : original.getPlaylist()){
 			playlist.add(new Track(track));
@@ -31,8 +30,8 @@ public class Audiobook implements Serializable{
 	public void setAlbum(String album) { this.album = album; }
 	public TrackList getPlaylist() { return playlist; }
 	public void setPlaylist(TrackList playlist) { this.playlist = playlist; }
-	public File getCover() { return cover; }
-	public void setCover(File cover) { this.cover = cover; }
+	public String getCover() { return cover; }
+	public void setCover(String cover) { this.cover = cover; }
 	
 	public String toString(){
 		String out = author + " : " + album;

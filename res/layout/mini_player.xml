@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:text="Author" />
         
-        <include layout="@layout/horizontal_divider"/>
+        <include layout="@layout/divider_horizontal"/>
 
         <TextView
             android:id="@+id/miniplayer_album_tv"
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:text="Album" />
         
-        <include layout="@layout/horizontal_divider"/>
+        <include layout="@layout/divider_horizontal"/>
 
         <TextView
             android:id="@+id/miniplayer_track_tv"

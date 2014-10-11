@@ -17,12 +17,19 @@
         android:background="@color/transparent"
         android:contentDescription="@string/content_description" />
 
+    <include
+        android:id="@+id/audiobook_basics_divider"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        layout="@layout/divider_vertical"
+        android:layout_toRightOf="@+id/audiobook_basics_cover_iv" />
+
     <LinearLayout
         android:id="@+id/audiobook_basics_info_layout"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_alignBottom="@+id/audiobook_basics_cover_iv"
-        android:layout_toRightOf="@+id/audiobook_basics_cover_iv"
+        android:layout_toRightOf="@+id/audiobook_basics_divider"
         android:gravity="center_vertical"
         android:orientation="vertical" >
 
@@ -35,7 +42,7 @@
             android:text="Author"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <include layout="@layout/horizontal_divider" />
+        <include layout="@layout/divider_horizontal" />
 
         <TextView
             android:id="@+id/audiobook_basics_album_tv"

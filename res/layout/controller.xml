@@ -30,8 +30,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_below="@+id/controller_fragment_audiobooks_basics"
-                layout="@layout/horizontal_divider" />
-            
+                layout="@layout/divider_horizontal" />
+
             <fragment
                 android:id="@+id/controller_track_fragment"
                 android:name="rd.dap.fragments.FragmentTrack"
@@ -41,12 +41,12 @@
                 android:layout_centerHorizontal="true"
                 tools:layout="@layout/fragment_track" />
 
-            <include 
+            <include
                 android:id="@+id/controller_divider_2"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_below="@+id/controller_track_fragment"
-                layout="@layout/horizontal_divider" />
+                layout="@layout/divider_horizontal" />
 
             <fragment
                 android:id="@+id/controller_seeker_fragment"
@@ -56,6 +56,13 @@
                 android:layout_below="@+id/controller_divider_2"
                 android:layout_centerHorizontal="true"
                 tools:layout="@layout/fragment_seeker" />
+            
+             <include
+                android:id="@+id/controller_divider_3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" 
+                android:layout_below="@+id/controller_seeker_fragment"
+                layout="@layout/divider_horizontal" />
         </RelativeLayout>
     </ScrollView>
 
@@ -66,10 +73,13 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@drawable/miniplayer_bg"
-        android:orientation="horizontal" >
+        android:divider="@drawable/vertical_divider"
+        android:orientation="horizontal"
+        android:showDividers="middle" >
 
         <ImageButton
             android:id="@+id/controller_upload"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="@dimen/btn_height"
             android:layout_weight="1"
@@ -78,6 +88,7 @@
 
         <ImageButton
             android:id="@+id/controller_play"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="@dimen/btn_height"
             android:layout_weight="2"
@@ -86,11 +97,52 @@
 
         <ImageButton
             android:id="@+id/controller_download"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="@dimen/btn_height"
             android:layout_weight="1"
             android:contentDescription="@string/content_description"
             android:src="@drawable/ic_action_download" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/controller_test_buttons"
+        style=" ?android:attr/buttonBarStyle"
+        android:layout_width="@dimen/mini_player_width"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/controller_buttons"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/miniplayer_bg"
+        android:divider="@drawable/vertical_divider"
+        android:orientation="horizontal"
+        android:showDividers="middle" >
+
+        <ImageButton
+            android:id="@+id/controller_test1"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_warning" />
+
+        <ImageButton
+            android:id="@+id/controller_test2"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_warning" />
+
+        <ImageButton
+            android:id="@+id/controller_test3"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_warning" />
     </LinearLayout>
 
 </RelativeLayout>

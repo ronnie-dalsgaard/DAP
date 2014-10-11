@@ -4,7 +4,6 @@ import static rd.dap.InputActivity.REQUEST_EDIT_ALBUM;
 import static rd.dap.InputActivity.REQUEST_EDIT_AUTHOR;
 import static rd.dap.InputActivity.REQUEST_EDIT_COVER;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -164,8 +163,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		case REQUEST_EDIT_COVER:
 			result = data.getStringExtra("result");
 			Log.d(TAG, "onActivityResult - REQUEST_EDIT_COVER : "+result);
-			File cover = new File(result);
-			audiobook.setCover(cover);
+			audiobook.setCover(result);
 			adapter.notifyDataSetChanged();
 			break;
 		}
@@ -229,9 +227,9 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 				} else {
 					coverHolder = (CoverViewHolder) convertView.getTag();
 				}
-				File cover = audiobook.getCover();
+				String cover = audiobook.getCover();
 				if(cover != null){
-					Bitmap bm = BitmapFactory.decodeFile(cover.getAbsolutePath());
+					Bitmap bm = BitmapFactory.decodeFile(cover);
 					coverHolder.cover_item_iv.setImageBitmap(bm);
 				} else {
 					Drawable drw = context.getResources().getDrawable(R.drawable.ic_action_help);
@@ -259,9 +257,9 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 				trackHolder.track_item_title_tv.setText(track.getTitle());
 
 				//Cover
-				File track_cover = track.getCover();
+				String track_cover = track.getCover();
 				if(track_cover != null){
-					Bitmap bm = BitmapFactory.decodeFile(track_cover.getAbsolutePath());
+					Bitmap bm = BitmapFactory.decodeFile(track_cover);
 					trackHolder.track_item_cover_iv.setImageBitmap(bm);
 					trackHolder.track_item_cover_iv.setVisibility(View.VISIBLE);
 				} else {

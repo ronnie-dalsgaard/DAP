@@ -4,7 +4,6 @@ import static rd.dap.AudiobookActivity.STATE_EDIT;
 import static rd.dap.PlayerService.audiobook;
 import static rd.dap.PlayerService.track;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import rd.dap.AudiobookActivity;
@@ -78,10 +77,10 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 	}
 	private void displayValues(){
 		//Cover
-		File cover = track.getCover();
+		String cover = track.getCover();
 		if(cover == null) cover = audiobook.getCover();
 		if(cover != null) {
-			Bitmap bitmap = BitmapFactory.decodeFile(cover.getPath());
+			Bitmap bitmap = BitmapFactory.decodeFile(cover);
 			cover_iv.setImageBitmap(bitmap);
 		} else {
 			cover_iv.setImageDrawable(noCover);

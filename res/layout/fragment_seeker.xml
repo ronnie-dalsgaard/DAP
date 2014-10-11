@@ -3,10 +3,13 @@
     android:id="@+id/controller_track_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:divider="@drawable/vertical_divider"
+    android:showDividers="middle"
     android:orientation="horizontal" >
 
     <ImageButton
         android:id="@+id/seeker_rewind"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="0dp"
         android:layout_height="@dimen/btn_height"
         android:layout_weight="1"
@@ -26,6 +29,7 @@
 
     <ImageButton
         android:id="@+id/seeker_fast_forward"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="0dp"
         android:layout_height="@dimen/btn_height"
         android:layout_weight="1"

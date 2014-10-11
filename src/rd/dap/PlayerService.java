@@ -1,5 +1,7 @@
 package rd.dap;
 
+import java.io.File;
+
 import rd.dap.model.Audiobook;
 import rd.dap.model.Track;
 import rd.dap.support.Monitor;
@@ -27,7 +29,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(track == null) return;
 		if(position < 0) return;
 		if(mp == null){
-			mp = MediaPlayer.create(this, Uri.fromFile(track.getFile()));
+			mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
 		}
 		if(mp.isPlaying()) mp.pause();
 		else mp.start();
@@ -37,7 +39,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(track == null) return;
 		if(position < 0) return;
 		if(mp == null){
-			mp = MediaPlayer.create(this, Uri.fromFile(track.getFile()));
+			mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
 		}
 		if(!mp.isPlaying()) mp.start();
 	}
@@ -79,7 +81,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(mp != null){
 			mp.release();
 		} 
-		mp = MediaPlayer.create(this, Uri.fromFile(track.getFile()));		
+		mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));		
 	}
 	public boolean isPlaying(){ 
 		if(mp == null) {
