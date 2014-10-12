@@ -1,7 +1,5 @@
 package rd.dap.fragments;
 
-import static rd.dap.PlayerService.audiobook;
-import static rd.dap.PlayerService.position;
 import static rd.dap.PlayerService.track;
 
 import java.util.ArrayList;
@@ -9,6 +7,7 @@ import java.util.ArrayList;
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
+import rd.dap.model.Data;
 import rd.dap.support.Monitor;
 import android.app.Fragment;
 import android.content.ComponentName;
@@ -74,8 +73,8 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 		prev_btn.setOnClickListener(this);
 
 		position_tv = (TextView) v.findViewById(R.id.track_position);
-		if(position != -1){
-			position_tv.setText(String.format("%02d", position+1));
+		if(Data.getPosition() != -1){
+			position_tv.setText(String.format("%02d", Data.getPosition()+1));
 		}
 
 		title_tv = (TextView) v.findViewById(R.id.track_title);
@@ -91,9 +90,9 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 	}
 
 	private void displayTracks(){
-		if(position == -1 || track == null || audiobook == null) return;
+		if(Data.getPosition() == -1 || track == null || Data.getAudiobook() == null) return;
 		//Position
-		position_tv.setText(String.format("%02d", position+1));
+		position_tv.setText(String.format("%02d", Data.getPosition()+1));
 
 		//Track
 		title_tv.setText(track.getTitle());
@@ -106,7 +105,7 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 		int w = LinearLayout.LayoutParams.WRAP_CONTENT;
 		LinearLayout.LayoutParams row_p = new LinearLayout.LayoutParams(m, w);
 		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 85, 1);
-		for(int i = 0; i < audiobook.getPlaylist().size(); i++){
+		for(int i = 0; i < Data.getAudiobook().getPlaylist().size(); i++){
 			if(i % COLUMNS == 0){
 				row = new LinearLayout(getActivity());
 				row.setOrientation(LinearLayout.HORIZONTAL);
@@ -116,7 +115,7 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 			cell.setTextColor(getResources().getColor(R.color.white));
 			cell.setGravity(Gravity.CENTER);
 			cell.setText(String.format("%02d", i+1));
-			if(i == position){
+			if(i == Data.getPosition()){
 				cell.setBackground(getResources().getDrawable(R.drawable.circle));
 			}
 			cell.setId(CELL);
@@ -124,9 +123,9 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 			cell.setOnClickListener(this);
 			row.addView(cell, p);
 		}
-		if(audiobook.getPlaylist().size() % COLUMNS > 0){
+		if(Data.getAudiobook().getPlaylist().size() % COLUMNS > 0){
 			Space space = new Space(getActivity());
-			int weight = COLUMNS - (audiobook.getPlaylist().size() % COLUMNS);
+			int weight = COLUMNS - (Data.getAudiobook().getPlaylist().size() % COLUMNS);
 			LinearLayout.LayoutParams space_p = new LinearLayout.LayoutParams(0, 75, weight);
 			row.addView(space, space_p);
 		}
@@ -135,12 +134,11 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 
 	@Override
 	public void onClick(View v) {
-		if(audiobook == null || track == null || position == -1) return;
+		if(Data.getAudiobook() == null || track == null || Data.getPosition() == -1) return;
 		switch(v.getId()){
 		case R.id.track_next:
-			if(audiobook.getPlaylist().getLast().equals(track)) return;
-			position++;
-			track = audiobook.getPlaylist().get(position);
+			if(Data.getAudiobook().getPlaylist().getLast().equals(track)) return;
+			track = Data.getAudiobook().getPlaylist().get(Data.getPosition()+1);
 			//Fix view
 			displayTracks();
 
@@ -153,9 +151,8 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 			break;
 
 		case R.id.track_previous:
-			if(audiobook.getPlaylist().getFirst().equals(track)) return;
-			position--;
-			track = audiobook.getPlaylist().get(position);
+			if(Data.getAudiobook().getPlaylist().getFirst().equals(track)) return;
+			track = Data.getAudiobook().getPlaylist().get(Data.getPosition()-1);
 			//Fix view
 			displayTracks();
 
@@ -171,9 +168,9 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 			if(v.getTag() == null) break;
 			try{
 				int i = ((Integer)v.getTag()).intValue();
-				if(i >= 0 && i < audiobook.getPlaylist().size()){
-					position = i;
-					track = audiobook.getPlaylist().get(position);
+				if(i >= 0 && i < Data.getAudiobook().getPlaylist().size()){
+					Data.setPosition(i);
+					track = Data.getAudiobook().getPlaylist().get(Data.getPosition());
 					//Fix view
 					displayTracks();
 

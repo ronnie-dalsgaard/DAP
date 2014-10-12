@@ -1,13 +1,11 @@
 package rd.dap;
 
-import static rd.dap.PlayerService.audiobook;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import rd.dap.fragments.FragmentMiniPlayer;
-
+import rd.dap.model.Data;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -79,7 +77,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 		
 		FragmentManager fm = getFragmentManager();
 		FragmentMiniPlayer miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.main_mini_player);
-		miniplayer.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
+		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 
 		Log.d(TAG, "created");
 	}

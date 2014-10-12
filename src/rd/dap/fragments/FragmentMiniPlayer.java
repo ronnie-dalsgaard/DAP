@@ -1,7 +1,5 @@
 package rd.dap.fragments;
 
-import static rd.dap.PlayerService.audiobook;
-import static rd.dap.PlayerService.position;
 import static rd.dap.PlayerService.track;
 
 import java.util.ArrayList;
@@ -10,6 +8,7 @@ import rd.dap.ControllerActivity;
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
+import rd.dap.model.Data;
 import rd.dap.support.Monitor;
 import rd.dap.support.Time;
 import android.app.Fragment;
@@ -120,19 +119,20 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		Log.d(TAG, "View created");
 		return v;
 	}
+	
 	public void updateView(){
 		if(miniplayer_layout != null){
-			miniplayer_layout.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
+			miniplayer_layout.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		}
-		if(audiobook == null || track == null){
+		if(Data.getAudiobook() == null || track == null){
 			Log.d(TAG, "Unable to update view - no audiobook selected!");
 			return;
 		}
-		author_tv.setText(audiobook.getAuthor());
-		album_tv.setText(audiobook.getAlbum());
-		track_tv.setText(String.format("%02d", position) + " " + track.getTitle());
+		author_tv.setText(Data.getAudiobook().getAuthor());
+		album_tv.setText(Data.getAudiobook().getAlbum());
+		track_tv.setText(String.format("%02d", Data.getPosition()+1) + " " + track.getTitle());
 		String cover = track.getCover();
-		if(cover == null) cover = audiobook.getCover();
+		if(cover == null) cover = Data.getAudiobook().getCover();
 		if(cover != null) {
 			Bitmap bitmap = BitmapFactory.decodeFile(cover);
 			iv.setImageBitmap(bitmap);
@@ -150,11 +150,9 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			btn.setImageDrawable(null);
 		}
 	}
-	
 	public void reload(){
 		player.reload();
 	}
-
 	public void setVisibility(int visibility){
 		miniplayer_layout.setVisibility(visibility);
 	}
@@ -208,7 +206,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			break;
 		case R.id.miniplayer_info:
 			Log.d(TAG, "Info long clicked - Audiobook un-selected");
-			audiobook = null;
+			Data.setAudiobook(null);
 			track = null;
 			reload();
 			updateView();
@@ -249,7 +247,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if(bound && audiobook != null){
+					if(bound && Data.getAudiobook() != null){
 						btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
 					} else {
 						btn.setImageDrawable(null);

@@ -3,8 +3,6 @@ package rd.dap;
 import static rd.dap.AudiobookActivity.STATE_EDIT;
 import static rd.dap.AudiobookActivity.STATE_NEW;
 import static rd.dap.FileBrowserActivity.TYPE_FOLDER;
-import static rd.dap.PlayerService.audiobook;
-import static rd.dap.PlayerService.position;
 import static rd.dap.PlayerService.track;
 
 import java.io.File;
@@ -15,6 +13,7 @@ import rd.dap.fragments.FragmentMiniPlayer;
 import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
+import rd.dap.model.Data;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -50,10 +49,8 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	
-	//TODO Bookmarks
 	//TODO autosave bookmarks
 	//TODO up-/download bookmarks
-	//TODO enable un-select audiobook on miniplayer.longclick
 	//TODO remove all activity titles
 	
 	//TODO use tabs/swipe to navigate
@@ -75,7 +72,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		FragmentManager fm = getFragmentManager();
 		miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.main_mini_player);
 		miniplayer.addObserver(this);
-		miniplayer.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
+		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		
 		adapter = new AudiobookAdapter(this, R.layout.audiobook_item, audiobooks);
 		
@@ -108,10 +105,10 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 		Log.d(TAG, "onItemClick");
-		audiobook = audiobooks.get(index);
-		position = 0;
-		track = audiobook.getPlaylist().get(position);
-		miniplayer.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
+		Data.setAudiobook(audiobooks.get(index));
+		Data.setPosition(0);
+		track = Data.getAudiobook().getPlaylist().get(Data.getPosition());
+		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.updateView();
 	}
@@ -234,7 +231,6 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 //		Toast.makeText(AudiobookListActivity.this, "Click on miniplayer", Toast.LENGTH_SHORT).show();
 	}
 
-	
 	public static class ChangeAudiobookDialogFragment extends DialogFragment {
 		public static final ChangeAudiobookDialogFragment newInstance(int position){
 			ChangeAudiobookDialogFragment fragment = new ChangeAudiobookDialogFragment();

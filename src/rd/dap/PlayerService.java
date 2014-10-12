@@ -2,7 +2,7 @@ package rd.dap;
 
 import java.io.File;
 
-import rd.dap.model.Audiobook;
+import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.support.Monitor;
 import android.app.Service;
@@ -17,17 +17,17 @@ import android.util.Log;
 public class PlayerService extends Service implements OnErrorListener {
 	private static final String TAG = "PlayerService";
 	private static MediaPlayer mp = null;
-	public static Audiobook audiobook;
-	public static int position;
+//	public static Audiobook audiobook;
+//	public static int position;
 	public static Track track;
-
 	private final IBinder binder = new DAPBinder();
 	private long laststart = 0;
-		
+
+	
 	public void toggle(){
-		if(audiobook == null) return;
+		if(Data.getAudiobook() == null) return;
 		if(track == null) return;
-		if(position < 0) return;
+		if(Data.getPosition() < 0) return;
 		if(mp == null){
 			mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
 		}
@@ -35,9 +35,9 @@ public class PlayerService extends Service implements OnErrorListener {
 		else mp.start();
 	}
 	public void play(){
-		if(audiobook == null) return;
+		if(Data.getAudiobook() == null) return;
 		if(track == null) return;
-		if(position < 0) return;
+		if(Data.getPosition() < 0) return;
 		if(mp == null){
 			mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
 		}
@@ -73,9 +73,9 @@ public class PlayerService extends Service implements OnErrorListener {
 			mp.release();
 			mp = null;
 		}
-		audiobook = null;
+		Data.setAudiobook(null);
 		track = null;
-		position = -1;
+		Data.setPosition(-1);
 	}
 	public void reload(){
 		if(mp != null){
@@ -94,7 +94,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		try{
 			return mp.isPlaying();
 		} catch(IllegalStateException e){
-			Log.d(TAG, "exception occured -> isPlaying is false");
+//			Log.d(TAG, "exception occured -> isPlaying is false");
 			return false;
 		}
 	}
@@ -102,7 +102,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		Log.d(TAG, "DIE");
 		mp.release();
 		mp = null;
-		audiobook = null;
+		Data.setAudiobook(null);
 		stopSelf();
 	}
 

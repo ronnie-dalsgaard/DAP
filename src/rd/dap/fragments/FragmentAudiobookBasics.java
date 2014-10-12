@@ -1,7 +1,6 @@
 package rd.dap.fragments;
 
 import static rd.dap.AudiobookActivity.STATE_EDIT;
-import static rd.dap.PlayerService.audiobook;
 import static rd.dap.PlayerService.track;
 
 import java.util.ArrayList;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import rd.dap.AudiobookActivity;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
+import rd.dap.model.Data;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -62,7 +62,7 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 		cover_iv = (ImageView) v.findViewById(R.id.audiobook_basics_cover_iv);
 		author_tv = (TextView) v.findViewById(R.id.audiobook_basics_author_tv);
 		audiobook_basics_album_tv = (TextView) v.findViewById(R.id.audiobook_basics_album_tv);
-		if(audiobook != null){
+		if(Data.getAudiobook() != null){
 			displayValues();
 		}
 		
@@ -78,7 +78,7 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 	private void displayValues(){
 		//Cover
 		String cover = track.getCover();
-		if(cover == null) cover = audiobook.getCover();
+		if(cover == null) cover = Data.getAudiobook().getCover();
 		if(cover != null) {
 			Bitmap bitmap = BitmapFactory.decodeFile(cover);
 			cover_iv.setImageBitmap(bitmap);
@@ -87,10 +87,10 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 		}
 
 		//Author
-		author_tv.setText(audiobook.getAuthor());
+		author_tv.setText(Data.getAudiobook().getAuthor());
 
 		//Album
-		audiobook_basics_album_tv.setText(audiobook.getAlbum());
+		audiobook_basics_album_tv.setText(Data.getAudiobook().getAlbum());
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 		case R.id.audiobook_basics_info_layout:
 			Intent intent = new Intent(getActivity(), AudiobookActivity.class);
 			intent.putExtra("state", STATE_EDIT);
-			intent.putExtra("audiobook", audiobook);
+			intent.putExtra("audiobook", Data.getAudiobook());
 			System.out.println("Start edit audiobook");
 			startActivityForResult(intent, REQUEST_FRAGMENT_BASICS_EDIT);
 			break;
@@ -118,7 +118,7 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 			Log.d(TAG, "onActivityResult - REQUEST_FRAGMENT_BASICS_EDIT");
 			if(resultCode == Activity.RESULT_OK){
 				Audiobook result = (Audiobook) data.getSerializableExtra("result");
-				audiobook.setAudiobook(result);
+				Data.setAudiobook(result);
 				displayValues();
 			}
 		}

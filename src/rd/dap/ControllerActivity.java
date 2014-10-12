@@ -1,7 +1,5 @@
 package rd.dap;
 
-import static rd.dap.PlayerService.audiobook;
-
 import java.util.ArrayList;
 
 import rd.dap.PlayerService.DAPBinder;
@@ -11,6 +9,9 @@ import rd.dap.fragments.FragmentSeeker;
 import rd.dap.fragments.FragmentSeeker.Seeker_Fragment_Observer;
 import rd.dap.fragments.FragmentTrack;
 import rd.dap.fragments.FragmentTrack.Fragment_Track_Observer;
+import rd.dap.model.Audiobook;
+import rd.dap.model.Bookmark;
+import rd.dap.model.Data;
 import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
 import android.app.Fragment;
@@ -100,6 +101,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		// Just for test
+		final Audiobook audiobook = Data.getAudiobook();
 		ImageButton t1 = (ImageButton) findViewById(R.id.controller_test1);
 		t1.setOnClickListener(new OnClickListener() {
 			@Override public void onClick(View v) {
@@ -119,7 +121,15 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		ImageButton t3 = (ImageButton) findViewById(R.id.controller_test3);
 		t3.setOnClickListener(new OnClickListener() {
 			@Override public void onClick(View arg0) {
+				if(audiobook == null || player == null) return;
 				
+				String author = audiobook.getAuthor();
+				String album = audiobook.getAlbum();
+				int trackno = Data.getPosition();
+				int progress = player.getCurrentProgress();
+				Bookmark b = new Bookmark(author, album, trackno, progress);
+				
+				System.out.println(b);
 			}
 		});
 		
@@ -152,7 +162,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		Log.d(TAG, "onClick");
 		switch(v.getId()){
 		case R.id.controller_play:
-			if(audiobook == null) break;
+			if(Data.getAudiobook() == null) break;
 			boolean isPlaying = false;
 			if(player != null) isPlaying = player.isPlaying();
 			//Fix view
@@ -251,7 +261,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 			ControllerActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if(bound && audiobook != null){
+					if(bound && Data.getAudiobook() != null){
 						play_btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
 						audiobook_basics_frag.setActionDrawabel(isPlaying ? drw_pause_on_cover : drw_play_on_cover);
 					} else {
@@ -297,7 +307,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 
 	@Override
 	public void fragment_audiobooks_basics_click() {
-		if(audiobook == null) return;;
+		if(Data.getAudiobook() == null) return;;
 		boolean isPlaying = false;
 		if(player != null) isPlaying = player.isPlaying();
 		//Fix view
