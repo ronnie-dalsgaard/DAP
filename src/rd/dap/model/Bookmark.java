@@ -13,30 +13,30 @@ public class Bookmark {
 	}
 
 	public final String getAuthor() { return new String(author); } //return defensive copy
-
-
-
 	public final String getAlbum() { return new String(album); } //return defensive copy
-
-
-
-	public final int getTrackno() { return trackno; } //int are immutable/primitive
-
-
-
-	public final int getProgress() { return progress; } //int are immutable/primitive
 	
-
-
-
+	/* 
+	 * trackno and progress (and thereby Bookmark) are mutable since
+	 * constant recreation might be too expensive!
+	 */
+	public final int getTrackno() { return trackno; }
+	public final void setTrackno(int trackno) { this.trackno = trackno; }
+	public final int getProgress() { return progress; }
+	public final void setProgress(int progress) { this.progress = progress; }
+	
+	public boolean matches(String author, String album) {
+		if(this.author == author && this.album == album) return true;
+		if(author == null || album == null) return false; //this is an asumption
+		if(author.equals(this.author) && album.equals(this.album)) return true;
+		return false;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 67;
 		int result = 1;
 		result = prime * result + ((album == null) ? 0 : album.hashCode());
 		result = prime * result + ((author == null) ? 0 : author.hashCode());
-		result = prime * result + progress;
-		result = prime * result + trackno;
 		return result;
 	}
 	@Override
@@ -58,13 +58,11 @@ public class Bookmark {
 				return false;
 		} else if (!author.equals(other.author))
 			return false;
-		if (progress != other.progress)
-			return false;
-		if (trackno != other.trackno)
-			return false;
 		return true;
 	}
 	public String toString(){
 		return author + " - " + album + " -> " + trackno + ":" + progress;
 	}
+
+	
 }

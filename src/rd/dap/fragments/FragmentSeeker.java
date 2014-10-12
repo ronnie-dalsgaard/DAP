@@ -1,6 +1,7 @@
 package rd.dap.fragments;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
@@ -41,7 +42,7 @@ public class FragmentSeeker extends Fragment implements OnClickListener, Service
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		monitor = new ProgressMonitor();
+		monitor = new ProgressMonitor(1, TimeUnit.SECONDS);
 		monitor.start();
 	}
 	@Override
@@ -140,6 +141,9 @@ public class FragmentSeeker extends Fragment implements OnClickListener, Service
 
 	
 	class ProgressMonitor extends Monitor{
+		public ProgressMonitor(int delay, TimeUnit unit) {
+			super(delay, unit);
+		}
 
 		@Override
 		public void execute() {

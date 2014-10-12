@@ -1,6 +1,7 @@
 package rd.dap.fragments;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import rd.dap.ControllerActivity;
 import rd.dap.PlayerService;
@@ -62,7 +63,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			drw_play = res.getDrawable(R.drawable.ic_action_play_over_video);
 			drw_pause = res.getDrawable(R.drawable.ic_action_pause_over_video);
 		}
-		monitor = new MiniPlayerMonitor();
+		monitor = new MiniPlayerMonitor(1, TimeUnit.SECONDS);
 		monitor.start();
 	}
 	@Override
@@ -235,6 +236,10 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		private static final String TAG = "MiniPlayer.Monitor";
 		private boolean isPlaying = false;
 		private int progress = 0;
+
+		public MiniPlayerMonitor(int delay, TimeUnit unit) {
+			super(delay, unit);
+		}
 		
 		@Override
 		public void execute() {

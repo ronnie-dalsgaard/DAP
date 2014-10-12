@@ -1,6 +1,7 @@
 package rd.dap;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import rd.dap.model.Data;
 import rd.dap.support.Monitor;
@@ -16,12 +17,23 @@ import android.util.Log;
 public class PlayerService extends Service implements OnErrorListener {
 	private static final String TAG = "PlayerService";
 	private static MediaPlayer mp = null;
-//	public static Audiobook audiobook;
-//	public static int position;
-//	public static Track track;
 	private final IBinder binder = new DAPBinder();
 	private long laststart = 0;
-
+	private static Monitor_Bookmarks monitor = null;
+	
+	@Override
+	public void onCreate(){
+		super.onCreate();
+		if(monitor == null){
+			monitor = new Monitor_Bookmarks(10, TimeUnit.SECONDS, getFilesDir());
+			monitor.start();
+		}
+	}
+	@Override
+	public void onDestroy(){
+		super.onDestroy();
+		kill();
+	}
 	
 	public void toggle(){
 		if(Data.getAudiobook() == null) return;
@@ -87,7 +99,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(mp == null) {
 			return false;
 		}
-		if(System.currentTimeMillis() - laststart < Monitor.DELAY * 1.5){
+		if(System.currentTimeMillis() - laststart < Monitor.delay * 1.5){
 			return true;
 		}
 		try{
@@ -102,9 +114,12 @@ public class PlayerService extends Service implements OnErrorListener {
 		mp.release();
 		mp = null;
 		Data.setAudiobook(null);
+		if(monitor != null){
+			monitor.kill();
+		}
 		stopSelf();
 	}
-
+	
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -123,5 +138,32 @@ public class PlayerService extends Service implements OnErrorListener {
 		System.out.println("An error occured in the MediaPlayer and" +
 				" was cought by PlayerSerice: what="+what+", extra="+extra);
 		return true; //Keep going
+	}
+
+	class Monitor_Bookmarks extends Monitor {
+		private static final String TAG = "Monitor_bookmarks";
+		private File filesDir;
+
+		public Monitor_Bookmarks(int delay, TimeUnit unit, File filesDir) {
+			super(delay, unit);
+			this.filesDir = filesDir;
+		}
+
+		@Override
+		public void execute() {
+			System.out.println("execute!!!!");
+			if(Data.getAudiobook() == null) return;
+			if(Data.getTrack() == null) return;
+			if(mp == null) {
+				Log.d(TAG, "Unable to update bookmarks, since no no mediaplayer is accessible");
+				return;
+			}
+			
+			//TODO this is called as it should
+//			BookmarkManager manager = BookmarkManager.getInstance();
+//			manager.get
+			System.out.println("SAVING BOOKMARK");
+		}
+
 	}
 }

@@ -1,11 +1,31 @@
 package rd.dap.support;
 
+import java.util.concurrent.TimeUnit;
+
 import android.util.Log;
 
 public abstract class Monitor extends Thread {
 	private static final String TAG = "Monitor";
-	public static final int DELAY = 1000;
+	public static final int DEFAULT_DELAY = 1000;
+	public static int delay = DEFAULT_DELAY;
 	private boolean alive = true;
+	
+	private static final int SEC = 1000;
+	private static final int MIN = 60*SEC;
+	private static final int HOUR = 60*MIN;
+	private static final int DAY = 24*HOUR;
+	
+	public Monitor(int delay, TimeUnit unit){
+		switch(unit){
+		case MILLISECONDS: Monitor.delay = delay; break;
+		case SECONDS: Monitor.delay = delay * SEC; break;
+		case MINUTES: Monitor.delay = delay * MIN; break;
+		case HOURS: Monitor.delay = delay * HOUR; break;
+		case DAYS: Monitor.delay = delay * DAY; break;
+		case MICROSECONDS: //fall through
+		case NANOSECONDS: Monitor.delay = DEFAULT_DELAY;
+		}
+	}
 
 	public void kill(){
 		this.alive = false;
@@ -24,7 +44,7 @@ public abstract class Monitor extends Thread {
 
 			//Delay with error handling
 			try {
-				Thread.sleep(DELAY);
+				Thread.sleep(delay);
 			} catch (InterruptedException e) {
 				//Ignored - just insomnia
 				insomnicEpisodes++;
