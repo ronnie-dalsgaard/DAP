@@ -39,7 +39,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	private boolean bound = false;
 	private PlayerService player;
 	private TextView author_tv, album_tv, track_tv, progress_tv;
-	private LinearLayout info;
+	private LinearLayout info, miniplayer_layout;
 	private ImageView iv;
 	private ImageButton btn;
 	private static Drawable noCover = null, drw_play = null, drw_pause = null;
@@ -107,6 +107,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		btn = (ImageButton) v.findViewById(R.id.miniplayer_play_btn);
 		info = (LinearLayout) v.findViewById(R.id.miniplayer_info);
 		progress_tv = (TextView) v.findViewById(R.id.miniplayer_progress_tv);
+		miniplayer_layout = (LinearLayout) v.findViewById(R.id.miniplayer_layout);
 
 		btn.setOnClickListener(this);
 		btn.setOnLongClickListener(this);
@@ -150,6 +151,10 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		player.reload();
 	}
 
+	public void setVisibility(int visibility){
+		miniplayer_layout.setVisibility(visibility);
+	}
+	
 	@Override
 	public void onClick(View v) {
 		switch(v.getId()){

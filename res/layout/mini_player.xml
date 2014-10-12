@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/miniplayer_layout"
     android:layout_width="@dimen/mini_player_width"
     android:layout_height="wrap_content"
     android:background="@drawable/miniplayer_bg"

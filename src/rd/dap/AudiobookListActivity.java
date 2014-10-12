@@ -39,7 +39,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class AudiobookListActivity extends Activity implements MiniPlayerObserver, OnItemClickListener, OnItemLongClickListener {
 	public static final String TAG = "AudiobookListActivity";
@@ -48,6 +47,24 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	public static FragmentMiniPlayer miniplayer = null;
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
+	
+	//TODO Save audiobooks
+	//TODO Bookmarks
+	//TODO autosave bookmarks
+	//TODO up-/download bookmarks
+	//TODO don't show miniplayer if no audiobooks is selected
+	//TODO enable un-select audiobook on miniplayer.longclick
+	//TODO remove all activity titles
+	
+	//TODO use tabs/swipe to navigate
+	//TODO constant class (final class + private constructor)
+	
+	//TODO Home folder
+	//TODO auto-detect all audiobooks
+	//TODO Texts as resource
+	//TODO sleeptimer
+	//TODO pregress as progressbar
+	//TODO Helper texts
 
 	@Override
  	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +75,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		FragmentManager fm = getFragmentManager();
 		miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.main_mini_player);
 		miniplayer.addObserver(this);
+		miniplayer.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
 		
 		adapter = new AudiobookAdapter(this, R.layout.audiobook_item, audiobooks);
 		
@@ -72,7 +90,6 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 			protected Void doInBackground(Void... params) {
 				AudiobookManager am = AudiobookManager.getInstance();
 				audiobooks.clear();
-//				audiobooks.addAll(am.autodetect());
 				audiobooks.addAll(am.getAudiobooks());
 				return null;
 			}
@@ -81,9 +98,6 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 				runOnUiThread(new Runnable() {
 					@Override public void run() {
 						adapter.notifyDataSetChanged();
-						for(Audiobook a : audiobooks){
-							System.out.println("#"+a);
-						}
 					}
 				});
 			}
@@ -96,12 +110,14 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		audiobook = audiobooks.get(index);
 		position = 0;
 		track = audiobook.getPlaylist().get(position);
+		miniplayer.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
 		miniplayer.updateView();
 		miniplayer.reload();
 	}
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 		Log.d(TAG, "onItemLongClick");
+		//FIXME use dialog fragment
 		final Audiobook audiobook = audiobooks.get(position);
 		AlertDialog dialog = new AlertDialog.Builder(this)
 		.setMessage("Change audiobook")
@@ -123,6 +139,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		return true; //consume click
 	}
 	private void confirmDelete(final Audiobook audiobook){
+		//FIXME use dialog fragment
 		AlertDialog dialog = new AlertDialog.Builder(this)
 		.setMessage("Confirm delete "+audiobook.getAuthor() + " - " + audiobook.getAlbum())
 		.setPositiveButton("Cancel", null) //Do nothing

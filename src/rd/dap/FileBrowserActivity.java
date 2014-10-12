@@ -1,10 +1,15 @@
 package rd.dap;
 
+import static rd.dap.PlayerService.audiobook;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import rd.dap.fragments.FragmentMiniPlayer;
+
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -25,13 +30,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class FileBrowserActivity extends Activity {
+public class FileBrowserActivity extends Activity implements OnItemClickListener, OnItemLongClickListener {
 	private static final String TAG = "FileBrowserActivity";
 	private static final String[] TYPE_IMAGE = {".jpg", ".png"};
 	private static final String[] TYPE_AUDIO = {".mp3"};
 	public static final String TYPE_FOLDER = "folder";
 	private String type, message;
+	private File root;
 	private ArrayList<File> list;
+	private FileAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +58,7 @@ public class FileBrowserActivity extends Activity {
 			throw new RuntimeException("No external storrage!");
 		}
 
-		final File root = Environment.getExternalStorageDirectory();
+		root = Environment.getExternalStorageDirectory();
 
 		list = new ArrayList<File>();
 		for(File f : root.listFiles()){
@@ -63,62 +70,65 @@ public class FileBrowserActivity extends Activity {
 		TextView v = (TextView) inflater.inflate(R.layout.file_browser_message, listview, false);
 		v.setText(message);
 		listview.addHeaderView(v);
-		final FileAdapter adapter = new FileAdapter(this, R.layout.file_browser_file_item, list);
+		adapter = new FileAdapter(this, R.layout.file_browser_file_item, list);
 		adapter.setRoot(root);
 		adapter.setCurent(root);
 		listview.setAdapter(adapter);
-		listview.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				position -= 1; //compensate for header
-				File file = list.get(position);
-
-				//Validate file
-				boolean accept = false;
-				String[] accepted = {};
-				if("image".equalsIgnoreCase(type)) accepted = TYPE_IMAGE;
-				if("audio".equalsIgnoreCase(type)) accepted = TYPE_AUDIO;
-				for(String type : accepted){
-					if(file.getPath().endsWith(type)) {
-						accept = true; break;
-					}
-				}
-				if(accept){
-					int requestcode = getIntent().getIntExtra("requestcode", -1);
-					if(requestcode > 0){
-						Intent intent = new Intent();
-						intent.putExtra("result", file.getAbsolutePath());
-						setResult(requestcode, intent);
-						finish();
-					}
-
-					//Go into folder
-				} else if(file.isDirectory()){
-					list.clear();
-					if(!file.equals(root)){
-						list.add(file.getParentFile());
-					}
-					for(File f : file.listFiles()){
-						list.add(f);
-					}
-					adapter.setCurent(file);
-					adapter.notifyDataSetChanged();
-				}
-			}
-		});
-		listview.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				position -= 1; //compensate for header
-				Toast.makeText(FileBrowserActivity.this, "LongClick", Toast.LENGTH_SHORT).show();
-				selectFolder(position);
-				return true;
-			}
-		});
+		listview.setOnItemClickListener(this);
+		listview.setOnItemLongClickListener(this);
+		
+		FragmentManager fm = getFragmentManager();
+		FragmentMiniPlayer miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.main_mini_player);
+		miniplayer.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
 
 		Log.d(TAG, "created");
 	}
+	
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		position -= 1; //compensate for header
+		File file = list.get(position);
+
+		//Validate file
+		boolean accept = false;
+		String[] accepted = {};
+		if("image".equalsIgnoreCase(type)) accepted = TYPE_IMAGE;
+		if("audio".equalsIgnoreCase(type)) accepted = TYPE_AUDIO;
+		for(String type : accepted){
+			if(file.getPath().endsWith(type)) {
+				accept = true; break;
+			}
+		}
+		if(accept){
+			int requestcode = getIntent().getIntExtra("requestcode", -1);
+			if(requestcode > 0){
+				Intent intent = new Intent();
+				intent.putExtra("result", file.getAbsolutePath());
+				setResult(requestcode, intent);
+				finish();
+			}
+
+			//Go into folder
+		} else if(file.isDirectory()){
+			list.clear();
+			if(!file.equals(root)){
+				list.add(file.getParentFile());
+			}
+			for(File f : file.listFiles()){
+				list.add(f);
+			}
+			adapter.setCurent(file);
+			adapter.notifyDataSetChanged();
+		}
+	}
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+		position -= 1; //compensate for header
+		Toast.makeText(FileBrowserActivity.this, "LongClick", Toast.LENGTH_SHORT).show();
+		selectFolder(position);
+		return true;
+	}
+	
 	
 	private void selectFolder(int position){
 		if(TYPE_FOLDER.equalsIgnoreCase(type)){
@@ -132,11 +142,6 @@ public class FileBrowserActivity extends Activity {
 				finish();
 			}
 		}
-	}
-
-	public void onDestroy(){
-		super.onDestroy();
-		Log.d(TAG, "onDestroy");
 	}
 
 	class FileAdapter extends ArrayAdapter<File> {
@@ -215,4 +220,6 @@ public class FileBrowserActivity extends Activity {
 		public ImageView type_iv;
 		public CheckBox cb;
 	}
+	
+	
 }
