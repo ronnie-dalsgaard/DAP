@@ -81,15 +81,14 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(mp != null){
 			mp.release();
 		} 
+		if(track == null) return;
 		mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));		
 	}
 	public boolean isPlaying(){ 
 		if(mp == null) {
-//			Log.d(TAG, "mp is null -> isPlaying is false");
 			return false;
 		}
 		if(System.currentTimeMillis() - laststart < Monitor.DELAY * 1.5){
-			Log.d(TAG, "debounce -> isPlaying is true");
 			return true;
 		}
 		try{

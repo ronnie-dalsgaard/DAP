@@ -112,8 +112,8 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		position = 0;
 		track = audiobook.getPlaylist().get(position);
 		miniplayer.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
-		miniplayer.updateView();
 		miniplayer.reload();
+		miniplayer.updateView();
 	}
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {

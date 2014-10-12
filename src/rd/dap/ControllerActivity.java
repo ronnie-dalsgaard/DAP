@@ -2,11 +2,6 @@ package rd.dap;
 
 import static rd.dap.PlayerService.audiobook;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import rd.dap.PlayerService.DAPBinder;
@@ -16,7 +11,6 @@ import rd.dap.fragments.FragmentSeeker;
 import rd.dap.fragments.FragmentSeeker.Seeker_Fragment_Observer;
 import rd.dap.fragments.FragmentTrack;
 import rd.dap.fragments.FragmentTrack.Fragment_Track_Observer;
-import rd.dap.model.AudiobookManager;
 import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
 import android.app.Fragment;
@@ -118,33 +112,13 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		ImageButton t2 = (ImageButton) findViewById(R.id.controller_test2);
 		t2.setOnClickListener(new OnClickListener() {
 			@Override public void onClick(View v) {
-				System.out.println("Test 2 clicked");
-				File file = new File(getFilesDir(), "audiobooks.dap");
-				try {
-					FileInputStream stream = new FileInputStream(file);
-					InputStreamReader reader = new InputStreamReader(stream);
-					BufferedReader in = new BufferedReader(reader);
-					
-					StringBuilder sb = new StringBuilder();
-					String line = in.readLine();
-					while(line != null){
-						sb.append(line);
-						line = in.readLine();
-					}
-					in.close();
-					System.out.println("============================================");
-					System.out.println(sb.toString());
-					System.out.println("============================================");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				
 			}
 		});
 		
 		ImageButton t3 = (ImageButton) findViewById(R.id.controller_test3);
 		t3.setOnClickListener(new OnClickListener() {
 			@Override public void onClick(View arg0) {
-				AudiobookManager.getInstance().loadAudiobooks(ControllerActivity.this);
 				
 			}
 		});

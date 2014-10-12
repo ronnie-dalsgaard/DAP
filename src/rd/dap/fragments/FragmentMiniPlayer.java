@@ -6,6 +6,7 @@ import static rd.dap.PlayerService.track;
 
 import java.util.ArrayList;
 
+import rd.dap.ControllerActivity;
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
@@ -32,7 +33,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnLongClickListener, ServiceConnection {
 	private static final String TAG = "MiniPlayer";
@@ -113,6 +113,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		btn.setOnLongClickListener(this);
 
 		info.setOnClickListener(this);
+		info.setOnLongClickListener(this);
 
 		updateView();
 
@@ -120,6 +121,9 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		return v;
 	}
 	public void updateView(){
+		if(miniplayer_layout != null){
+			miniplayer_layout.setVisibility(audiobook == null ? View.GONE : View.VISIBLE);
+		}
 		if(audiobook == null || track == null){
 			Log.d(TAG, "Unable to update view - no audiobook selected!");
 			return;
@@ -177,17 +181,14 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			break;
 
 		case R.id.miniplayer_info:
-			//FIXME remove - this is just for testing
 			Log.d(TAG, "Info clicked");
 			if(player != null){
-				String txt = player.isPlaying() ? "is playing" : "is NOT playing";
-				Toast.makeText(getActivity(), txt, Toast.LENGTH_SHORT).show();
-				
 				for(MiniPlayerObserver observer : observers){
 					observer.miniplayer_click();
 				}
-			
-				Log.d(TAG, txt);
+				
+				Intent intent = new Intent(getActivity(), ControllerActivity.class);
+				startActivity(intent);
 			} else {
 				Log.d(TAG, "PLAYER IS NULL");
 			}
@@ -199,13 +200,23 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		switch(v.getId()){
 		case R.id.miniplayer_play_btn:
 			player.kill();
+			Log.d(TAG, "Cover long clicked - Play/Pause long pressed (Kill mp)");
 
 			for(MiniPlayerObserver observer : observers){
 				observer.miniplayer_longClick();
 			}
-
-			Log.d(TAG, "Play/Pause long pressed (Kill mp)");
 			break;
+		case R.id.miniplayer_info:
+			Log.d(TAG, "Info long clicked - Audiobook un-selected");
+			audiobook = null;
+			track = null;
+			reload();
+			updateView();
+
+//			for(MiniPlayerObserver observer : observers){
+//				observer.miniplayer_longClick();
+//			}
+			return true;
 		}
 
 		return true;
