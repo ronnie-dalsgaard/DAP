@@ -1,7 +1,5 @@
 package rd.dap.fragments;
 
-import static rd.dap.PlayerService.track;
-
 import java.util.ArrayList;
 
 import rd.dap.PlayerService;
@@ -78,8 +76,8 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 		}
 
 		title_tv = (TextView) v.findViewById(R.id.track_title);
-		if(track != null){
-			title_tv.setText(track.getTitle());
+		if(Data.getTrack() != null){
+			title_tv.setText(Data.getTrack().getTitle());
 		}
 
 		tracks_gv = (LinearLayout) v.findViewById(R.id.tracks_grid);
@@ -90,12 +88,12 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 	}
 
 	private void displayTracks(){
-		if(Data.getPosition() == -1 || track == null || Data.getAudiobook() == null) return;
+		if(Data.getPosition() == -1 || Data.getTrack() == null || Data.getAudiobook() == null) return;
 		//Position
 		position_tv.setText(String.format("%02d", Data.getPosition()+1));
 
 		//Track
-		title_tv.setText(track.getTitle());
+		title_tv.setText(Data.getTrack().getTitle());
 
 		//Tracks
 		tracks_gv.removeAllViews();
@@ -134,11 +132,11 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 
 	@Override
 	public void onClick(View v) {
-		if(Data.getAudiobook() == null || track == null || Data.getPosition() == -1) return;
+		if(Data.getAudiobook() == null || Data.getTrack() == null || Data.getPosition() == -1) return;
 		switch(v.getId()){
 		case R.id.track_next:
-			if(Data.getAudiobook().getPlaylist().getLast().equals(track)) return;
-			track = Data.getAudiobook().getPlaylist().get(Data.getPosition()+1);
+			if(Data.getAudiobook().getPlaylist().getLast().equals(Data.getTrack())) return;
+			Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()+1));
 			//Fix view
 			displayTracks();
 
@@ -151,8 +149,8 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 			break;
 
 		case R.id.track_previous:
-			if(Data.getAudiobook().getPlaylist().getFirst().equals(track)) return;
-			track = Data.getAudiobook().getPlaylist().get(Data.getPosition()-1);
+			if(Data.getAudiobook().getPlaylist().getFirst().equals(Data.getTrack())) return;
+			Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()-1));
 			//Fix view
 			displayTracks();
 
@@ -170,7 +168,7 @@ public class FragmentTrack extends Fragment implements OnClickListener, ServiceC
 				int i = ((Integer)v.getTag()).intValue();
 				if(i >= 0 && i < Data.getAudiobook().getPlaylist().size()){
 					Data.setPosition(i);
-					track = Data.getAudiobook().getPlaylist().get(Data.getPosition());
+					Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()));
 					//Fix view
 					displayTracks();
 

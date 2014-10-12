@@ -3,7 +3,6 @@ package rd.dap;
 import java.io.File;
 
 import rd.dap.model.Data;
-import rd.dap.model.Track;
 import rd.dap.support.Monitor;
 import android.app.Service;
 import android.content.Intent;
@@ -19,27 +18,27 @@ public class PlayerService extends Service implements OnErrorListener {
 	private static MediaPlayer mp = null;
 //	public static Audiobook audiobook;
 //	public static int position;
-	public static Track track;
+//	public static Track track;
 	private final IBinder binder = new DAPBinder();
 	private long laststart = 0;
 
 	
 	public void toggle(){
 		if(Data.getAudiobook() == null) return;
-		if(track == null) return;
+		if(Data.getTrack() == null) return;
 		if(Data.getPosition() < 0) return;
 		if(mp == null){
-			mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
+			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getTrack().getPath())));
 		}
 		if(mp.isPlaying()) mp.pause();
 		else mp.start();
 	}
 	public void play(){
 		if(Data.getAudiobook() == null) return;
-		if(track == null) return;
+		if(Data.getTrack() == null) return;
 		if(Data.getPosition() < 0) return;
 		if(mp == null){
-			mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
+			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getTrack().getPath())));
 		}
 		if(!mp.isPlaying()) mp.start();
 	}
@@ -74,15 +73,15 @@ public class PlayerService extends Service implements OnErrorListener {
 			mp = null;
 		}
 		Data.setAudiobook(null);
-		track = null;
+		Data.setTrack(null);
 		Data.setPosition(-1);
 	}
 	public void reload(){
 		if(mp != null){
 			mp.release();
 		} 
-		if(track == null) return;
-		mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));		
+		if(Data.getTrack() == null) return;
+		mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getTrack().getPath())));		
 	}
 	public boolean isPlaying(){ 
 		if(mp == null) {

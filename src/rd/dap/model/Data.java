@@ -3,9 +3,7 @@ package rd.dap.model;
 public class Data {
 	private static Audiobook audiobook;
 	private static int position;
-//TODO Move track from PlayerService to here
-	
-	
+	private static Track track;
 	
 	public static Audiobook getAudiobook() { return audiobook; }
 	public static void setAudiobook(Audiobook audiobook) { Data.audiobook = audiobook; }
@@ -13,6 +11,7 @@ public class Data {
 	public static int getPosition() { return position; }
 	public static void setPosition(int position) { Data.position = position; }
 	
-	
+	public static Track getTrack() { return track; }
+	public static void setTrack(Track track) { Data.track = track; }
 	
 }

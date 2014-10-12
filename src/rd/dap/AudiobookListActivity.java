@@ -3,7 +3,6 @@ package rd.dap;
 import static rd.dap.AudiobookActivity.STATE_EDIT;
 import static rd.dap.AudiobookActivity.STATE_NEW;
 import static rd.dap.FileBrowserActivity.TYPE_FOLDER;
-import static rd.dap.PlayerService.track;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -107,7 +106,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		Log.d(TAG, "onItemClick");
 		Data.setAudiobook(audiobooks.get(index));
 		Data.setPosition(0);
-		track = Data.getAudiobook().getPlaylist().get(Data.getPosition());
+		Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()));
 		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.updateView();
@@ -154,7 +153,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		switch(requestCode){
 		case REQUEST_NEW_AUDIOBOOK:
 			Log.d(TAG, "onActivityResult - REQUEST_NEW_AUDIOBOOK");
-			if(data == null) throw new RuntimeException("No data provided");
+			if(data == null) return;
 			String folder_path = data.getStringExtra("result");
 			File folder = new File(folder_path);
 			AudiobookManager manager = AudiobookManager.getInstance();
@@ -282,7 +281,19 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 			.setPositiveButton("Cancel", null) //Do nothing
 			.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
 				@Override public void onClick(DialogInterface dialog, int which) {
+					//stop and un-set as current
+					miniplayer.getPlayer().pause();
+					Data.setAudiobook(null);
+					Data.setTrack(null);
+					Data.setPosition(-1);
+					
+					//update the miniplayers view
+					miniplayer.updateView();
+
+					//Remove the audiobook
 					AudiobookManager.getInstance().removeAudiobook(getActivity(), audiobook);
+					
+					//update the list
 					audiobooks.remove(audiobook);
 					adapter.notifyDataSetChanged();
 				}

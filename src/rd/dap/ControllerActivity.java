@@ -273,41 +273,25 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		}
 	}
 
-	@Override
-	public void fragment_track_next() {
+	@Override public void fragment_track_next() {
 		play_btn.setImageDrawable(drw_play);
 		audiobook_basics_frag.setActionDrawabel(drw_play_on_cover);
 	}
-	@Override
-	public void fragment_track_previous() {
+	@Override public void fragment_track_previous() {
 		play_btn.setImageDrawable(drw_play);
 		audiobook_basics_frag.setActionDrawabel(drw_play_on_cover);
 	}
-	@Override
-	public void fragment_track_click() {
-		Toast.makeText(this, "Click on track_fragment", Toast.LENGTH_SHORT).show();
-	}
-	@Override
-	public void fragment_track_select(int position) {
+	@Override public void fragment_track_click() { }
+	@Override public void fragment_track_select(int position) {
 		play_btn.setImageDrawable(drw_play);
 		audiobook_basics_frag.setActionDrawabel(drw_play_on_cover);
 	}
 
-	@Override public void seeker_fragment_forward() {
-		Toast.makeText(this, "Seeker forward", Toast.LENGTH_SHORT).show();
-	}
-
-	@Override public void seeker_fragment_rewind() {
-		
-	}
-
-	@Override public void seeker_fragment_click() {
-		
-	}
-
-	@Override
-	public void fragment_audiobooks_basics_click() {
-		if(Data.getAudiobook() == null) return;;
+	@Override public void seeker_fragment_forward() { }
+	@Override public void seeker_fragment_rewind() { }
+	@Override public void seeker_fragment_click() { }
+	@Override public void fragment_audiobooks_basics_click() {
+		if(Data.getAudiobook() == null) return;
 		boolean isPlaying = false;
 		if(player != null) isPlaying = player.isPlaying();
 		//Fix view

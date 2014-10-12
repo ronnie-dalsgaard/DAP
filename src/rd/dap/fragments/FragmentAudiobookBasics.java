@@ -1,7 +1,6 @@
 package rd.dap.fragments;
 
 import static rd.dap.AudiobookActivity.STATE_EDIT;
-import static rd.dap.PlayerService.track;
 
 import java.util.ArrayList;
 
@@ -77,7 +76,7 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 	}
 	private void displayValues(){
 		//Cover
-		String cover = track.getCover();
+		String cover = Data.getTrack().getCover();
 		if(cover == null) cover = Data.getAudiobook().getCover();
 		if(cover != null) {
 			Bitmap bitmap = BitmapFactory.decodeFile(cover);
@@ -102,6 +101,7 @@ public class FragmentAudiobookBasics extends Fragment implements OnClickListener
 			}
 			break;
 		case R.id.audiobook_basics_info_layout:
+			if(Data.getAudiobook() == null) return;
 			Intent intent = new Intent(getActivity(), AudiobookActivity.class);
 			intent.putExtra("state", STATE_EDIT);
 			intent.putExtra("audiobook", Data.getAudiobook());

@@ -1,7 +1,5 @@
 package rd.dap.fragments;
 
-import static rd.dap.PlayerService.track;
-
 import java.util.ArrayList;
 
 import rd.dap.ControllerActivity;
@@ -44,6 +42,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	private static Drawable noCover = null, drw_play = null, drw_pause = null;
 	private MiniPlayerMonitor monitor;
 	
+	//Observer pattern - Miniplayer is observable
 	private ArrayList<MiniPlayerObserver> observers = new ArrayList<MiniPlayerObserver>();
 	public interface MiniPlayerObserver{
 		public void miniplayer_play();
@@ -124,14 +123,14 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		if(miniplayer_layout != null){
 			miniplayer_layout.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		}
-		if(Data.getAudiobook() == null || track == null){
+		if(Data.getAudiobook() == null || Data.getTrack() == null){
 			Log.d(TAG, "Unable to update view - no audiobook selected!");
 			return;
 		}
 		author_tv.setText(Data.getAudiobook().getAuthor());
 		album_tv.setText(Data.getAudiobook().getAlbum());
-		track_tv.setText(String.format("%02d", Data.getPosition()+1) + " " + track.getTitle());
-		String cover = track.getCover();
+		track_tv.setText(String.format("%02d", Data.getPosition()+1) + " " + Data.getTrack().getTitle());
+		String cover = Data.getTrack().getCover();
 		if(cover == null) cover = Data.getAudiobook().getCover();
 		if(cover != null) {
 			Bitmap bitmap = BitmapFactory.decodeFile(cover);
@@ -156,6 +155,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	public void setVisibility(int visibility){
 		miniplayer_layout.setVisibility(visibility);
 	}
+	public PlayerService getPlayer(){ return player; } //Convenience method
 	
 	@Override
 	public void onClick(View v) {
@@ -207,7 +207,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		case R.id.miniplayer_info:
 			Log.d(TAG, "Info long clicked - Audiobook un-selected");
 			Data.setAudiobook(null);
-			track = null;
+			Data.setTrack(null);
 			reload();
 			updateView();
 
