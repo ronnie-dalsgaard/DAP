@@ -17,6 +17,8 @@ import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -48,11 +50,9 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	
-	//TODO Save audiobooks
 	//TODO Bookmarks
 	//TODO autosave bookmarks
 	//TODO up-/download bookmarks
-	//TODO don't show miniplayer if no audiobooks is selected
 	//TODO enable un-select audiobook on miniplayer.longclick
 	//TODO remove all activity titles
 	
@@ -89,8 +89,9 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 			@Override
 			protected Void doInBackground(Void... params) {
 				AudiobookManager am = AudiobookManager.getInstance();
+				ArrayList<Audiobook> loadedList = am.loadAudiobooks(AudiobookListActivity.this); 
 				audiobooks.clear();
-				audiobooks.addAll(am.getAudiobooks());
+				audiobooks.addAll(loadedList);
 				return null;
 			}
 			@Override 
@@ -115,43 +116,12 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		miniplayer.reload();
 	}
 	@Override
-	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+	public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
 		Log.d(TAG, "onItemLongClick");
-		//FIXME use dialog fragment
-		final Audiobook audiobook = audiobooks.get(position);
-		AlertDialog dialog = new AlertDialog.Builder(this)
-		.setMessage("Change audiobook")
-		.setPositiveButton("Edit audiobook", new DialogInterface.OnClickListener() {
-			@Override public void onClick(DialogInterface dialog, int which) {
-				Intent intent = new Intent(AudiobookListActivity.this, AudiobookActivity.class);
-				intent.putExtra("state", STATE_EDIT);
-				intent.putExtra("audiobook", audiobook);
-				startActivity(intent);
-			}
-		})
-		.setNegativeButton("Delete audiobook", new DialogInterface.OnClickListener() {
-			@Override public void onClick(DialogInterface dialog, int which) {
-				confirmDelete(audiobook);
-			}
-		})
-		.create();
-		dialog.show();
+		ChangeAudiobookDialogFragment frag = ChangeAudiobookDialogFragment.newInstance(position);
+		frag.show(getFragmentManager(), "ChagenAudiobookDialogFragment");
+		
 		return true; //consume click
-	}
-	private void confirmDelete(final Audiobook audiobook){
-		//FIXME use dialog fragment
-		AlertDialog dialog = new AlertDialog.Builder(this)
-		.setMessage("Confirm delete "+audiobook.getAuthor() + " - " + audiobook.getAlbum())
-		.setPositiveButton("Cancel", null) //Do nothing
-		.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-			@Override public void onClick(DialogInterface dialog, int which) {
-				AudiobookManager.getInstance().removeAudiobook(audiobook);
-				audiobooks.remove(audiobook);
-				adapter.notifyDataSetChanged();
-			}
-		})
-		.create();
-		dialog.show();
 	}
 
 	@Override
@@ -200,8 +170,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 		case REQUEST_EDIT_AUDIOBOOK:
 			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUDIOBOOK");
 			audiobooks.clear();
-			audiobooks.addAll(AudiobookManager.getInstance().getAudiobooks());
-			for(Audiobook a : audiobooks) System.out.println("! "+a);
+			audiobooks.addAll(AudiobookManager.getInstance().getAudiobooks(this));
 			adapter.notifyDataSetChanged();
 		}
 	}
@@ -266,4 +235,63 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	}
 
 	
+	public static class ChangeAudiobookDialogFragment extends DialogFragment {
+		public static final ChangeAudiobookDialogFragment newInstance(int position){
+			ChangeAudiobookDialogFragment fragment = new ChangeAudiobookDialogFragment();
+		    Bundle bundle = new Bundle();
+		    bundle.putInt("position", position);
+		    fragment.setArguments(bundle);
+		    return fragment ;
+		}
+		
+		@Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+			final int position = getArguments().getInt("position");
+			final Audiobook audiobook = audiobooks.get(position);
+	        
+			return new AlertDialog.Builder(getActivity())
+			.setMessage("Change audiobook")
+			.setPositiveButton("Edit audiobook", new DialogInterface.OnClickListener() {
+				@Override public void onClick(DialogInterface dialog, int which) {
+					Intent intent = new Intent(getActivity(), AudiobookActivity.class);
+					intent.putExtra("state", STATE_EDIT);
+					intent.putExtra("audiobook", audiobook);
+					startActivity(intent);
+				}
+			})
+			.setNegativeButton("Delete audiobook", new DialogInterface.OnClickListener() {
+				@Override public void onClick(DialogInterface dialog, int which) {
+					ConfirmDeleteDialogFragment frag = ConfirmDeleteDialogFragment.newInstance(position);
+					frag.show(getFragmentManager(), "ConfirmDeleteDialogFragment");
+				}
+			})
+			.create();
+	    }
+	}
+	public static class ConfirmDeleteDialogFragment extends DialogFragment {
+		public static final ConfirmDeleteDialogFragment newInstance(int position){
+			ConfirmDeleteDialogFragment fragment = new ConfirmDeleteDialogFragment();
+		    Bundle bundle = new Bundle();
+		    bundle.putInt("position", position);
+		    fragment.setArguments(bundle);
+		    return fragment ;
+		}
+		
+		@Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+			int position = getArguments().getInt("position");
+			final Audiobook audiobook = audiobooks.get(position);
+	        return new AlertDialog.Builder(getActivity())
+			.setMessage("Confirm delete "+audiobook.getAuthor() + " - " + audiobook.getAlbum())
+			.setPositiveButton("Cancel", null) //Do nothing
+			.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+				@Override public void onClick(DialogInterface dialog, int which) {
+					AudiobookManager.getInstance().removeAudiobook(getActivity(), audiobook);
+					audiobooks.remove(audiobook);
+					adapter.notifyDataSetChanged();
+				}
+			})
+			.create();
+	    }
+	}
 }

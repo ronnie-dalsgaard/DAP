@@ -88,8 +88,8 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		case R.id.audiobook_header_save_btn:
 			if(audiobook != null){
 				AudiobookManager manager = AudiobookManager.getInstance();
-				if(state == STATE_NEW) { manager.addAudiobook(audiobook); }
-				else { manager.updateAudiobook(audiobook, original_audiobook); }
+				if(state == STATE_NEW) { manager.addAudiobook(this, audiobook); }
+				else { manager.updateAudiobook(this, audiobook, original_audiobook); }
 			}
 			break;
 		case R.id.audiobook_header_cancel_btn:
