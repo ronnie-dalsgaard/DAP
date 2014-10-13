@@ -465,7 +465,6 @@ int id folder_fragment_subfolder_cb 0x7f070046
 int id folder_fragment_tv 0x7f070045
 int id grayscale 0x7f070012
 int id grid_layout_gv 0x7f070014
-int id grid_layout_mini_player 0x7f070015
 int id holo_dark 0x7f070005
 int id holo_light 0x7f070006
 int id hybrid 0x7f070004
@@ -473,9 +472,10 @@ int id input_btn 0x7f070053
 int id input_et 0x7f070052
 int id input_item_tv 0x7f070055
 int id input_lv 0x7f070054
-int id list_layout_lv 0x7f070016
-int id list_layout_mini_player 0x7f070018
-int id main_mini_player 0x7f070017
+int id list_layout_lv 0x7f070015
+int id list_layout_mini_player 0x7f070017
+int id main_mini_player 0x7f070016
+int id main_miniplayer 0x7f070019
 int id match_parent 0x7f07000c
 int id menu_item_audiobook_list 0x7f070068
 int id menu_item_controller 0x7f070066
@@ -492,7 +492,7 @@ int id miniplayer_track_tv 0x7f07005f
 int id monochrome 0x7f070013
 int id none 0x7f070000
 int id normal 0x7f070001
-int id pager 0x7f070019
+int id pager 0x7f070018
 int id production 0x7f070007
 int id sandbox 0x7f070008
 int id satellite 0x7f070002
@@ -584,6 +584,9 @@ int string hello_world 0x7f060024
 int string pause 0x7f06001d
 int string play 0x7f06001c
 int string progress 0x7f060021
+int string tab1 0x7f060031
+int string tab2 0x7f060032
+int string tab3 0x7f060033
 int string title 0x7f06001f
 int string title_activity_audiobook 0x7f060026
 int string title_activity_audiobook_list 0x7f06002d
@@ -593,12 +596,8 @@ int string title_activity_edit_audiobook 0x7f060029
 int string title_activity_file_browser 0x7f060023
 int string title_activity_input 0x7f06002a
 int string title_activity_main 0x7f060030
-int string title_activity_main2 0x7f060034
 int string title_activity_new_audiobook 0x7f06002e
 int string title_activity_track 0x7f06002b
-int string title_section1 0x7f060031
-int string title_section2 0x7f060032
-int string title_section3 0x7f060033
 int string track 0x7f060020
 int string wallet_buy_button_place_holder 0x7f060019
 int style AppBaseTheme 0x7f040005

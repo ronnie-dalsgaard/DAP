@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rd.dap.fragments.FragmentMiniPlayer;
-import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,11 +28,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class BookmarkListActivity extends Fragment implements MiniPlayerObserver, OnItemClickListener, OnItemLongClickListener {
+public class BookmarkListActivity extends Fragment implements OnItemClickListener, OnItemLongClickListener {
 	public static final String TAG = "BookmarkListActivity";
 	public static ArrayAdapter<Bookmark> adapter;
 	public static ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
-	public static FragmentMiniPlayer miniplayer = null;
+	public static FragmentMiniPlayer miniplayer;
 	
 	
 	//TODO Bookmark activity
@@ -51,6 +49,10 @@ public class BookmarkListActivity extends Fragment implements MiniPlayerObserver
 	//TODO sleeptimer
 	//TODO pregress as progressbar
 	//TODO Helper texts
+
+	public BookmarkListActivity(FragmentMiniPlayer miniplayer) {
+		BookmarkListActivity.miniplayer = miniplayer;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -85,11 +87,6 @@ public class BookmarkListActivity extends Fragment implements MiniPlayerObserver
 		Log.d(TAG, "onCreateView");
 		View v = (ViewGroup) inflater.inflate(R.layout.activity_list_with_miniplayer, container, false);
 
-		FragmentManager fm = getFragmentManager();
-		miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.list_layout_mini_player);
-		miniplayer.addObserver(this);
-		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
-		
 		ListView list = (ListView) v.findViewById(R.id.list_layout_lv);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(this);
@@ -165,18 +162,4 @@ public class BookmarkListActivity extends Fragment implements MiniPlayerObserver
 		public TextView author_tv, album_tv;
 		public ImageView cover_iv;
 	}
-	
-	@Override public void miniplayer_play() {
-//		Toast.makeText(AudiobookListActivity.this, "Play on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-	@Override public void miniplayer_pause() {
-//		Toast.makeText(AudiobookListActivity.this, "Pause on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-	@Override public void miniplayer_longClick() {
-//		Toast.makeText(AudiobookListActivity.this, "Long click on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-	@Override public void miniplayer_click() {
-//		Toast.makeText(AudiobookListActivity.this, "Click on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-	
 }

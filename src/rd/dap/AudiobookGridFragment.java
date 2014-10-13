@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rd.dap.fragments.FragmentMiniPlayer;
-import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Data;
@@ -16,7 +15,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,14 +34,18 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class AudiobookGridFragment extends Fragment implements MiniPlayerObserver, OnItemClickListener, OnItemLongClickListener{
+public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObserver,*/ OnItemClickListener, OnItemLongClickListener{
 	private static final String TAG = "AudiobookGridActivity";
 	private static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 	private static ImageAdapter adapter;
-	public static FragmentMiniPlayer miniplayer = null;
+	public static FragmentMiniPlayer miniplayer;
 	private GridView grid;
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
+
+	public AudiobookGridFragment(FragmentMiniPlayer miniplayer) {
+		AudiobookGridFragment.miniplayer = miniplayer;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -78,11 +80,6 @@ public class AudiobookGridFragment extends Fragment implements MiniPlayerObserve
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
 		View v = (ViewGroup) inflater.inflate(R.layout.activity_grid_with_miniplayer, container, false);
-
-		FragmentManager fm = getFragmentManager();
-		miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.grid_layout_mini_player);
-		miniplayer.addObserver(this);
-		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		
 		grid = (GridView) v.findViewById(R.id.grid_layout_gv);
 		grid.setAdapter(adapter);
@@ -105,6 +102,7 @@ public class AudiobookGridFragment extends Fragment implements MiniPlayerObserve
 		Data.setAudiobook(audiobooks.get(index));
 		Data.setPosition(0);
 		Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()));
+		
 		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.updateView();
@@ -181,21 +179,6 @@ public class AudiobookGridFragment extends Fragment implements MiniPlayerObserve
 	static class ViewHolder {
 		public ImageView cover_iv;
 	}
-
-	@Override public void miniplayer_play() {
-//		Toast.makeText(AudiobookListActivity.this, "Play on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-	@Override public void miniplayer_pause() {
-//		Toast.makeText(AudiobookListActivity.this, "Pause on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-	@Override public void miniplayer_longClick() {
-//		Toast.makeText(AudiobookListActivity.this, "Long click on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-	@Override public void miniplayer_click() {
-//		Toast.makeText(AudiobookListActivity.this, "Click on miniplayer", Toast.LENGTH_SHORT).show();
-	}
-
-
 
 	public static class ChangeAudiobookDialogFragment extends DialogFragment {
 		public static final ChangeAudiobookDialogFragment newInstance(int position){

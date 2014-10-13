@@ -781,7 +781,6 @@ containing a value of this type.
         public static final int folder_fragment_tv=0x7f070045;
         public static final int grayscale=0x7f070012;
         public static final int grid_layout_gv=0x7f070014;
-        public static final int grid_layout_mini_player=0x7f070015;
         public static final int holo_dark=0x7f070005;
         public static final int holo_light=0x7f070006;
         public static final int hybrid=0x7f070004;
@@ -789,9 +788,10 @@ containing a value of this type.
         public static final int input_et=0x7f070052;
         public static final int input_item_tv=0x7f070055;
         public static final int input_lv=0x7f070054;
-        public static final int list_layout_lv=0x7f070016;
-        public static final int list_layout_mini_player=0x7f070018;
-        public static final int main_mini_player=0x7f070017;
+        public static final int list_layout_lv=0x7f070015;
+        public static final int list_layout_mini_player=0x7f070017;
+        public static final int main_mini_player=0x7f070016;
+        public static final int main_miniplayer=0x7f070019;
         public static final int match_parent=0x7f07000c;
         public static final int menu_item_audiobook_list=0x7f070068;
         public static final int menu_item_controller=0x7f070066;
@@ -808,7 +808,7 @@ containing a value of this type.
         public static final int monochrome=0x7f070013;
         public static final int none=0x7f070000;
         public static final int normal=0x7f070001;
-        public static final int pager=0x7f070019;
+        public static final int pager=0x7f070018;
         public static final int production=0x7f070007;
         public static final int sandbox=0x7f070008;
         public static final int satellite=0x7f070002;
@@ -972,6 +972,9 @@ containing a value of this type.
         public static final int pause=0x7f06001d;
         public static final int play=0x7f06001c;
         public static final int progress=0x7f060021;
+        public static final int tab1=0x7f060031;
+        public static final int tab2=0x7f060032;
+        public static final int tab3=0x7f060033;
         public static final int title=0x7f06001f;
         public static final int title_activity_audiobook=0x7f060026;
         public static final int title_activity_audiobook_list=0x7f06002d;
@@ -981,12 +984,8 @@ containing a value of this type.
         public static final int title_activity_file_browser=0x7f060023;
         public static final int title_activity_input=0x7f06002a;
         public static final int title_activity_main=0x7f060030;
-        public static final int title_activity_main2=0x7f060034;
         public static final int title_activity_new_audiobook=0x7f06002e;
         public static final int title_activity_track=0x7f06002b;
-        public static final int title_section1=0x7f060031;
-        public static final int title_section2=0x7f060032;
-        public static final int title_section3=0x7f060033;
         public static final int track=0x7f060020;
         /**  Text on a placeholder buy button when Google Play services is not
          available or up-to-date 
