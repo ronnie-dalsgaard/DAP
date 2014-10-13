@@ -1,5 +1,7 @@
 package rd.dap.model;
 
+import rd.dap.support.Time;
+
 public class Bookmark {
 	private String author, album;
 	private int trackno, progress;
@@ -61,7 +63,7 @@ public class Bookmark {
 		return true;
 	}
 	public String toString(){
-		return author + " - " + album + " -> " + trackno + ":" + progress;
+		return author + " - " + album + " -> (" + trackno + ") " + Time.toString(progress);
 	}
 
 	

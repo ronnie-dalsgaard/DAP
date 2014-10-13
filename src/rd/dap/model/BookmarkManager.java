@@ -9,10 +9,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class BookmarkManager { //Singleton
+	private static final String TAG = "BookmarkManager";
+	
 	private static BookmarkManager instance = new BookmarkManager();
 	private ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
 	
@@ -57,7 +61,8 @@ public class BookmarkManager { //Singleton
 	}
 	
 	//Load and save bookmarks
-	public void loadBookmarks(File filesDir){
+	public ArrayList<Bookmark> loadBookmarks(File filesDir){
+		Log.d(TAG, "loadBookmarks");
 		File file = new File(filesDir, "bookmarks.dap");
 		try {
 			FileInputStream stream = new FileInputStream(file);
@@ -68,14 +73,16 @@ public class BookmarkManager { //Singleton
 			bookmarks.clear();
 			bookmarks.addAll(list);
 			in.close();
+			return bookmarks;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 	public boolean saveBookmarks(File filesDir){
+		Log.d(TAG, "saveBookmarks");
 		Gson gson = new Gson();
 		String json = gson.toJson(bookmarks);
-		System.out.println(json);
 		
 		//create a file in internal storage
 		File file = new File(filesDir, "bookmarks.dap"); //FIXME filename as constant

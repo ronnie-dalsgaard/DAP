@@ -12,6 +12,7 @@ import rd.dap.fragments.FragmentTrack;
 import rd.dap.fragments.FragmentTrack.Fragment_Track_Observer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
@@ -107,15 +108,17 @@ Fragment_Track_Observer, Seeker_Fragment_Observer, Fragment_Audiobooks_Basics_Ob
 		t1.setOnClickListener(new OnClickListener() {
 			@Override public void onClick(View v) {
 				Gson gson = new Gson();
-				System.out.println(gson.toJson(audiobook));
-
+				Toast.makeText(ControllerActivity.this, gson.toJson(audiobook), Toast.LENGTH_SHORT).show();
 			}
 		});
 
 		ImageButton t2 = (ImageButton) findViewById(R.id.controller_test2);
 		t2.setOnClickListener(new OnClickListener() {
 			@Override public void onClick(View v) {
-
+				ArrayList<Bookmark> list = BookmarkManager.getInstance().loadBookmarks(getFilesDir());
+				String str = "";
+				for(Bookmark b : list) str += b.toString() + "\n";
+				Toast.makeText(ControllerActivity.this, str, Toast.LENGTH_SHORT).show();
 			}
 		});
 
@@ -129,8 +132,7 @@ Fragment_Track_Observer, Seeker_Fragment_Observer, Fragment_Audiobooks_Basics_Ob
 				int trackno = Data.getPosition();
 				int progress = player.getCurrentProgress();
 				Bookmark b = new Bookmark(author, album, trackno, progress);
-
-				System.out.println(b);
+				Toast.makeText(ControllerActivity.this, b.toString(), Toast.LENGTH_SHORT).show();
 			}
 		});
 

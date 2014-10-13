@@ -16,12 +16,14 @@ import rd.dap.support.Mp3FileFilter;
 import rd.dap.support.TrackList;
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public final class AudiobookManager {
+	private static final String TAG = "AudiobookManager";
 	private static AudiobookManager instance = new AudiobookManager();
 	private static final File root = Environment.getExternalStorageDirectory();
 	private static final File home = new File(root.getPath() + File.separator +"Audiobooks");
@@ -54,9 +56,9 @@ public final class AudiobookManager {
 	
 	//Load and save
 	private void saveAudiobooks(Context context){
+		Log.d(TAG, "saveAudiobooks");
 		Gson gson = new Gson();
 		String json = gson.toJson(audiobooks);
-		System.out.println(json);
 		
 		//create a file in internal storage
 		File file = new File(context.getFilesDir(), "audiobooks.dap"); //FIXME filename as constant
@@ -71,6 +73,7 @@ public final class AudiobookManager {
 		}
 	}
 	public ArrayList<Audiobook> loadAudiobooks(Context context){
+		Log.d(TAG, "loadAudiobooks");
 		File file = new File(context.getFilesDir(), "audiobooks.dap");
 		try {
 			FileInputStream stream = new FileInputStream(file);

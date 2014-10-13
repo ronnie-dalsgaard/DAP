@@ -54,6 +54,7 @@ public class AudiobookListActivity extends Activity implements MiniPlayerObserve
 	
 	//TODO use tabs/swipe to navigate
 	//TODO constant class (final class + private constructor)
+	//TODO enable delete track
 	
 	//TODO Home folder
 	//TODO auto-detect all audiobooks

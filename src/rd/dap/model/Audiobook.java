@@ -15,9 +15,9 @@ public class Audiobook implements Serializable{
 		setAudiobook(original);
 	}
 	public void setAudiobook(Audiobook original){ //copy method
-		author = new String(original.getAuthor());
-		album = new String(original.getAlbum());
-		cover = new String(original.getCover());
+		author = original.getAuthor() == null ? null : new String(original.getAuthor());
+		album = original.getAlbum() == null ? null : new String(original.getAlbum());
+		cover = original.getCover() == null ? null : new String(original.getCover());
 		playlist.clear();
 		for(Track track : original.getPlaylist()){
 			playlist.add(new Track(track));

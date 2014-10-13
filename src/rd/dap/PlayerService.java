@@ -3,6 +3,7 @@ package rd.dap;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import rd.dap.support.Monitor;
 import android.app.Service;
@@ -99,7 +100,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(mp == null) {
 			return false;
 		}
-		if(System.currentTimeMillis() - laststart < Monitor.delay * 1.5){
+		if(System.currentTimeMillis() - laststart < Monitor.DEFAULT_DELAY * 1.5){
 			return true;
 		}
 		try{
@@ -111,11 +112,14 @@ public class PlayerService extends Service implements OnErrorListener {
 	}
 	public void kill(){
 		Log.d(TAG, "DIE");
-		mp.release();
-		mp = null;
+		if(mp != null){
+			mp.release();
+			mp = null;
+		}
 		Data.setAudiobook(null);
 		if(monitor != null){
 			monitor.kill();
+			monitor = null;
 		}
 		stopSelf();
 	}
@@ -151,19 +155,30 @@ public class PlayerService extends Service implements OnErrorListener {
 
 		@Override
 		public void execute() {
-			System.out.println("execute!!!!");
-			if(Data.getAudiobook() == null) return;
-			if(Data.getTrack() == null) return;
+			if(Data.getAudiobook() == null) {
+				Log.d(TAG, "Unable to update bookmarks, since audiobook is missing");
+				return;
+			}
+			if(Data.getTrack() == null) {
+				Log.d(TAG, "Unable to update bookmarks, since track is missing");
+				return;
+			}
+			if(Data.getPosition() < 0) {
+				Log.d(TAG, "Unable to update bookmarks, since position is missing");
+				return;
+			}
 			if(mp == null) {
-				Log.d(TAG, "Unable to update bookmarks, since no no mediaplayer is accessible");
+				Log.d(TAG, "Unable to update bookmarks, since mediaplayer is unset");
 				return;
 			}
 			
-			//TODO this is called as it should
-//			BookmarkManager manager = BookmarkManager.getInstance();
-//			manager.get
-			System.out.println("SAVING BOOKMARK");
+			BookmarkManager manager = BookmarkManager.getInstance();
+			String author = Data.getAudiobook().getAuthor();
+			String album = Data.getAudiobook().getAlbum();
+			int trackno = Data.getPosition();
+			int progress = mp.getCurrentPosition();
+			manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress);
+			Log.d(TAG, "Bookmark created or updated");
 		}
-
 	}
 }
