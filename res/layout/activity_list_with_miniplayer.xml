@@ -5,7 +5,7 @@
     tools:context="rd.dap.MainActivity" >
 
     <ListView
-        android:id="@+id/main_list"
+        android:id="@+id/list_layout_lv"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="match_parent"
         android:layout_above="@+id/main_mini_player"
@@ -15,7 +15,7 @@
     </ListView>
 
     <fragment
-        android:id="@+id/main_mini_player"
+        android:id="@+id/list_layout_mini_player"
         android:name="rd.dap.fragments.FragmentMiniPlayer"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"

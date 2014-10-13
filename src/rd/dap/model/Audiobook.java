@@ -15,23 +15,23 @@ public class Audiobook implements Serializable{
 		setAudiobook(original);
 	}
 	public void setAudiobook(Audiobook original){ //copy method
-		author = original.getAuthor() == null ? null : new String(original.getAuthor());
-		album = original.getAlbum() == null ? null : new String(original.getAlbum());
-		cover = original.getCover() == null ? null : new String(original.getCover());
-		playlist.clear();
-		for(Track track : original.getPlaylist()){
-			playlist.add(new Track(track));
-		}
+		setAuthor(original.getAuthor() == null ? null : new String(original.getAuthor()));
+		setAlbum(original.getAlbum() == null ? null : new String(original.getAlbum()));
+		setCover(original.getCover() == null ? null : new String(original.getCover()));
+		setPlaylist(original.getPlaylist());
 	}
 	
-	public String getAuthor() { return author; }
-	public void setAuthor(String author) { this.author = author; }
-	public String getAlbum() { return album; }
-	public void setAlbum(String album) { this.album = album; }
-	public TrackList getPlaylist() { return playlist; }
-	public void setPlaylist(TrackList playlist) { this.playlist = playlist; }
-	public String getCover() { return cover; }
-	public void setCover(String cover) { this.cover = cover; }
+	/*
+	 * Audiobooks are immutable
+	 */
+	public String getAuthor() { return new String(author); }
+	public void setAuthor(String author) { this.author = new String(author); }
+	public String getAlbum() { return new String(album); }
+	public void setAlbum(String album) { this.album = new String(album); }
+	public TrackList getPlaylist() { return new TrackList(playlist); }
+	public void setPlaylist(TrackList playlist) { this.playlist = new TrackList(playlist); }
+	public String getCover() { return new String(cover); }
+	public void setCover(String cover) { this.cover = new String(cover); }
 	
 	public String toString(){
 		String out = author + " : " + album;

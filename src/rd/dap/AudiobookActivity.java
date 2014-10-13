@@ -52,7 +52,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.list_with_miniplayer);
+		setContentView(R.layout.activity_list_with_miniplayer);
 
 		original_audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
 		if(original_audiobook == null) throw new RuntimeException("No audiobook supplied");
@@ -62,7 +62,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		if(state == 0) throw new RuntimeException("State not provided");
 		
 		//List
-		ListView list = (ListView) findViewById(R.id.main_list);
+		ListView list = (ListView) findViewById(R.id.list_layout_lv);
 		adapter = new AudiobookDetailsAdapter(this, R.layout.item_track, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);

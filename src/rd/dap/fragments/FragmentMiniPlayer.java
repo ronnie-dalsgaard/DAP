@@ -153,6 +153,9 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	public void reload(){
 		player.reload();
 	}
+	public void seekTo(int progress){
+		player.seekTo(progress);
+	}
 	public void setVisibility(int visibility){
 		miniplayer_layout.setVisibility(visibility);
 	}

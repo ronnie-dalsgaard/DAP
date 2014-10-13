@@ -17,20 +17,23 @@ public class Track implements Serializable{
 		setTrack(original);
 	}
 	public void setTrack(Track original){ //copy method
-		path = new String(original.getPath());
-		title = new String(original.getTitle());
-		duration = original.getDuration();
-		cover = new String(original.getCover());
+		setPath(new String(original.getPath()));
+		setTitle(new String(original.getTitle()));
+		setDuration(original.getDuration());
+		setCover(new String(original.getCover()));
 	}
 	
-	public String getTitle() { return title; }
-	public void setTitle(String title) { this.title = title; }
-	public String getPath() { return path; }
-	public void setPath(String path) { this.path = path; }
+	/*
+	 * Tracks are immutable
+	 */
+	public String getTitle() { return new String(title); }
+	public void setTitle(String title) { this.title = new String(title); }
+	public String getPath() { return new String(path); }
+	public void setPath(String path) { this.path = new String(path); }
 	public long getDuration() { return duration; }
 	public void setDuration(long duration) { this.duration = duration; }
-	public String getCover() { return cover; }
-	public void setCover(String cover) { this.cover = cover; }
+	public String getCover() { return new String(cover); }
+	public void setCover(String cover) { this.cover = new String(cover); }
 	
 	public String toString(){
 		String out = ""; 

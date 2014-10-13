@@ -40,6 +40,14 @@ public final class AudiobookManager {
 		audiobooks.add(audiobook);
 		saveAudiobooks(context);
 	}
+	public Audiobook getAudiobook(Bookmark bookmark){
+		for(Audiobook audiobook : audiobooks){
+			if(bookmark.matches(audiobook.getAuthor(), audiobook.getAlbum())){
+				return audiobook;
+			}
+		}
+		return null;
+	}
 	public ArrayList<Audiobook> getAudiobooks(Context context){ return audiobooks; }
 	public void updateAudiobook(Context context, Audiobook audiobook, Audiobook original_audiobook) {
 		for(Audiobook element : getAudiobooks(context)){

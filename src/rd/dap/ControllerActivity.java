@@ -118,21 +118,15 @@ Fragment_Track_Observer, Seeker_Fragment_Observer, Fragment_Audiobooks_Basics_Ob
 				ArrayList<Bookmark> list = BookmarkManager.getInstance().loadBookmarks(getFilesDir());
 				String str = "";
 				for(Bookmark b : list) str += b.toString() + "\n";
-				Toast.makeText(ControllerActivity.this, str, Toast.LENGTH_SHORT).show();
+				Toast.makeText(ControllerActivity.this, str, Toast.LENGTH_LONG).show();
 			}
 		});
 
 		ImageButton t3 = (ImageButton) findViewById(R.id.controller_test3);
 		t3.setOnClickListener(new OnClickListener() {
 			@Override public void onClick(View arg0) {
-				if(audiobook == null || player == null) return;
-
-				String author = audiobook.getAuthor();
-				String album = audiobook.getAlbum();
-				int trackno = Data.getPosition();
-				int progress = player.getCurrentProgress();
-				Bookmark b = new Bookmark(author, album, trackno, progress);
-				Toast.makeText(ControllerActivity.this, b.toString(), Toast.LENGTH_SHORT).show();
+				Intent intent = new Intent(ControllerActivity.this, AudiobookGridFragment.class);
+				ControllerActivity.this.startActivity(intent);
 			}
 		});
 
@@ -154,7 +148,7 @@ Fragment_Track_Observer, Seeker_Fragment_Observer, Fragment_Audiobooks_Basics_Ob
 		Intent intent;
 		switch(id){
 		case R.id.menu_item_audiobook_list:
-			intent = new Intent(this, AudiobookListActivity.class);
+			intent = new Intent(this, BookmarkListActivity.class);
 			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
