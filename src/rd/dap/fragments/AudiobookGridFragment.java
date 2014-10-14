@@ -10,9 +10,6 @@ import java.util.List;
 
 import rd.dap.AudiobookActivity;
 import rd.dap.R;
-import rd.dap.R.drawable;
-import rd.dap.R.id;
-import rd.dap.R.layout;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Data;

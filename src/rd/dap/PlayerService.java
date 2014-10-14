@@ -1,6 +1,7 @@
 package rd.dap;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.model.Bookmark;
@@ -22,6 +23,13 @@ public class PlayerService extends Service implements OnErrorListener {
 	private final IBinder binder = new DAPBinder();
 	private long laststart = 0;
 	private static Monitor_Bookmarks monitor = null;
+	
+	//Observer pattern - Miniplayer is observable
+		private ArrayList<PlayerObserver> observers = new ArrayList<PlayerObserver>();
+		public interface PlayerObserver{
+			public void updateBookmark(Bookmark bookmark);
+		}
+		public void addObserver(PlayerObserver observer) { observers.add(observer); }
 	
 	@Override
 	public void onCreate(){
@@ -190,6 +198,10 @@ public class PlayerService extends Service implements OnErrorListener {
 			boolean force = false; //only update bookmark if progress is greater than previously recorded
 			Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
 			Log.d(TAG, "Bookmark created or updated\n"+bookmark);
+			
+			for(PlayerObserver observer : observers){
+				observer.updateBookmark(bookmark);
+			}
 			
 			go_again = mp.isPlaying();
 		}

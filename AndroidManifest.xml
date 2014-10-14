@@ -25,12 +25,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="rd.dap.fragments.BookmarkListActivity"
+            android:name="rd.dap.fragments.BookmarkListFragment"
             android:label="@string/title_activity_audiobook_list" >
         </activity>
         <activity
-          rd.dap.fragments.AudiobookGridFragmentbookGridFragment"
+            android:name="rd.dap.fragments.AudiobookGridFragment"
             android:label="@string/title_activity_bookmark" >
+        </activity>
+        <activity
+            android:name="rd.dap.fragments.ControllerFragment"
+            android:label="@string/title_activity_controller" >
         </activity>
         <activity
             android:name=".FileBrowserActivity"
@@ -41,16 +45,12 @@
             android:label="@string/title_activity_audiobook" >
         </activity>
         <activity
-            android:name=".InputActivity"
-            android:label="@string/title_activity_input" >
-        </activity>
-        <activity
             android:name=".TrackActivity"
             android:label="@string/title_activity_track" >
         </activity>
         <activity
-            android:name="rd.dap.fragments.ControllerActivity"
-            android:label="@string/title_activity_controller" >
+            android:name=".InputActivity"
+            android:label="@string/title_activity_input" >
         </activity>
         <activity
             android:name=".NewAudiobookActivity"

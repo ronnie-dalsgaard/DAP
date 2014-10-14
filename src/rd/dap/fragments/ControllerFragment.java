@@ -7,12 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import rd.dap.AudiobookActivity;
 import rd.dap.PlayerService;
-import rd.dap.R;
 import rd.dap.PlayerService.DAPBinder;
-import rd.dap.R.color;
-import rd.dap.R.drawable;
-import rd.dap.R.id;
-import rd.dap.R.layout;
+import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
@@ -45,7 +41,7 @@ import android.widget.Toast;
 import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.Metadata;
 
-public class ControllerActivity extends DriveHandler implements ServiceConnection, OnClickListener {
+public class ControllerFragment extends DriveHandler implements ServiceConnection, OnClickListener {
 
 	private final String TAG = "ControllerActivity";
 	private boolean bound = false;
@@ -151,6 +147,8 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		progress_tv.setText(Time.toString(0));
 		progress_tv.setOnClickListener(this);
 		
+		displayProgress();
+		
 		return v;
 		
 		
@@ -184,7 +182,9 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 //		});
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 	}
-	private void displayValues(){
+	public void displayValues(){
+		if(Data.getAudiobook() == null) return;
+		if(Data.getTrack() == null) return;
 		//Cover
 		String cover = Data.getTrack().getCover();
 		if(cover == null) cover = Data.getAudiobook().getCover();
@@ -201,7 +201,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		//Album
 		audiobook_basics_album_tv.setText(Data.getAudiobook().getAlbum());
 	}
-	private void displayTracks(){
+	public void displayTracks(){
 		if(Data.getPosition() == -1 || Data.getTrack() == null || Data.getAudiobook() == null) return;
 		//Position
 		position_tv.setText(String.format("%02d", Data.getPosition()+1));
@@ -242,7 +242,12 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 			row.addView(space, space_p);
 		}
 	}
-
+	public void displayProgress(){
+		if(player == null) return;
+		int progress = player.getCurrentProgress();
+		progress_tv.setText(Time.toString(progress));
+	}
+	
 	@Override
 	public void onClick(View v) {
 		Log.d(TAG, "onClick");
@@ -281,6 +286,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 			
 		//Cases for Tracks
 		case R.id.track_next:
+			if(player == null) return;
 			//if currently playing the last track - do nothing
 			if(Data.getAudiobook().getPlaylist().getLast().equals(Data.getTrack())) return;
 			
@@ -297,6 +303,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 			break;
 
 		case R.id.track_previous:
+			if(player == null) return;
 			//if currently playing the first track - do nothing
 			if(Data.getAudiobook().getPlaylist().getFirst().equals(Data.getTrack())) return;
 			
@@ -313,7 +320,8 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 			break;
 
 		case CELL:
-			if(v.getTag() == null) break;
+			if(player == null) return;
+			if(v.getTag() == null) return;
 			try{
 				int i = ((Integer)v.getTag()).intValue();
 				if(i >= 0 && i < Data.getAudiobook().getPlaylist().size()){
@@ -332,6 +340,9 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 			
 		//Cases for seeker
 		case R.id.seeker_fast_forward:
+			if(player == null) return;
+			if(Data.getAudiobook() == null) return;
+			if(Data.getTrack() == null) return;
 			int ff_position = player.getCurrentProgress();
 			int ff_duration = player.getDuration();
 			int ff_newPos = 0;
@@ -343,6 +354,9 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 			break;
 
 		case R.id.seeker_rewind:
+			if(player == null) return;
+			if(Data.getAudiobook() == null) return;
+			if(Data.getTrack() == null) return;
 			int rew_position = player.getCurrentProgress();
 			int rew_duration = player.getDuration();
 			int rew_newPos = 0;
@@ -385,12 +399,9 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 	}
 
 	private void play_pause(){
-		if(Data.getAudiobook() == null) return;
-		boolean isPlaying = false;
-		if(player != null) isPlaying = player.isPlaying();
 		//Fix view
-		play_btn.setImageDrawable(!isPlaying ? drw_pause : drw_play);
-		cover_btn.setImageDrawable(!isPlaying ? drw_pause_on_cover : drw_play_on_cover);
+		play_btn.setImageDrawable(!player.isPlaying() ? drw_pause : drw_play);
+		cover_btn.setImageDrawable(!player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
 		//Toggle play/pause
 		player.toggle();
 	}
@@ -462,6 +473,7 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		public void execute() {
 			isPlaying = player != null && player.isPlaying();
 
+			if(getActivity() == null) return;
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -487,12 +499,11 @@ public class ControllerActivity extends DriveHandler implements ServiceConnectio
 		public void execute() {
 			if(progress_tv == null) return;
 			if(player == null) return;
+			if(getActivity() == null) return;
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if(player.isPlaying()){
-						progress_tv.setText(Time.toString(player.getCurrentProgress()));
-					}
+					progress_tv.setText(Time.toString(player.getCurrentProgress()));
 				}
 			});
 		}

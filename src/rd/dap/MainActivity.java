@@ -3,8 +3,8 @@ package rd.dap;
 import java.util.Locale;
 
 import rd.dap.fragments.AudiobookGridFragment;
-import rd.dap.fragments.BookmarkListActivity;
-import rd.dap.fragments.ControllerActivity;
+import rd.dap.fragments.BookmarkListFragment;
+import rd.dap.fragments.ControllerFragment;
 import rd.dap.fragments.FragmentMiniPlayer;
 import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.Data;
@@ -25,6 +25,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 	public static FragmentMiniPlayer miniplayer = null;
 	private SectionsPagerAdapter sectionsPagerAdapter;
 	private ViewPager viewPager;
+	private AudiobookGridFragment audiobookGridFragment;
+	private BookmarkListFragment bookmarkListFragment;
+	private ControllerFragment controllerFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		
 		Intent serviceIntent = new Intent(this, PlayerService.class);
 		startService(serviceIntent);
+		
+		audiobookGridFragment = new AudiobookGridFragment();
+		bookmarkListFragment = new BookmarkListFragment();
+		controllerFragment = new ControllerFragment();
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
@@ -122,6 +129,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 	@Override public void miniplayer_click() {
 //		Toast.makeText(AudiobookListActivity.this, "Click on miniplayer", Toast.LENGTH_SHORT).show();
 	}
+	@Override public void miniplayer_seekTo(int progress){
+		controllerFragment.displayValues();
+		controllerFragment.displayTracks();
+		controllerFragment.displayProgress();
+	}
 	
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -135,9 +147,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		@Override
 		public Fragment getItem(int position) {
 			switch(position){
-			case 0: return new AudiobookGridFragment();
-			case 1: return new BookmarkListActivity();
-			case 2: return new ControllerActivity();
+			case 0: return audiobookGridFragment;
+			case 1: return bookmarkListFragment;
+			case 2: return controllerFragment;
 			}
 			return null;
 		}

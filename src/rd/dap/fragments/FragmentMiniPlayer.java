@@ -28,7 +28,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnLongClickListener, ServiceConnection {
@@ -36,11 +36,12 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	private boolean bound = false;
 	private PlayerService player;
 	private TextView author_tv, album_tv, track_tv, progress_tv;
-	private LinearLayout info, miniplayer_layout;
+	private RelativeLayout info, bookmark_layout;
 	private ImageView iv;
 	private ImageButton btn;
 	private static Drawable noCover = null, drw_play = null, drw_pause = null;
 	private MiniPlayerMonitor monitor;
+	private static final int COVER_BTN_ID = 22223;
 	
 	//Observer pattern - Miniplayer is observable
 	private ArrayList<MiniPlayerObserver> observers = new ArrayList<MiniPlayerObserver>();
@@ -49,6 +50,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		public void miniplayer_pause();
 		public void miniplayer_click();
 		public void miniplayer_longClick();
+		public void miniplayer_seekTo(int progress);
 	}
 	public void addObserver(MiniPlayerObserver observer) { observers.add(observer); }
 
@@ -96,17 +98,28 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
-		View v = (ViewGroup) inflater.inflate(R.layout.mini_player, container, false);
+		View v = (ViewGroup) inflater.inflate(R.layout.bookmark_item, container, false);
+//		View v = (ViewGroup) inflater.inflate(R.layout.mini_player, container, false);
 
-		author_tv = ((TextView) v.findViewById(R.id.miniplayer_author_tv));
-		album_tv = ((TextView) v.findViewById(R.id.miniplayer_album_tv));
-		track_tv = ((TextView) v.findViewById(R.id.miniplayer_track_tv));
-		iv = (ImageView) v.findViewById(R.id.miniplayer_cover_iv); 
-		btn = (ImageButton) v.findViewById(R.id.miniplayer_play_btn);
-		info = (LinearLayout) v.findViewById(R.id.miniplayer_info);
-		progress_tv = (TextView) v.findViewById(R.id.miniplayer_progress_tv);
-		miniplayer_layout = (LinearLayout) v.findViewById(R.id.miniplayer_layout);
-
+		author_tv = ((TextView) v.findViewById(R.id.bookmark_author_tv));
+		album_tv = ((TextView) v.findViewById(R.id.bookmark_album_tv));
+		track_tv = ((TextView) v.findViewById(R.id.bookmark_track_tv));
+		iv = (ImageView) v.findViewById(R.id.bookmark_cover_iv); 
+		info = (RelativeLayout) v.findViewById(R.id.bookmark_info_layout);
+		progress_tv = (TextView) v.findViewById(R.id.bookmark_progress_tv);
+		bookmark_layout = (RelativeLayout) v.findViewById(R.id.bookmark_layout);
+		RelativeLayout cover_layout = (RelativeLayout) v.findViewById(R.id.bookmark_cover_layout);
+		
+		bookmark_layout.setBackground(getActivity().getResources().getDrawable(R.drawable.miniplayer_bg));
+		
+		int width = (int) getActivity().getResources().getDimension(R.dimen.cover_width);
+		int height = (int) getActivity().getResources().getDimension(R.dimen.cover_height);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
+		btn = new ImageButton(getActivity());
+		btn.setId(COVER_BTN_ID);
+		btn.setBackgroundColor(getActivity().getResources().getColor(R.color.transparent));
+		cover_layout.addView(btn, params);
+		
 		btn.setOnClickListener(this);
 		btn.setOnLongClickListener(this);
 
@@ -120,8 +133,8 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	}
 	
 	public void updateView(){
-		if(miniplayer_layout != null){
-			miniplayer_layout.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+		if(bookmark_layout != null){
+			bookmark_layout.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		}
 		if(Data.getAudiobook() == null || Data.getTrack() == null){
 			Log.d(TAG, "Unable to update view - no audiobook selected!");
@@ -129,7 +142,9 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		}
 		author_tv.setText(Data.getAudiobook().getAuthor());
 		album_tv.setText(Data.getAudiobook().getAlbum());
-		track_tv.setText(String.format("%02d", Data.getPosition()+1) + " " + Data.getTrack().getTitle());
+		String title = Data.getTrack().getTitle();
+		if(title.length() > 28) title = title.substring(0, 25) + "...";
+		track_tv.setText(String.format("%02d", Data.getPosition()+1) + " " + title);
 		String cover = Data.getTrack().getCover();
 		if(cover == null) cover = Data.getAudiobook().getCover();
 		if(cover != null) {
@@ -154,16 +169,19 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	}
 	public void seekTo(int progress){
 		player.seekTo(progress);
+		for(MiniPlayerObserver observer : observers){
+			observer.miniplayer_seekTo(progress);
+		}
 	}
 	public void setVisibility(int visibility){
-		miniplayer_layout.setVisibility(visibility);
+		bookmark_layout.setVisibility(visibility);
 	}
 	public PlayerService getPlayer(){ return player; } //Convenience method
 	
 	@Override
-	public void onClick(View v) {
+ 	public void onClick(View v) {
 		switch(v.getId()){
-		case R.id.miniplayer_play_btn:
+		case COVER_BTN_ID: //id is set programmativcally
 			//Toggle button icon
 			/* Note that the result of isPlaying is the state BEFORE the click,
 			 * thus the result must be negated.
