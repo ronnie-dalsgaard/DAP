@@ -5,15 +5,15 @@
 
     <ImageView
         android:id="@+id/audiobook_basics_cover_iv"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="96dp"
+        android:layout_height="128dp"
         android:contentDescription="@string/content_description"
         android:src="@drawable/ic_action_help" />
 
     <ImageButton
         android:id="@+id/audiobook_basics_cover_btn"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="96dp"
+        android:layout_height="128dp"
         android:background="@color/transparent"
         android:contentDescription="@string/content_description" />
 

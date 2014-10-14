@@ -75,9 +75,10 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 		listview.setOnItemClickListener(this);
 		listview.setOnItemLongClickListener(this);
 		
-		FragmentManager fm = getFragmentManager();
-		FragmentMiniPlayer miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.list_layout_mini_player);
-		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+		//FIXME
+//		FragmentManager fm = getFragmentManager();
+//		FragmentMiniPlayer miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.list_layout_mini_player);
+//		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 
 		Log.d(TAG, "created");
 	}

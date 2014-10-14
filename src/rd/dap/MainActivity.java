@@ -2,13 +2,18 @@ package rd.dap;
 
 import java.util.Locale;
 
+import rd.dap.fragments.AudiobookGridFragment;
+import rd.dap.fragments.BookmarkListActivity;
+import rd.dap.fragments.ControllerActivity;
 import rd.dap.fragments.FragmentMiniPlayer;
 import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
+import rd.dap.model.Data;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -18,25 +23,16 @@ import android.view.View;
 
 public class MainActivity extends Activity implements ActionBar.TabListener, MiniPlayerObserver {
 	public static FragmentMiniPlayer miniplayer = null;
-
-	/**
-	 * The {@link android.support.v4.view.PagerAdapter} that will provide
-	 * fragments for each of the sections. We use a {@link FragmentPagerAdapter}
-	 * derivative, which will keep every loaded fragment in memory. If this
-	 * becomes too memory intensive, it may be best to switch to a
-	 * {@link android.support.v13.app.FragmentStatePagerAdapter}.
-	 */
-	SectionsPagerAdapter sectionsPagerAdapter;
-
-	/**
-	 * The {@link ViewPager} that will host the section contents.
-	 */
-	ViewPager viewPager;
+	private SectionsPagerAdapter sectionsPagerAdapter;
+	private ViewPager viewPager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		Intent serviceIntent = new Intent(this, PlayerService.class);
+		startService(serviceIntent);
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
@@ -56,6 +52,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override public void onPageSelected(int position) {
 				actionBar.setSelectedNavigationItem(position);
+				System.out.println("Swipe to: "+position);
+				
+				if(position == 2){
+					miniplayer.setVisibility(View.GONE);
+				} else {
+					miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+				}
 			}
 		});
 
@@ -71,7 +74,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.main_miniplayer);
 		miniplayer.addObserver(this);
 //		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
-		miniplayer.setVisibility(View.VISIBLE);
+//		miniplayer.setVisibility(View.VISIBLE);
 	}
 
 	//Menu
@@ -96,8 +99,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 	//Tabs
 	@Override
 	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-		// When the given tab is selected, switch to the corresponding page in
-		// the ViewPager.
+		// When the given tab is selected, switch to the corresponding page in the ViewPager.
 		viewPager.setCurrentItem(tab.getPosition());
 	}
 	@Override
@@ -105,8 +107,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 			FragmentTransaction fragmentTransaction) {
 	}
 	@Override
-	public void onTabReselected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
+	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 
 	@Override public void miniplayer_play() {
@@ -134,13 +135,14 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		@Override
 		public Fragment getItem(int position) {
 			switch(position){
-			case 0: return new AudiobookGridFragment(miniplayer);
-			case 1: return new BookmarkListActivity(miniplayer);
+			case 0: return new AudiobookGridFragment();
+			case 1: return new BookmarkListActivity();
+			case 2: return new ControllerActivity();
 			}
 			return null;
 		}
 
-		@Override public int getCount() { return 2; }
+		@Override public int getCount() { return 3; }
 
 		@Override
 		public CharSequence getPageTitle(int position) {

@@ -25,11 +25,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BookmarkListActivity"
+            android:name="rd.dap.fragments.BookmarkListActivity"
             android:label="@string/title_activity_audiobook_list" >
         </activity>
         <activity
-            android:name=".AudiobookGridFragment"
+          rd.dap.fragments.AudiobookGridFragmentbookGridFragment"
             android:label="@string/title_activity_bookmark" >
         </activity>
         <activity
@@ -49,7 +49,7 @@
             android:label="@string/title_activity_track" >
         </activity>
         <activity
-            android:name=".ControllerActivity"
+            android:name="rd.dap.fragments.ControllerActivity"
             android:label="@string/title_activity_controller" >
         </activity>
         <activity

@@ -1,9 +1,14 @@
-package rd.dap;
+package rd.dap.fragments;
+
+import static rd.dap.MainActivity.miniplayer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rd.dap.fragments.FragmentMiniPlayer;
+import rd.dap.R;
+import rd.dap.R.drawable;
+import rd.dap.R.id;
+import rd.dap.R.layout;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
@@ -32,8 +37,6 @@ public class BookmarkListActivity extends Fragment implements OnItemClickListene
 	public static final String TAG = "BookmarkListActivity";
 	public static ArrayAdapter<Bookmark> adapter;
 	public static ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
-	public static FragmentMiniPlayer miniplayer;
-	
 	
 	//TODO Bookmark activity
 	//TODO up-/download bookmarks
@@ -49,10 +52,6 @@ public class BookmarkListActivity extends Fragment implements OnItemClickListene
 	//TODO sleeptimer
 	//TODO pregress as progressbar
 	//TODO Helper texts
-
-	public BookmarkListActivity(FragmentMiniPlayer miniplayer) {
-		BookmarkListActivity.miniplayer = miniplayer;
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -104,7 +103,7 @@ public class BookmarkListActivity extends Fragment implements OnItemClickListene
 		Data.setAudiobook(audiobook);
 		Data.setPosition(bookmark.getTrackno());
 		Data.setTrack(audiobook.getPlaylist().get(bookmark.getTrackno()));
-		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+//		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.seekTo(bookmark.getProgress());
 		miniplayer.updateView();

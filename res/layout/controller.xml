@@ -12,58 +12,35 @@
         android:layout_above="@+id/controller_buttons"
         android:layout_centerHorizontal="true" >
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <fragment
-                android:id="@+id/controller_fragment_audiobooks_basics"
-                android:name="rd.dap.fragments.FragmentAudiobookBasics"
-                android:layout_width="@dimen/mini_player_width"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                tools:layout="@layout/fragment_audiobook_basics" />
+            <include layout="@layout/fragment_audiobook_basics"/>
 
             <include
                 android:id="@+id/controller_divider_1"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_below="@+id/controller_fragment_audiobooks_basics"
                 layout="@layout/divider_horizontal" />
-
-            <fragment
-                android:id="@+id/controller_track_fragment"
-                android:name="rd.dap.fragments.FragmentTrack"
-                android:layout_width="@dimen/mini_player_width"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/controller_divider_1"
-                android:layout_centerHorizontal="true"
-                tools:layout="@layout/fragment_track" />
+            
+            <include layout="@layout/fragment_track"/>
 
             <include
                 android:id="@+id/controller_divider_2"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_below="@+id/controller_track_fragment"
                 layout="@layout/divider_horizontal" />
 
-            <fragment
-                android:id="@+id/controller_seeker_fragment"
-                android:name="rd.dap.fragments.FragmentSeeker"
-                android:layout_width="@dimen/mini_player_width"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/controller_divider_2"
-                android:layout_centerHorizontal="true"
-                tools:layout="@layout/fragment_seeker" />
+            <include layout="@layout/fragment_seeker"/>
             
              <include
                 android:id="@+id/controller_divider_3"
                 android:layout_width="match_parent"
                 android:layout_height="1dp" 
-                android:layout_below="@+id/controller_seeker_fragment"
                 layout="@layout/divider_horizontal" />
-        </RelativeLayout>
+        </LinearLayout>
     </ScrollView>
 
     <LinearLayout

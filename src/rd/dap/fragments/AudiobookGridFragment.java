@@ -1,13 +1,18 @@
-package rd.dap;
+package rd.dap.fragments;
 
 import static rd.dap.AudiobookActivity.STATE_EDIT;
 import static rd.dap.AudiobookActivity.STATE_NEW;
+import static rd.dap.MainActivity.miniplayer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import rd.dap.fragments.FragmentMiniPlayer;
+import rd.dap.AudiobookActivity;
+import rd.dap.R;
+import rd.dap.R.drawable;
+import rd.dap.R.id;
+import rd.dap.R.layout;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Data;
@@ -38,14 +43,9 @@ public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObser
 	private static final String TAG = "AudiobookGridActivity";
 	private static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 	private static ImageAdapter adapter;
-	public static FragmentMiniPlayer miniplayer;
 	private GridView grid;
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
-
-	public AudiobookGridFragment(FragmentMiniPlayer miniplayer) {
-		AudiobookGridFragment.miniplayer = miniplayer;
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -103,7 +103,7 @@ public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObser
 		Data.setPosition(0);
 		Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()));
 		
-		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+//		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.updateView();
 	}

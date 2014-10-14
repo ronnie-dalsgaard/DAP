@@ -15,6 +15,7 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -48,7 +49,7 @@ import com.google.android.gms.drive.query.SearchableField;
 /* Store dele af denne klasse er kopieret fra developer.android.com/google/auth/api-client.html
  * Der er fortaget mindre justeringer.
  */
-public abstract class DriveHandler extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
+public abstract class DriveHandler extends Fragment implements ConnectionCallbacks, OnConnectionFailedListener {
 	private final String TAG = "DriveHandler";
 	private static GoogleApiClient client = null;
 	private boolean isResolvingError = false;
@@ -73,7 +74,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 				.setMimeType(new String[] {"text/plain"})
 				.build(client);
 		try {
-			startIntentSenderForResult(i, DH_REQUEST_CODE_DOWNLOAD, null, 0, 0, 0);
+			getActivity().startIntentSenderForResult(i, DH_REQUEST_CODE_DOWNLOAD, null, 0, 0, 0);
 		} catch (SendIntentException e) {
 			Log.i(TAG, "Failed to launch file chooser.");
 		}
@@ -116,7 +117,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 						.setInitialContents(result.getContents())
 						.build(client);
 				try {
-					startIntentSenderForResult(
+					getActivity().startIntentSenderForResult(
 							intentSender, DH_REQUEST_CODE_UPDATE, 
 							/*fillInIntent = */ null, 
 							/*flagsMask = */ 0, 
@@ -140,7 +141,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 			@Override
 			public void onResult(MetadataBufferResult result) {
 				MetadataBuffer buffer = result.getMetadataBuffer();
-				Toast.makeText(DriveHandler.this, "Files found: "+buffer.getCount(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Files found: "+buffer.getCount(), Toast.LENGTH_SHORT).show();
 				Log.d(TAG, "Files found: "+buffer.getCount());
 				if(buffer.getCount() > 0){
 					ArrayList<Metadata> list = new ArrayList<Metadata>();
@@ -169,7 +170,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 			@Override
 			public void onResult(ContentsResult result) {
 				if(!result.getStatus().isSuccess()){
-					Toast.makeText(DriveHandler.this, "Failure to download", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), "Failure to download", Toast.LENGTH_SHORT).show();
 					Log.d(TAG, "Failure to download");
 					return;
 				}
@@ -213,7 +214,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 			@Override
 			public void onResult(ContentsResult result) {
 				if(!result.getStatus().isSuccess()){
-					Toast.makeText(DriveHandler.this, "Failure to download", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), "Failure to download", Toast.LENGTH_SHORT).show();
 					Log.d(TAG, "Failure to download");
 					return;
 				}
@@ -260,7 +261,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 
 		case DH_REQUEST_CODE_UPLOAD:
 			if (resultCode == Activity.RESULT_OK) {
-				Toast.makeText(this, "Bookmarks uploaded", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Bookmarks uploaded", Toast.LENGTH_SHORT).show();
 				Log.d(TAG, "File saved successfully");
 				onDriveResult(upload_requestCode, DriveHandler.SUCCESS);
 			} else {
@@ -275,7 +276,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 				System.out.println("WRONG ACTION...!");
 				return;
 			}
-			if (resultCode == RESULT_OK) {
+			if (resultCode == Activity.RESULT_OK) {
 				DriveId driveId = (DriveId) data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
 				System.out.println("driveID = "+driveId);
 				System.out.println("driveId as String: " + driveId.encodeToString());
@@ -290,7 +291,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 			
 		case DH_REQUEST_CODE_UPDATE:
 			if(resultCode == Activity.RESULT_OK){
-				Toast.makeText(this, "Bookmarks uploaded", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Bookmarks uploaded", Toast.LENGTH_SHORT).show();
 				Log.d(TAG, "File saved successfully");
 				onDriveResult(update_requestCode, DriveHandler.SUCCESS);
 			} else {
@@ -312,7 +313,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 		} else if (result.hasResolution()) {
 			try {
 				isResolvingError = true;
-				result.startResolutionForResult(this, DH_REQUEST_CODE_RESOLVE_ERROR);
+				result.startResolutionForResult(getActivity(), DH_REQUEST_CODE_RESOLVE_ERROR);
 			} catch (SendIntentException e) {
 				// There was an error with the resolution intent. Try again.
 				client.connect();
@@ -330,7 +331,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 	}
 	@Override
 	public void onConnectionSuspended(int result) {
-		Toast.makeText(this, "Connection suspende", Toast.LENGTH_SHORT).show();
+		Toast.makeText(getActivity(), "Connection suspende", Toast.LENGTH_SHORT).show();
 		Log.d(TAG, "onConnectionSuspende: "+result);
 	}
 
@@ -371,10 +372,10 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 	}
 
 	public void connect() {
-		int playServiceAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		int playServiceAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
 		switch(playServiceAvailable){
 		case ConnectionResult.SUCCESS:
-			client = new GoogleApiClient.Builder(this)
+			client = new GoogleApiClient.Builder(getActivity())
 			.addApi(Drive.API)
 			.addScope(Drive.SCOPE_FILE)
 			.addConnectionCallbacks(this)
@@ -388,7 +389,7 @@ public abstract class DriveHandler extends Activity implements ConnectionCallbac
 		case ConnectionResult.SERVICE_MISSING:
 		case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
 		case ConnectionResult.SERVICE_DISABLED:
-			GooglePlayServicesUtil.getErrorDialog(playServiceAvailable, this, DH_REQUEST_CODE_ERROR_DIALOG);
+			GooglePlayServicesUtil.getErrorDialog(playServiceAvailable, getActivity(), DH_REQUEST_CODE_ERROR_DIALOG);
 			break;
 		}
 	}

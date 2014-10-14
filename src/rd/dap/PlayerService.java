@@ -3,6 +3,7 @@ package rd.dap;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import rd.dap.support.Monitor;
@@ -24,6 +25,7 @@ public class PlayerService extends Service implements OnErrorListener {
 	
 	@Override
 	public void onCreate(){
+		Log.d(TAG, "onCreate");
 		super.onCreate();
 		if(monitor == null){
 			monitor = new Monitor_Bookmarks(10, TimeUnit.SECONDS, getFilesDir());
@@ -32,6 +34,7 @@ public class PlayerService extends Service implements OnErrorListener {
 	}
 	@Override
 	public void onDestroy(){
+		Log.d(TAG, "onDestroy");
 		super.onDestroy();
 		kill();
 	}
@@ -78,7 +81,10 @@ public class PlayerService extends Service implements OnErrorListener {
 	}
 	public void seekTo(int position){
 		if(mp == null) return;
+//		boolean wasPlaying = mp.isPlaying();
+//		mp.pause();
 		mp.seekTo(position);
+//		if(wasPlaying) mp.start();
 	}
 	public void reset(){
 		if (mp != null) {
@@ -111,7 +117,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		}
 	}
 	public void kill(){
-		Log.d(TAG, "DIE");
+		Log.d(TAG, "kill");
 		if(mp != null){
 			mp.release();
 			mp = null;
@@ -147,6 +153,7 @@ public class PlayerService extends Service implements OnErrorListener {
 	class Monitor_Bookmarks extends Monitor {
 		private static final String TAG = "Monitor_bookmarks";
 		private File filesDir;
+		private boolean go_again = true;
 
 		public Monitor_Bookmarks(int delay, TimeUnit unit, File filesDir) {
 			super(delay, unit);
@@ -155,6 +162,13 @@ public class PlayerService extends Service implements OnErrorListener {
 
 		@Override
 		public void execute() {
+			if(mp == null) {
+				Log.d(TAG, "Unable to update bookmarks, since mediaplayer is unset");
+				return;
+			}
+			if(!go_again && !mp.isPlaying()){
+				return;
+			}
 			if(Data.getAudiobook() == null) {
 				Log.d(TAG, "Unable to update bookmarks, since audiobook is missing");
 				return;
@@ -167,18 +181,17 @@ public class PlayerService extends Service implements OnErrorListener {
 				Log.d(TAG, "Unable to update bookmarks, since position is missing");
 				return;
 			}
-			if(mp == null) {
-				Log.d(TAG, "Unable to update bookmarks, since mediaplayer is unset");
-				return;
-			}
 			
 			BookmarkManager manager = BookmarkManager.getInstance();
 			String author = Data.getAudiobook().getAuthor();
 			String album = Data.getAudiobook().getAlbum();
 			int trackno = Data.getPosition();
 			int progress = mp.getCurrentPosition();
-			manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress);
-			Log.d(TAG, "Bookmark created or updated");
+			boolean force = false; //only update bookmark if progress is greater than previously recorded
+			Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
+			Log.d(TAG, "Bookmark created or updated\n"+bookmark);
+			
+			go_again = mp.isPlaying();
 		}
 	}
 }

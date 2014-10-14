@@ -3,7 +3,6 @@ package rd.dap.fragments;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import rd.dap.ControllerActivity;
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
@@ -184,16 +183,18 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 
 		case R.id.miniplayer_info:
 			Log.d(TAG, "Info clicked");
-			if(player != null){
-				for(MiniPlayerObserver observer : observers){
-					observer.miniplayer_click();
-				}
-				
-				Intent intent = new Intent(getActivity(), ControllerActivity.class);
-				startActivity(intent);
-			} else {
+			if(player != null) {
 				Log.d(TAG, "PLAYER IS NULL");
+				return;
 			}
+			for(MiniPlayerObserver observer : observers){
+				observer.miniplayer_click();
+			}
+
+			//FIXME - this wont work Controller is not an activity but a fragment
+//			Intent intent = new Intent(getActivity(), ControllerActivity.class);
+//			startActivity(intent);
+
 		}
 
 	}

@@ -24,21 +24,36 @@ public class BookmarkManager { //Singleton
 	public static BookmarkManager getInstance() { return instance; }
 	
 	//CRUD bookmarks
-	public boolean createOrUpdateBookmark(File filesDir, String author, String album, int trackno, int progress){
+	public Bookmark createOrUpdateBookmark(File filesDir, String author, String album, int trackno, int progress, boolean force){
 		boolean found = false;
+		Bookmark result = null;
 		for(Bookmark bookmark : bookmarks){
 			if(bookmark.matches(author, album)){
-				bookmark.setTrackno(trackno);
-				bookmark.setProgress(progress);
+				result = bookmark;
 				found = true;
+				if(force){ //set bookmark no matter the trackno and progress
+					bookmark.setTrackno(trackno);
+					bookmark.setProgress(progress);
+					break;
+				}
+				
+				if(trackno < bookmark.getTrackno()){
+					break;
+				} else if(trackno > bookmark.getTrackno()){
+					bookmark.setTrackno(trackno);
+					bookmark.setProgress(progress);
+				} else if(progress > bookmark.getProgress()){
+					bookmark.setProgress(progress);
+				}
 				break;
 			}
 		}
 		if(!found){
 			Bookmark bookmark = new Bookmark(author, album, trackno, progress);
 			bookmarks.add(bookmark);
+			result = bookmark;
 		}
-		return saveBookmarks(filesDir);
+		return saveBookmarks(filesDir) ? result : null;
 	}
 	public Bookmark getBookmark(File filesDir, String author, String album){
 		loadBookmarks(filesDir);
