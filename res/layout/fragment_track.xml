@@ -9,6 +9,8 @@
                 android:id="@+id/track_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingTop="@dimen/margin_small"
+                android:paddingBottom="@dimen/margin_small"
                 android:divider="@drawable/vertical_divider"
                 android:showDividers="middle"
                 android:orientation="horizontal" >
@@ -23,21 +25,11 @@
                     android:src="@drawable/ic_action_previous" />
 
                 <TextView
-                    android:id="@+id/track_position"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/btn_height"
-                    android:gravity="center"
-                    android:paddingLeft="@dimen/margin_small"
-                    android:paddingRight="@dimen/margin_small"
-                    android:text="00"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                <TextView
                     android:id="@+id/track_title"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="4"
-                    android:gravity="center_vertical"
+                    android:gravity="center"
                     android:maxLines="2"
                     android:paddingLeft="@dimen/margin_small"
                     android:text="Title"

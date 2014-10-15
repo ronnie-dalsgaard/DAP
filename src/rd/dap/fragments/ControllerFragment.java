@@ -10,6 +10,8 @@ import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
+import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.support.DriveHandler;
@@ -36,10 +38,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.drive.DriveFile;
-import com.google.android.gms.drive.Metadata;
+import com.google.gson.Gson;
 
 public class ControllerFragment extends DriveHandler implements ServiceConnection, OnClickListener {
 
@@ -49,7 +50,7 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 	private Monitor controllerMonitor, progressMonitor;
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private LinearLayout info_layout, tracks_gv;
-	private TextView author_tv, audiobook_basics_album_tv, position_tv, title_tv, progress_tv;
+	private TextView author_tv, audiobook_basics_album_tv, title_tv, progress_tv;
 	private ImageButton cover_btn, play_btn, upload_btn, download_btn, next_btn, prev_btn, forward_btn, rewind_btn;
 	private ImageView cover_iv;
 
@@ -121,11 +122,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 
 		prev_btn = (ImageButton) v.findViewById(R.id.track_previous);
 		prev_btn.setOnClickListener(this);
-
-		position_tv = (TextView) v.findViewById(R.id.track_position);
-		if(Data.getPosition() != -1){
-			position_tv.setText(String.format("%02d", Data.getPosition()+1));
-		}
 
 		title_tv = (TextView) v.findViewById(R.id.track_title);
 		if(Data.getTrack() != null){
@@ -203,10 +199,7 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 	}
 	public void displayTracks(){
 		if(Data.getPosition() == -1 || Data.getTrack() == null || Data.getAudiobook() == null) return;
-		//Position
-		position_tv.setText(String.format("%02d", Data.getPosition()+1));
-
-		//Track
+		//Title
 		title_tv.setText(Data.getTrack().getTitle());
 
 		//Tracks
@@ -257,17 +250,25 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 		case R.id.controller_play:
 			play_pause();
 			break;
-			
+
 		case R.id.controller_upload:
-			if(this.currentBookmarkFile == null){
-				upload(REQUEST_CODE_UPLOAD, "THIS IS A TEST!!!");
-			} else {
-				update(REQUEST_CODE_UPDATE, currentBookmarkFile, "New test");
+			BookmarkManager manager = BookmarkManager.getInstance();
+			ArrayList<Bookmark> bookmarks = manager. getBookmarks();
+			Gson gson = new Gson();
+			String json = "";
+			for(Bookmark bookmark : bookmarks){
+				json += gson.toJson(bookmark) + "\n";
 			}
+			System.out.println("JSON:\n"+json);
+			upload(json);
 			break;
+			
 		case R.id.controller_download:
-			super.download(REQUEST_CODE_DOWNLOAD);
-			//			super.query(REQUEST_CODE_QUERY, ".dap");
+			super.download(new DriveHandler.DapResultCallback<String>() {
+				@Override public void onResult(String result) {
+					System.out.println("Download callback result\n"+result);
+				}
+			});
 			break;
 			
 		//Cases for audiobook basics
@@ -371,32 +372,37 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			break;
 		}
 	}
-	public void onDriveResult(int requestCode, int result, Object... data){
-		if(result != DriveHandler.SUCCESS) return;
-		switch(requestCode){
-		case REQUEST_CODE_UPLOAD: 
-			Toast.makeText(getActivity(), "Upload successfull", Toast.LENGTH_SHORT).show();
-			break;
-		case REQUEST_CODE_DOWNLOAD: 
-			//This is a passthrough
-			currentBookmarkFile = (DriveFile) data[0];
-			getContents(REQUEST_CODE_GET_CONTENTS, currentBookmarkFile);
-			break;
-		case REQUEST_CODE_GET_CONTENTS:
-			String str = (String) data[0];
-			Toast.makeText(getActivity(), ":::"+str, Toast.LENGTH_SHORT).show();
-			break;
-		case REQUEST_CODE_QUERY:
-			@SuppressWarnings("unchecked")
-			ArrayList<Metadata> list = (ArrayList<Metadata>) data[0];
-			for(Metadata m : list){
-				System.out.println("--->"+m.getTitle());
-			}
-		case REQUEST_CODE_UPDATE:
-			Toast.makeText(getActivity(), "Update successfull", Toast.LENGTH_SHORT).show();
-			break;
-		}
-	}
+//	public void onDriveResult(int requestCode, int result, Object... data){
+//		if(result != DriveHandler.SUCCESS) return;
+//		switch(requestCode){
+//		case REQUEST_CODE_UPLOAD: 
+//			Log.d(TAG, "onDriveResult - REQUEST_CODE_UPLOAD");
+//			Toast.makeText(getActivity(), "Upload successfull", Toast.LENGTH_SHORT).show();
+//			break;
+//		case REQUEST_CODE_DOWNLOAD:
+//			Log.d(TAG, "onDriveResult - REQUEST_CODE_DOWNLOAD");
+//			//This is a passthrough
+//			currentBookmarkFile = (DriveFile) data[0];
+//			getContents(REQUEST_CODE_GET_CONTENTS, currentBookmarkFile);
+//			break;
+//		case REQUEST_CODE_GET_CONTENTS:
+//			Log.d(TAG, "onDriveResult - REQUEST_CODE_GET_CONTENTS");
+//			String str = (String) data[0];
+//			Toast.makeText(getActivity(), ":::"+str, Toast.LENGTH_SHORT).show();
+//			break;
+//		case REQUEST_CODE_QUERY:
+//			Log.d(TAG, "onDriveResult - REQUEST_CODE_QUERY");
+//			@SuppressWarnings("unchecked")
+//			ArrayList<Metadata> list = (ArrayList<Metadata>) data[0];
+//			for(Metadata m : list){
+//				System.out.println("--->"+m.getTitle());
+//			}
+//		case REQUEST_CODE_UPDATE:
+//			Log.d(TAG, "onDriveResult - REQUEST_CODE_UPDATE");
+//			Toast.makeText(getActivity(), "Update successfull", Toast.LENGTH_SHORT).show();
+//			break;
+//		}
+//	}
 
 	private void play_pause(){
 		//Fix view

@@ -1,4 +1,4 @@
-package rd.dap.support;
+package rd.dap.discontinued;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import rd.dap.model.Bookmark;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
@@ -53,39 +52,28 @@ import com.google.android.gms.drive.query.SearchableField;
 /* Store dele af denne klasse er kopieret fra developer.android.com/google/auth/api-client.html
  * Der er fortaget mindre justeringer.
  */
-public abstract class DriveHandler extends Fragment implements ConnectionCallbacks, OnConnectionFailedListener {
+public abstract class DriveHandler2 extends Fragment implements ConnectionCallbacks, OnConnectionFailedListener {
 	private final String TAG = "DriveHandler";
 	private static GoogleApiClient client = null;
 	private boolean isResolvingError = false;
 	private static final int DH_REQUEST_CODE_ERROR_DIALOG = 10001;
 	private static final int DH_REQUEST_CODE_RESOLVE_ERROR = 11001;
+	private static final int DH_REQUEST_CODE_UPLOAD = 11011;
+	private static final int DH_REQUEST_CODE_DOWNLOAD = 11012;
+	private static final int DH_REQUEST_CODE_UPDATE = 11013;
 	private static final String DH_ERROR_DIALOG_TAG = "DriveHandler.ErrorDialogFragment";
 	private static final String DH_DRIVE_FILENAME = "bookmarks.dap";
 	private static final String DH_DRIVE_FOLDERNAME = "DAP";
 	public static final int SUCCESS = 0;
 	public static final int FAILURE = -1;
+	private int download_requestCode = -1;
+	private int upload_requestCode = -1;
+	private int update_requestCode = -1;
 
-	protected void download(DapResultCallback<String> resultCallback){
-		Log.d(TAG, "download");
-		if(client == null) throw new RuntimeException("Not connected to Drive API");
-		download_query_folder(resultCallback);
-	}
-	private void download_query_folder(DapResultCallback<String> resultCallback){
-		
-	}
-
-	
-	
-	
-	public interface DapResultCallback<T>{
-		public void onResult(T result);
-	}
-	
-	
 
 	protected void upload(final String data){
 		Log.d(TAG, "upload");
-		if(client == null) throw new RuntimeException("Not connected to Drive API");
+		
 		upload_query_folder(data);
 	}
 	private void upload_query_folder(final String data){
@@ -175,7 +163,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 						System.out.println("SUCCESS: (list size = "+list.size()+")");
 						DriveId id = list.get(0).getDriveId();
 						DriveFile file = Drive.DriveApi.getFile(client, id);
-						upload_read(file, data);
+						upload_update_file(file, data);
 					} else {
 						System.out.println("FAILURE - No untrashed files found");
 						upload_create_contents(folder, data);
@@ -244,86 +232,53 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 				}
 			});
 	}
-	private void upload_read(final DriveFile file, final String newData){
-		file.open(client, DriveFile.MODE_READ_ONLY, new DownloadProgressListener() {
-
-			@Override
-			public void onProgress(long bytesDownloaded, long bytesExpected) {
-				System.out.println(bytesDownloaded + " / " + bytesExpected);
-			}
-		}).setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
-
-			@Override
-			public void onResult(DriveContentsResult result) {
-				DriveContents contents = result.getDriveContents();
-
-				//Input
-				InputStream stream = contents.getInputStream();
-				InputStreamReader reader = new InputStreamReader(stream);
-				BufferedReader in = new BufferedReader(reader);
-
-				try {
-					//Read
-					StringBuilder stringbuilder = new StringBuilder();
-					String line = in.readLine();
-					while(line != null){
-						stringbuilder.append(line);
-						line = in.readLine();
-					}
-					String oldData = stringbuilder.toString();
-					in.close();
-					Log.d(TAG, "File contents (before) = "+oldData);
-					
-					upload_write(file, oldData, newData);
-				} catch (IOException e) {
-					Log.d(TAG, "Failed to read/write contents");
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	private void upload_write(DriveFile file, final String oldData, final String newData){	
-		file.open(client, DriveFile.MODE_WRITE_ONLY, new DownloadProgressListener() {
+	private void upload_update_file(final DriveFile file, final String newData){
+		DriveContentsResult result = file.open(client, DriveFile.MODE_READ_WRITE, new DownloadProgressListener() {
 			
 			@Override
 			public void onProgress(long bytesDownloaded, long bytesExpected) {
 				System.out.println(bytesDownloaded + " / " + bytesExpected);
 			}
-		}).setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
-			
-			@Override
-			public void onResult(DriveContentsResult result) {
-				DriveContents contents = result.getDriveContents();
-				
-				//Output
-				OutputStream out = contents.getOutputStream();
-				
-				try {
-					//Resove conflicts
-					String resolved = upload_resolve_conflicts(oldData, newData);
-					
-					//Write
-					out.write(resolved.getBytes());
-					out.flush();
-					out.close();
-					
-					Log.d(TAG, "File contents (after) = "+resolved);
-					
-					contents.commit(client, null).setResultCallback(new ResultCallback<Status>() {
-						
-						@Override
-						public void onResult(Status status) {
-							System.out.println("Status: " + (status.isSuccess() ? "Success" : "Failure"));
-						}
-					});
-				} catch (IOException e) {
-					Log.d(TAG, "Failed to read/write contents");
-					e.printStackTrace();
-				}
+		}).await();
+		
+		DriveContents contents = result.getDriveContents();
+		
+		//Input
+		InputStream stream = contents.getInputStream();
+		InputStreamReader reader = new InputStreamReader(stream);
+		BufferedReader in = new BufferedReader(reader);
+		
+		//Output
+		OutputStream out = contents.getOutputStream();
+		
+		try {
+			//Read
+			StringBuilder stringbuilder = new StringBuilder();
+			String line = in.readLine();
+			while(line != null){
+				stringbuilder.append(line);
+				line = in.readLine();
 			}
-		});
-		
-		
+			String oldData = stringbuilder.toString();
+			in.close();
+			Log.d(TAG, "File contents (before) = "+oldData);
+			
+			//Resove conflicts
+			String resolved = upload_resolve_conflicts(oldData, newData);
+			
+			//Write
+			out.write(resolved.getBytes());
+			out.flush();
+			out.close();
+			
+			Log.d(TAG, "File contents (after) = "+resolved);
+			
+			Status status = contents.commit(client, null).await();
+			System.out.println("Status: " + (status.isSuccess() ? "Success" : "Failure"));
+		} catch (IOException e) {
+			Log.d(TAG, "Failed to read/write contents");
+			e.printStackTrace();
+		}
 	}
 	private String upload_resolve_conflicts(String oldData, String newData){
 		//FIXME conflicts are not really resolved - new is written, old is discarded
@@ -349,6 +304,8 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 				}
 			}
 			break;
+
+
 		}
 	} 
 
@@ -416,7 +373,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 
 		@Override
 		public void onDismiss(DialogInterface dialog) {
-			DriveHandler.this.onDialogDismissed();
+			DriveHandler2.this.onDialogDismissed();
 		}
 	}
 

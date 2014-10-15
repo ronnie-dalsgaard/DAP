@@ -13,7 +13,7 @@
     <dimen name="cover_width">64dp</dimen>
     <dimen name="cover_height">96dp</dimen>
     <dimen name="cover_width_big">96dp</dimen>
-    <dimen name="cover_height_big">128dp</dimen>
+    <dimen name="cover_height_big">144dp</dimen>
     
     <dimen name="file_type_width">32dp</dimen>
     <dimen name="file_type_height">32dp</dimen>

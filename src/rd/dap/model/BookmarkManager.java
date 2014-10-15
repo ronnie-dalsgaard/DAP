@@ -74,6 +74,7 @@ public class BookmarkManager { //Singleton
 		boolean result = bookmarks.remove(delete);
 		return result && saveBookmarks(filesDir);
 	}
+	public ArrayList<Bookmark> getBookmarks() { return bookmarks; }
 	
 	//Load and save bookmarks
 	public ArrayList<Bookmark> loadBookmarks(File filesDir){

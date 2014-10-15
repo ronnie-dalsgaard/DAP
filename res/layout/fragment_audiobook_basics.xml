@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp" >
+    android:layout_height="wrap_content" >
 
     <ImageView
         android:id="@+id/audiobook_basics_cover_iv"
-        android:layout_width="96dp"
-        android:layout_height="128dp"
+        android:layout_width="@dimen/cover_width_big"
+        android:layout_height="@dimen/cover_height_big"
+        android:layout_marginRight="5dp"
         android:contentDescription="@string/content_description"
         android:src="@drawable/ic_action_help" />
 
     <ImageButton
         android:id="@+id/audiobook_basics_cover_btn"
-        android:layout_width="96dp"
-        android:layout_height="128dp"
+        android:layout_width="@dimen/cover_width_big"
+        android:layout_height="@dimen/cover_height_big"
         android:background="@color/transparent"
         android:contentDescription="@string/content_description" />
 
     <include
         android:id="@+id/audiobook_basics_divider"
         android:layout_width="1dp"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/cover_height_big"
         layout="@layout/divider_vertical"
         android:layout_toRightOf="@+id/audiobook_basics_cover_iv" />
 
     <LinearLayout
         android:id="@+id/audiobook_basics_info_layout"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="@dimen/cover_height_big"
         android:layout_alignBottom="@+id/audiobook_basics_cover_iv"
         android:layout_toRightOf="@+id/audiobook_basics_divider"
         android:gravity="center_vertical"
@@ -37,8 +38,7 @@
             android:id="@+id/audiobook_basics_author_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingLeft="@dimen/margin_big"
+            android:paddingLeft="@dimen/margin_small"
             android:text="Author"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -48,8 +48,7 @@
             android:id="@+id/audiobook_basics_album_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingLeft="@dimen/margin_big"
+            android:paddingLeft="@dimen/margin_small"
             android:text="Album"
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
