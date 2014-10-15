@@ -52,6 +52,7 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 	private TextView author_tv, audiobook_basics_album_tv, title_tv, progress_tv;
 	private ImageButton cover_btn, play_btn, upload_btn, download_btn, next_btn, prev_btn, forward_btn, rewind_btn;
 	private ImageView cover_iv;
+	private static final String END = "/END";
 
 	private static final int REQUEST_FRAGMENT_BASICS_EDIT = 1701;
 	private static final int CELL = 1111;
@@ -249,7 +250,7 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			Gson gson = new Gson();
 			String json = "";
 			for(Bookmark bookmark : bookmarks){
-				json += gson.toJson(bookmark) + "\n";
+				json += gson.toJson(bookmark) + END + "\n";
 			}
 			System.out.println("JSON:\n"+json);
 			upload(json);
@@ -259,6 +260,11 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			super.download(new DriveHandler.DapResultCallback<String>() {
 				@Override public void onResult(String result) {
 					System.out.println("Download callback result\n"+result);
+					Gson gson = new Gson();
+					for(String line : result.split("END")){
+						Bookmark bookmark = gson.fromJson(line, Bookmark.class);
+						System.out.println("->"+bookmark);
+					}
 				}
 			});
 			break;
@@ -274,7 +280,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			intent.putExtra("audiobook", Data.getAudiobook());
 			startActivityForResult(intent, REQUEST_FRAGMENT_BASICS_EDIT);
 			break;
-			
 			
 		//Cases for Tracks
 		case R.id.track_next:
