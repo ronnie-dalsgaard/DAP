@@ -59,7 +59,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override public void onPageSelected(int position) {
 				actionBar.setSelectedNavigationItem(position);
-				System.out.println("Swipe to: "+position);
 				
 				if(position == 2){
 					miniplayer.setVisibility(View.GONE);

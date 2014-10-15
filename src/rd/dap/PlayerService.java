@@ -153,7 +153,7 @@ public class PlayerService extends Service implements OnErrorListener {
 
 	@Override
 	public boolean onError(MediaPlayer mp, int what, int extra) {
-		System.out.println("An error occured in the MediaPlayer and" +
+		Log.e(TAG, "An error occured in the MediaPlayer and" +
 				" was cought by PlayerSerice: what="+what+", extra="+extra);
 		return true; //Keep going
 	}

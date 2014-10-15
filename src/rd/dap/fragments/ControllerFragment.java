@@ -39,7 +39,6 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
-import com.google.android.gms.drive.DriveFile;
 import com.google.gson.Gson;
 
 public class ControllerFragment extends DriveHandler implements ServiceConnection, OnClickListener {
@@ -55,15 +54,8 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 	private ImageView cover_iv;
 
 	private static final int REQUEST_FRAGMENT_BASICS_EDIT = 1701;
-	private static final int REQUEST_CODE_UPLOAD = 13001;
-	private static final int REQUEST_CODE_DOWNLOAD = 13002;
-	private static final int REQUEST_CODE_GET_CONTENTS = 13003;
-	private static final int REQUEST_CODE_QUERY = 13004;
-	private static final int REQUEST_CODE_UPDATE = 13005;
-	
 	private static final int CELL = 1111;
 
-	private DriveFile currentBookmarkFile = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -280,7 +272,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			Intent intent = new Intent(getActivity(), AudiobookActivity.class);
 			intent.putExtra("state", STATE_EDIT);
 			intent.putExtra("audiobook", Data.getAudiobook());
-			System.out.println("Start edit audiobook");
 			startActivityForResult(intent, REQUEST_FRAGMENT_BASICS_EDIT);
 			break;
 			
@@ -372,37 +363,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			break;
 		}
 	}
-//	public void onDriveResult(int requestCode, int result, Object... data){
-//		if(result != DriveHandler.SUCCESS) return;
-//		switch(requestCode){
-//		case REQUEST_CODE_UPLOAD: 
-//			Log.d(TAG, "onDriveResult - REQUEST_CODE_UPLOAD");
-//			Toast.makeText(getActivity(), "Upload successfull", Toast.LENGTH_SHORT).show();
-//			break;
-//		case REQUEST_CODE_DOWNLOAD:
-//			Log.d(TAG, "onDriveResult - REQUEST_CODE_DOWNLOAD");
-//			//This is a passthrough
-//			currentBookmarkFile = (DriveFile) data[0];
-//			getContents(REQUEST_CODE_GET_CONTENTS, currentBookmarkFile);
-//			break;
-//		case REQUEST_CODE_GET_CONTENTS:
-//			Log.d(TAG, "onDriveResult - REQUEST_CODE_GET_CONTENTS");
-//			String str = (String) data[0];
-//			Toast.makeText(getActivity(), ":::"+str, Toast.LENGTH_SHORT).show();
-//			break;
-//		case REQUEST_CODE_QUERY:
-//			Log.d(TAG, "onDriveResult - REQUEST_CODE_QUERY");
-//			@SuppressWarnings("unchecked")
-//			ArrayList<Metadata> list = (ArrayList<Metadata>) data[0];
-//			for(Metadata m : list){
-//				System.out.println("--->"+m.getTitle());
-//			}
-//		case REQUEST_CODE_UPDATE:
-//			Log.d(TAG, "onDriveResult - REQUEST_CODE_UPDATE");
-//			Toast.makeText(getActivity(), "Update successfull", Toast.LENGTH_SHORT).show();
-//			break;
-//		}
-//	}
 
 	private void play_pause(){
 		//Fix view

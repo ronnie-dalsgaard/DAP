@@ -151,7 +151,6 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 			result = data.getStringExtra("result");
 			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUTHOR : "+result);
 			audiobook.setAuthor(result);
-			System.out.println("->"+audiobook);
 			adapter.notifyDataSetChanged();
 			break;
 		case REQUEST_EDIT_ALBUM:

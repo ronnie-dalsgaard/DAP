@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import rd.dap.model.Bookmark;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
@@ -64,31 +63,26 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 	private static final String DH_DRIVE_FOLDERNAME = "DAP";
 	public static final int SUCCESS = 0;
 	public static final int FAILURE = -1;
-
-	protected void download(DapResultCallback<String> resultCallback){
-		Log.d(TAG, "download");
-		if(client == null) throw new RuntimeException("Not connected to Drive API");
-		download_query_folder(resultCallback);
-	}
-	private void download_query_folder(DapResultCallback<String> resultCallback){
-		
-	}
-
-	
-	
+	private enum Mode {DOWNLOAD, UPLOAD};
 	
 	public interface DapResultCallback<T>{
+		public static final String NO_FOLDER = "no_folder";
+		public static final String NO_FILE = "no_file";
 		public void onResult(T result);
 	}
 	
-	
-
+	protected void download(DapResultCallback<String> resultCallback){
+		Log.d(TAG, "download");
+		if(client == null) throw new RuntimeException("Not connected to Drive API");
+		common_query_folder(null, Mode.DOWNLOAD, resultCallback);
+	}
 	protected void upload(final String data){
 		Log.d(TAG, "upload");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
-		upload_query_folder(data);
+		common_query_folder(data, Mode.UPLOAD, null);
 	}
-	private void upload_query_folder(final String data){
+
+	private void common_query_folder(final String data, final Mode mode, final DapResultCallback<String> resultCallback){
 		Query query = new Query.Builder()
 		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FOLDERNAME))
 		.addFilter(Filters.eq(SearchableField.MIME_TYPE, DriveFolder.MIME_TYPE))
@@ -98,7 +92,6 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 			@Override
 			public void onResult(MetadataBufferResult result) {
 				MetadataBuffer buffer = result.getMetadataBuffer();
-				System.out.println("Files found: "+buffer.getCount());
 				if(buffer.getCount() > 0){
 					ArrayList<Metadata> list = new ArrayList<Metadata>();
 					Iterator<Metadata> iterator = buffer.iterator();
@@ -109,23 +102,116 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 						}
 					}
 					if(!list.isEmpty()) {
-						System.out.println("SUCCESS: (list size = "+list.size()+")");
 						DriveId id = list.get(0).getDriveId();
 						DriveFolder folder = Drive.DriveApi.getFolder(client, id);
-						upload_query_file(folder, data);
+						
+						//Query file no matter what
+						common_query_file(folder, data, mode, resultCallback);
+						
 					} else {
-						System.out.println("FAILURE - No untrashed files found");
-						upload_create_folder(data);
+						switch(mode){
+						case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FOLDER); break;
+						case UPLOAD: upload_create_folder(data); break; 
+						}
+						
 					}
 					
 				} else {
-					System.out.println("FAILURE - No files found");
-					upload_create_folder(data);
+					switch(mode){
+					case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FOLDER); break;
+					case UPLOAD: upload_create_folder(data); break; 
+					}
 				}
 				buffer.close();
 			}
 		});
 	}
+	private void common_query_file(final DriveFolder folder, final String data, final Mode mode, final DapResultCallback<String> resultCallback){
+		Query query = new Query.Builder()
+		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FILENAME))
+		.addFilter(Filters.eq(SearchableField.MIME_TYPE, "text/plain"))
+		.build();
+		Drive.DriveApi.query(client, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
+			
+			@Override
+			public void onResult(MetadataBufferResult result) {
+				MetadataBuffer buffer = result.getMetadataBuffer();
+				if(buffer.getCount() > 0){
+					ArrayList<Metadata> list = new ArrayList<Metadata>();
+					Iterator<Metadata> iterator = buffer.iterator();
+					while(iterator.hasNext()){
+						Metadata metadata = iterator.next();
+						if(!metadata.isTrashed()){
+							list.add(metadata);
+						}
+					}
+					if(!list.isEmpty()) {
+						DriveId id = list.get(0).getDriveId();
+						DriveFile file = Drive.DriveApi.getFile(client, id);
+						
+						//Read file no matter what
+						common_read(file, data, mode, resultCallback);
+						
+					} else {
+						switch(mode){
+						case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FILE); break;
+						case UPLOAD: upload_create_contents(folder, data); break; 
+						}
+					}
+					
+				} else {
+					switch(mode){
+					case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FILE); break;
+					case UPLOAD: upload_create_contents(folder, data); break; 
+					}
+				}
+				buffer.close();
+			}
+		});
+	}
+	private void common_read(final DriveFile file, final String newData, final Mode mode, final DapResultCallback<String> resultCallback){
+		file.open(client, DriveFile.MODE_READ_ONLY, new DownloadProgressListener() {
+
+			@Override
+			public void onProgress(long bytesDownloaded, long bytesExpected) {
+				System.out.println(bytesDownloaded + " / " + bytesExpected);
+			}
+		}).setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
+
+			@Override
+			public void onResult(DriveContentsResult result) {
+				DriveContents contents = result.getDriveContents();
+
+				//Input
+				InputStream stream = contents.getInputStream();
+				InputStreamReader reader = new InputStreamReader(stream);
+				BufferedReader in = new BufferedReader(reader);
+
+				try {
+					//Read
+					StringBuilder stringbuilder = new StringBuilder();
+					String line = in.readLine();
+					while(line != null){
+						stringbuilder.append(line);
+						line = in.readLine();
+					}
+					String oldData = stringbuilder.toString();
+					in.close();
+					Log.d(TAG, "File contents (before) = "+oldData);
+					
+					switch(mode){
+					case DOWNLOAD: resultCallback.onResult(oldData); break;
+					case UPLOAD: upload_write(file, oldData, newData); 
+					}
+					
+				} catch (IOException e) {
+					Log.d(TAG, "Failed to read/write contents");
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
 	private void upload_create_folder(final String data){
 		Log.d(TAG, "upload_create_folder");
 		//Create metadata
@@ -150,44 +236,6 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 					upload_create_contents(folder, data);
 				}
 			});
-	}
-	private void upload_query_file(final DriveFolder folder, final String data){
-		Query query = new Query.Builder()
-		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FILENAME))
-		.addFilter(Filters.eq(SearchableField.MIME_TYPE, "text/plain"))
-		.build();
-		Drive.DriveApi.query(client, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
-			
-			@Override
-			public void onResult(MetadataBufferResult result) {
-				MetadataBuffer buffer = result.getMetadataBuffer();
-				System.out.println("Files found: "+buffer.getCount());
-				if(buffer.getCount() > 0){
-					ArrayList<Metadata> list = new ArrayList<Metadata>();
-					Iterator<Metadata> iterator = buffer.iterator();
-					while(iterator.hasNext()){
-						Metadata metadata = iterator.next();
-						if(!metadata.isTrashed()){
-							list.add(metadata);
-						}
-					}
-					if(!list.isEmpty()) {
-						System.out.println("SUCCESS: (list size = "+list.size()+")");
-						DriveId id = list.get(0).getDriveId();
-						DriveFile file = Drive.DriveApi.getFile(client, id);
-						upload_read(file, data);
-					} else {
-						System.out.println("FAILURE - No untrashed files found");
-						upload_create_contents(folder, data);
-					}
-					
-				} else {
-					System.out.println("FAILURE - No files found");
-					upload_create_contents(folder, data);
-				}
-				buffer.close();
-			}
-		});
 	}
 	private void upload_create_contents(final DriveFolder folder, final String data){
 		Log.d(TAG, "upload_create_contents");
@@ -244,44 +292,6 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 				}
 			});
 	}
-	private void upload_read(final DriveFile file, final String newData){
-		file.open(client, DriveFile.MODE_READ_ONLY, new DownloadProgressListener() {
-
-			@Override
-			public void onProgress(long bytesDownloaded, long bytesExpected) {
-				System.out.println(bytesDownloaded + " / " + bytesExpected);
-			}
-		}).setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
-
-			@Override
-			public void onResult(DriveContentsResult result) {
-				DriveContents contents = result.getDriveContents();
-
-				//Input
-				InputStream stream = contents.getInputStream();
-				InputStreamReader reader = new InputStreamReader(stream);
-				BufferedReader in = new BufferedReader(reader);
-
-				try {
-					//Read
-					StringBuilder stringbuilder = new StringBuilder();
-					String line = in.readLine();
-					while(line != null){
-						stringbuilder.append(line);
-						line = in.readLine();
-					}
-					String oldData = stringbuilder.toString();
-					in.close();
-					Log.d(TAG, "File contents (before) = "+oldData);
-					
-					upload_write(file, oldData, newData);
-				} catch (IOException e) {
-					Log.d(TAG, "Failed to read/write contents");
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 	private void upload_write(DriveFile file, final String oldData, final String newData){	
 		file.open(client, DriveFile.MODE_WRITE_ONLY, new DownloadProgressListener() {
 			
@@ -313,7 +323,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 						
 						@Override
 						public void onResult(Status status) {
-							System.out.println("Status: " + (status.isSuccess() ? "Success" : "Failure"));
+							Log.d(TAG, "Status: " + (status.isSuccess() ? "Success" : "Failure"));
 						}
 					});
 				} catch (IOException e) {
@@ -331,18 +341,12 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 		
 	}
 	
-	
-	
-	
-	
-	
-
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode){
 		case DH_REQUEST_CODE_RESOLVE_ERROR:
 			isResolvingError = false;
 			if (resultCode == Activity.RESULT_OK) {
-				System.out.println(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+				Log.i(TAG, data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
 				// Make sure the app is not already connected or attempting to connect
 				if (!client.isConnecting() && !client.isConnected()) {
 					client.connect();
@@ -351,9 +355,6 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 			break;
 		}
 	} 
-
-
-
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
@@ -384,7 +385,6 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 		Log.d(TAG, "onConnectionSuspende: "+result);
 	}
 
-
 	private void showErrorDialog(int errorCode) {
 		/* Creates a dialog for an error message */
 
@@ -400,7 +400,6 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 		/* Called from ErrorDialogFragment when the dialog is dismissed. */
 		isResolvingError = false;
 	}
-
 
 	public class ErrorDialogFragment extends DialogFragment {
 		/* A fragment to display an error dialog */

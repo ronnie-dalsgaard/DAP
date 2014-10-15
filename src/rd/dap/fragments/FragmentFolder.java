@@ -80,7 +80,6 @@ public class FragmentFolder extends Fragment implements OnClickListener {
 	}
 
 	public void setFolderName(String foldername){
-		System.out.println("====> "+foldername+"\tfolder_tv is null "+(folder_tv==null));
 		if(folder_tv == null) return;
 		folder_tv.setText(foldername);
 	}

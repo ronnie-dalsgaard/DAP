@@ -63,7 +63,6 @@ public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObser
 			@Override 
 			protected void onPostExecute(Void result){
 				Log.d(TAG, "onPostExecute - audiobooks loaded");
-				for(Audiobook a : audiobooks) System.out.println(a);
 				getActivity().runOnUiThread(new Runnable() {
 					@Override public void run() {
 						adapter.notifyDataSetChanged();
