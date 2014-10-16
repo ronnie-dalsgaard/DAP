@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,41 +45,25 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	
+	//Constructors
 	public AudiobookGridFragment(){
 		super();
 	}
 	public AudiobookGridFragment(Activity activity){
 		super();
-		adapter = new AudiobookAdapter(activity, R.layout.cover_view, Data.getAudiobooks());
+		
 	}
 	
+	//Fragment must-haves
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
-		setHasOptionsMenu(true);
+		adapter = new AudiobookAdapter(getActivity(), R.layout.cover_view, Data.getAudiobooks());
 		
-//		adapter = new AudiobookAdapter(getActivity(), R.layout.cover_view, Data.getAudiobooks());
-
-//		new AsyncTask<Void, Void, Void>(){
-//			@Override
-//			protected Void doInBackground(Void... params) {
-//				AudiobookManager.getInstance().loadAudiobooks(getActivity()); 
-//				return null;
-//			}
-//			@Override 
-//			protected void onPostExecute(Void result){
-//				Log.d(TAG, "onPostExecute - audiobooks loaded");
-//				getActivity().runOnUiThread(new Runnable() {
-//					@Override public void run() {
-//						adapter.notifyDataSetChanged();
-//					}
-//				});
-//			}
-//		}.execute();
+		setHasOptionsMenu(true);
 	}
-	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
@@ -158,6 +141,7 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 		}
 	}
 	
+	//Listeners
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 		Log.d(TAG, "onItemClick");
@@ -173,11 +157,12 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 	public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
 		Log.d(TAG, "onItemLongClick");
 		ChangeAudiobookDialogFragment frag = ChangeAudiobookDialogFragment.newInstance(position);
-		frag.show(getFragmentManager(), "ChagenAudiobookDialogFragment");
+		frag.show(getFragmentManager(), "ChagenAudiobookDialog");
 		
 		return true; //consume click
 	}
 
+	//Adapter
 	public AudiobookAdapter getAdapter() { return adapter; }
 	public class AudiobookAdapter extends ArrayAdapter<Audiobook> {
 		private List<Audiobook> audiobooks;
@@ -189,6 +174,7 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 
 		// create a new ImageView for each item referenced by the Adapter
 		public View getView(int position, View convertView, ViewGroup parent) {
+			Log.d(TAG, "getView");
 			ViewHolder holder;
 			if(convertView == null){
 				LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);

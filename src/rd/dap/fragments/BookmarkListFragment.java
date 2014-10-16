@@ -4,6 +4,7 @@ import static rd.dap.MainActivity.miniplayer;
 
 import java.util.List;
 
+import rd.dap.MainActivity.ChangeBookmarkDialogFragment;
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.PlayerService.PlayerObserver;
@@ -11,7 +12,6 @@ import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
-import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.support.Time;
@@ -24,7 +24,6 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -48,16 +47,6 @@ public class BookmarkListFragment extends Fragment implements
 	private boolean bound = false;
 	private ListView list;
 	
-	public BookmarkListFragment(){
-		super();
-	}
-	public BookmarkListFragment(Activity activity){
-		super();
-		adapter = new BookmarkAdapter(activity, R.layout.bookmark_item, Data.getBookmarks());
-	}
-	
-	//TODO only add audiobook on audiobook tab
-	//TODO delete bookmark
 	//TODO up-/download bookmarks
 	//TODO Helper texts
 	
@@ -73,28 +62,13 @@ public class BookmarkListFragment extends Fragment implements
 	//TODO pregress as progressbar
 	//TODO author heading for audiobooks
 
+	//Fragment must-haves
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
-//		adapter = new BookmarkAdapter(getActivity(), R.layout.bookmark_item, Data.getBookmarks());
-		
-//		new AsyncTask<Void, Void, Void>(){
-//			@Override
-//			protected Void doInBackground(Void... params) {
-//				BookmarkManager.getInstance().loadBookmarks(getActivity().getFilesDir()); 
-//				return null;
-//			}
-//			@Override 
-//			protected void onPostExecute(Void result){
-//				getActivity().runOnUiThread(new Runnable() {
-//					@Override public void run() {
-//						adapter.notifyDataSetChanged();
-//					}
-//				});
-//			}
-//		}.execute();
+		adapter = new BookmarkAdapter(getActivity(), R.layout.bookmark_item, Data.getBookmarks());
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -106,10 +80,14 @@ public class BookmarkListFragment extends Fragment implements
 		list.setOnItemClickListener(this);
 		list.setOnItemLongClickListener(this);
 		
+		System.out.println(Data.getBookmarks());
+		
 		return v;
 	}
 	
+	//Helper method
 	public void updateBookmark(Bookmark bookmark){
+		Log.d(TAG, "updateBookmark");
 		Activity activity = getActivity();
 		if(activity == null) return;
 		activity.runOnUiThread(new Runnable() {
@@ -119,6 +97,7 @@ public class BookmarkListFragment extends Fragment implements
 		});
 	}
 	
+	//Listener
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 		Log.d(TAG, "onItemClick");
@@ -136,10 +115,13 @@ public class BookmarkListFragment extends Fragment implements
 	}
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-		// TODO Auto-generated method stub
+		Log.d(TAG, "onItemLongClick");
+		ChangeBookmarkDialogFragment frag = ChangeBookmarkDialogFragment.newInstance(position);
+		frag.show(getFragmentManager(), "ChagenBookmarkDialog");
 		return true; //Consume click
 	}	
 
+	//Adapter
 	public BookmarkAdapter getAdapter() { return adapter; }
 	public class BookmarkAdapter extends ArrayAdapter<Bookmark> {
 		private List<Bookmark> bookmarks;
@@ -151,6 +133,7 @@ public class BookmarkListFragment extends Fragment implements
 		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent){
+			Log.d(TAG, "getView");
 			ViewHolder holder;
 			if(convertView == null){
 				LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -205,6 +188,7 @@ public class BookmarkListFragment extends Fragment implements
 		public RelativeLayout info;
 	}
 
+	//Connection must-haves
 	@Override
 	public void onStart(){
 		Log.d(TAG, "onStart");
@@ -223,7 +207,6 @@ public class BookmarkListFragment extends Fragment implements
 			bound = false;
 		}
 	}
-
 	
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {

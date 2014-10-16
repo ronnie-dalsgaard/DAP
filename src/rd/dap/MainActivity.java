@@ -32,6 +32,7 @@ import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements ActionBar.TabListener, MiniPlayerObserver {
 	private static final String TAG = "MainActivity";
@@ -51,8 +52,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		Intent serviceIntent = new Intent(this, PlayerService.class);
 		startService(serviceIntent);
 		
-		audiobookGridFragment = new AudiobookGridFragment(this);
-		bookmarkListFragment = new BookmarkListFragment(this);
+		audiobookGridFragment = new AudiobookGridFragment();
+		bookmarkListFragment = new BookmarkListFragment();
 		controllerFragment = new ControllerFragment();
 		
 		//Load Bookmarks
@@ -67,7 +68,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 			protected void onPostExecute(Void result){
 				runOnUiThread(new Runnable() {
 					@Override public void run() {
-						MainActivity.getBookmarkListFragment().getAdapter().notifyDataSetChanged();
+						BookmarkListFragment frag = MainActivity.getBookmarkListFragment();
+						if(frag != null){
+							BookmarkAdapter adapter = frag.getAdapter();
+							if(adapter != null) adapter.notifyDataSetChanged();
+						}
 					}
 				});
 			}
@@ -88,8 +93,21 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 				Log.d(TAG, "onPostExecute - audiobooks loaded");
 				runOnUiThread(new Runnable() {
 					@Override public void run() {
-						MainActivity.getAudiobookGridFragment().getAdapter().notifyDataSetChanged();
-						MainActivity.getBookmarkListFragment().getAdapter().notifyDataSetChanged();
+						AudiobookGridFragment a_frag = MainActivity.getAudiobookGridFragment();
+						if(a_frag != null){
+							AudiobookAdapter a_adapter = a_frag.getAdapter();
+							if(a_adapter != null) {
+								a_adapter.notifyDataSetChanged();
+							} else System.err.println("No audiobook adapter");
+						} else System.err.println("No audiobook fragment");
+
+						BookmarkListFragment b_frag = MainActivity.getBookmarkListFragment();
+						if(b_frag != null){
+							BookmarkAdapter b_adapter = b_frag.getAdapter();
+							if(b_adapter != null) {
+								b_adapter.notifyDataSetChanged();
+							} else System.err.println("No bookmark adapter");
+						} else System.err.println("No bookmark fragment");
 					}
 				});
 			}
@@ -210,7 +228,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		}
 	}
 
-	
+	//Edit audiobook dialogs
 	public static class ChangeAudiobookDialogFragment extends DialogFragment {
 		public static final ChangeAudiobookDialogFragment newInstance(int position){
 			ChangeAudiobookDialogFragment fragment = new ChangeAudiobookDialogFragment();
@@ -219,7 +237,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 			fragment.setArguments(bundle);
 			return fragment ;
 		}
-
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			final int position = getArguments().getInt("position");
@@ -237,31 +254,31 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 			})
 			.setNegativeButton("Delete audiobook", new DialogInterface.OnClickListener() {
 				@Override public void onClick(DialogInterface dialog, int which) {
-					ConfirmDeleteDialogFragment frag = ConfirmDeleteDialogFragment.newInstance(position);
-					frag.show(getFragmentManager(), "ConfirmDeleteDialogFragment");
+					ConfirmDeleteaAudiobookDialog frag = ConfirmDeleteaAudiobookDialog.newInstance(position);
+					frag.show(getFragmentManager(), "ConfirmDeleteAudiobookDialog");
 				}
 			})
 			.create();
 		}
 	}
-	public static class ConfirmDeleteDialogFragment extends DialogFragment {
-		public static final ConfirmDeleteDialogFragment newInstance(int position){
-			ConfirmDeleteDialogFragment fragment = new ConfirmDeleteDialogFragment();
+	public static class ConfirmDeleteaAudiobookDialog extends DialogFragment {
+		public static final ConfirmDeleteaAudiobookDialog newInstance(int position){
+			ConfirmDeleteaAudiobookDialog fragment = new ConfirmDeleteaAudiobookDialog();
 			Bundle bundle = new Bundle();
 			bundle.putInt("position", position);
 			fragment.setArguments(bundle);
 			return fragment ;
 		}
-
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			int position = getArguments().getInt("position");
 			final Audiobook audiobook = Data.getAudiobooks().get(position);
 			return new AlertDialog.Builder(getActivity())
 			.setIcon(getActivity().getResources().getDrawable(R.drawable.ic_action_warning))
-			.setMessage("Confirm delete "+audiobook.getAuthor() + " - " + audiobook.getAlbum())
-			.setPositiveButton("Cancel", null) //Do nothing
-			.setNegativeButton("Confirm", new DialogInterface.OnClickListener() {
+			.setTitle("Confirm delete")
+			.setMessage(audiobook.getAuthor() + "\n" + audiobook.getAlbum())
+			.setNegativeButton("Cancel", null) //Do nothing
+			.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
 				@Override public void onClick(DialogInterface dialog, int which) {
 					if(audiobook.equals(Data.getAudiobook()) && miniplayer != null){
 						//stop and un-set as current
@@ -284,6 +301,95 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 					//update the lists
 					AudiobookAdapter audiobookAdapter = audiobookGridFragment.getAdapter();
 					if(audiobookAdapter != null) audiobookAdapter.notifyDataSetChanged();
+					
+					BookmarkAdapter bookmarkAdapter = bookmarkListFragment.getAdapter();
+					if(bookmarkAdapter != null) bookmarkAdapter.notifyDataSetChanged();
+					
+					//update the controller
+					if(controllerFragment != null){
+						controllerFragment.displayValues();
+						controllerFragment.displayTracks();
+						controllerFragment.displayProgress();
+					}
+				}
+			})
+			.create();
+		}
+	}
+	
+	//Edit bookmark dialogs
+	public static class ChangeBookmarkDialogFragment extends DialogFragment {
+		public static final ChangeBookmarkDialogFragment newInstance(int position){
+			ChangeBookmarkDialogFragment fragment = new ChangeBookmarkDialogFragment();
+			Bundle bundle = new Bundle();
+			bundle.putInt("position", position);
+			fragment.setArguments(bundle);
+			return fragment ;
+		}
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			final int position = getArguments().getInt("position");
+			final Bookmark bookmark = Data.getBookmarks().get(position);
+
+			return new AlertDialog.Builder(getActivity())
+			.setMessage("Change bookmark")
+			.setPositiveButton("Edit bookmark", new DialogInterface.OnClickListener() {
+				@Override public void onClick(DialogInterface dialog, int which) {
+//					Intent intent = new Intent(getActivity(), AudiobookActivity.class);
+//					intent.putExtra("state", STATE_EDIT);
+//					intent.putExtra("bookmark", bookmark);
+//					startActivity(intent);
+					Toast.makeText(getActivity(), "Not implemented yet!", Toast.LENGTH_LONG).show();
+				}
+			})
+			.setNegativeButton("Delete bookmark", new DialogInterface.OnClickListener() {
+				@Override public void onClick(DialogInterface dialog, int which) {
+					ConfirmDeleteaBookmarkDialog frag = ConfirmDeleteaBookmarkDialog.newInstance(position);
+					frag.show(getFragmentManager(), "ConfirmDeleteBookmarkDialog");
+				}
+			})
+			.create();
+		}
+	}
+	public static class ConfirmDeleteaBookmarkDialog extends DialogFragment {
+		public static final ConfirmDeleteaBookmarkDialog newInstance(int position){
+			ConfirmDeleteaBookmarkDialog fragment = new ConfirmDeleteaBookmarkDialog();
+			Bundle bundle = new Bundle();
+			bundle.putInt("position", position);
+			fragment.setArguments(bundle);
+			return fragment ;
+		}
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			int position = getArguments().getInt("position");
+			final Bookmark bookmark = Data.getBookmarks().get(position);
+			
+			return new AlertDialog.Builder(getActivity(), android.R.style.Theme_Holo_Dialog)
+			.setIcon(getActivity().getResources().getDrawable(R.drawable.ic_action_warning))
+			.setTitle("Confirm delete bookmark")
+			.setMessage(bookmark.getAuthor() + "\n" + bookmark.getAlbum())
+			.setNegativeButton("Cancel", null) //Do nothing
+			.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+				@Override public void onClick(DialogInterface dialog, int which) {
+					Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+					if(audiobook != null && audiobook.equals(Data.getAudiobook()) && miniplayer != null){
+						//stop and un-set as current
+						miniplayer.getPlayer().pause();
+						Data.setAudiobook(null);
+						Data.setTrack(null);
+						Data.setPosition(-1);
+						
+						//update the miniplayers view
+						miniplayer.updateView();
+					}
+
+					//Remove the audiobook
+					BookmarkManager.getInstance().removeBookmark(getActivity(), bookmark);
+					Log.d(TAG, "Deleting Bookmark:\n"+bookmark);
+
+					//update the lists
+//					AudiobookAdapter audiobookAdapter = audiobookGridFragment.getAdapter();
+//					if(audiobookAdapter != null) audiobookAdapter.notifyDataSetChanged();
 					
 					BookmarkAdapter bookmarkAdapter = bookmarkListFragment.getAdapter();
 					if(bookmarkAdapter != null) bookmarkAdapter.notifyDataSetChanged();
