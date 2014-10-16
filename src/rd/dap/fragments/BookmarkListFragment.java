@@ -15,6 +15,7 @@ import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.support.Time;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
@@ -49,7 +50,6 @@ public class BookmarkListFragment extends Fragment implements
 	
 	//TODO up-/download bookmarks
 	//TODO remove all activity titles
-	//TODO add audiobook
 	
 	//TODO constant class (final class + private constructor)
 	//TODO enable delete track
@@ -99,7 +99,9 @@ public class BookmarkListFragment extends Fragment implements
 	}
 	
 	public void updateBookmark(Bookmark bookmark){
-		getActivity().runOnUiThread(new Runnable() {
+		Activity activity = getActivity();
+		if(activity == null) return;
+		activity.runOnUiThread(new Runnable() {
 			@Override public void run() {
 				adapter.notifyDataSetChanged();
 			}

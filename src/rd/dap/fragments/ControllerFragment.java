@@ -178,53 +178,55 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 		if(cover == null) cover = Data.getAudiobook().getCover();
 		if(cover != null) {
 			Bitmap bitmap = BitmapFactory.decodeFile(cover);
-			cover_iv.setImageBitmap(bitmap);
+			if(cover_iv != null) cover_iv.setImageBitmap(bitmap);
 		} else {
-			cover_iv.setImageDrawable(noCover);
+			if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 		}
 
 		//Author
-		author_tv.setText(Data.getAudiobook().getAuthor());
+		if(author_tv != null) author_tv.setText(Data.getAudiobook().getAuthor());
 
 		//Album
-		audiobook_basics_album_tv.setText(Data.getAudiobook().getAlbum());
+		if(audiobook_basics_album_tv != null) audiobook_basics_album_tv.setText(Data.getAudiobook().getAlbum());
 	}
 	public void displayTracks(){
 		if(Data.getPosition() == -1 || Data.getTrack() == null || Data.getAudiobook() == null) return;
 		//Title
-		title_tv.setText(Data.getTrack().getTitle());
+		if(title_tv != null) title_tv.setText(Data.getTrack().getTitle());
 
 		//Tracks
-		tracks_gv.removeAllViews();
-		final int COLUMNS = 8;
-		LinearLayout row = null;
-		int m = LinearLayout.LayoutParams.MATCH_PARENT;
-		int w = LinearLayout.LayoutParams.WRAP_CONTENT;
-		LinearLayout.LayoutParams row_p = new LinearLayout.LayoutParams(m, w);
-		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 85, 1);
-		for(int i = 0; i < Data.getAudiobook().getPlaylist().size(); i++){
-			if(i % COLUMNS == 0){
-				row = new LinearLayout(getActivity());
-				row.setOrientation(LinearLayout.HORIZONTAL);
-				tracks_gv.addView(row, row_p);
+		if(tracks_gv != null){
+			tracks_gv.removeAllViews();
+			final int COLUMNS = 8;
+			LinearLayout row = null;
+			int m = LinearLayout.LayoutParams.MATCH_PARENT;
+			int w = LinearLayout.LayoutParams.WRAP_CONTENT;
+			LinearLayout.LayoutParams row_p = new LinearLayout.LayoutParams(m, w);
+			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 85, 1);
+			for(int i = 0; i < Data.getAudiobook().getPlaylist().size(); i++){
+				if(i % COLUMNS == 0){
+					row = new LinearLayout(getActivity());
+					row.setOrientation(LinearLayout.HORIZONTAL);
+					tracks_gv.addView(row, row_p);
+				}
+				TextView cell = new TextView(getActivity());
+				cell.setTextColor(getResources().getColor(R.color.white));
+				cell.setGravity(Gravity.CENTER);
+				cell.setText(String.format("%02d", i+1));
+				if(i == Data.getPosition()){
+					cell.setBackground(getResources().getDrawable(R.drawable.circle));
+				}
+				cell.setId(CELL);
+				cell.setTag(i); //Autoboxing
+				cell.setOnClickListener(this);
+				row.addView(cell, p);
 			}
-			TextView cell = new TextView(getActivity());
-			cell.setTextColor(getResources().getColor(R.color.white));
-			cell.setGravity(Gravity.CENTER);
-			cell.setText(String.format("%02d", i+1));
-			if(i == Data.getPosition()){
-				cell.setBackground(getResources().getDrawable(R.drawable.circle));
+			if(Data.getAudiobook().getPlaylist().size() % COLUMNS > 0){
+				Space space = new Space(getActivity());
+				int weight = COLUMNS - (Data.getAudiobook().getPlaylist().size() % COLUMNS);
+				LinearLayout.LayoutParams space_p = new LinearLayout.LayoutParams(0, 75, weight);
+				row.addView(space, space_p);
 			}
-			cell.setId(CELL);
-			cell.setTag(i); //Autoboxing
-			cell.setOnClickListener(this);
-			row.addView(cell, p);
-		}
-		if(Data.getAudiobook().getPlaylist().size() % COLUMNS > 0){
-			Space space = new Space(getActivity());
-			int weight = COLUMNS - (Data.getAudiobook().getPlaylist().size() % COLUMNS);
-			LinearLayout.LayoutParams space_p = new LinearLayout.LayoutParams(0, 75, weight);
-			row.addView(space, space_p);
 		}
 	}
 	public void displayProgress(){
@@ -449,9 +451,9 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 						play_btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
 						cover_btn.setImageDrawable(isPlaying ? drw_pause_on_cover : drw_play_on_cover);
 					} else {
-						play_btn.setImageDrawable(null);
-						cover_btn.setImageDrawable(null);
-						cover_iv.setImageDrawable(noCover);
+						if(play_btn != null) play_btn.setImageDrawable(null);
+						if(cover_btn != null) cover_btn.setImageDrawable(null);
+						if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 					}
 					displayValues();
 				}

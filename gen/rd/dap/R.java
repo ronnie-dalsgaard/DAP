@@ -870,7 +870,7 @@ containing a value of this type.
     public static final class string {
         public static final int _progress=0x7f05002b;
         public static final int accept=0x7f050002;
-        public static final int action_settings=0x7f05002e;
+        public static final int action_settings=0x7f05002d;
         public static final int app_name=0x7f050023;
         public static final int author=0x7f050027;
         /**   Text for notification shown when the Android Wear apps needs to be updated. Only shown on the wearable. [CHAR LIMIT=NONE] 
@@ -976,28 +976,18 @@ containing a value of this type.
         public static final int create_calendar_message=0x7f050005;
         public static final int create_calendar_title=0x7f050004;
         public static final int decline=0x7f050003;
-        public static final int edit_mode_enter=0x7f050030;
-        public static final int edit_mode_exit=0x7f050031;
-        public static final int hello_world=0x7f05002d;
+        public static final int edit_mode_enter=0x7f05002e;
+        public static final int edit_mode_exit=0x7f05002f;
+        public static final int hello_world=0x7f05002c;
         public static final int pause=0x7f050026;
         public static final int play=0x7f050025;
         public static final int progress=0x7f05002a;
         public static final int store_picture_message=0x7f050001;
         public static final int store_picture_title=0x7f050000;
-        public static final int tab1=0x7f05003a;
-        public static final int tab2=0x7f05003b;
-        public static final int tab3=0x7f05003c;
+        public static final int tab1=0x7f050030;
+        public static final int tab2=0x7f050031;
+        public static final int tab3=0x7f050032;
         public static final int title=0x7f050028;
-        public static final int title_activity_audiobook=0x7f05002f;
-        public static final int title_activity_audiobook_list=0x7f050036;
-        public static final int title_activity_bookmark=0x7f050038;
-        public static final int title_activity_controller=0x7f050035;
-        public static final int title_activity_edit_audiobook=0x7f050032;
-        public static final int title_activity_file_browser=0x7f05002c;
-        public static final int title_activity_input=0x7f050033;
-        public static final int title_activity_main=0x7f050039;
-        public static final int title_activity_new_audiobook=0x7f050037;
-        public static final int title_activity_track=0x7f050034;
         public static final int track=0x7f050029;
         /**  Text on a placeholder buy button when Google Play services is not
          available or up-to-date 

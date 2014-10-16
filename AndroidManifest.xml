@@ -15,56 +15,24 @@
         android:icon="@drawable/red_tape"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/title_activity_main" >
+        <activity android:name=".MainActivity" android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="rd.dap.fragments.BookmarkListFragment"
-            android:label="@string/title_activity_audiobook_list" >
-        </activity>
-        <activity
-            android:name="rd.dap.fragments.AudiobookGridFragment"
-            android:label="@string/title_activity_bookmark" >
-        </activity>
-        <activity
-            android:name="rd.dap.fragments.ControllerFragment"
-            android:label="@string/title_activity_controller" >
-        </activity>
-        <activity
-            android:name=".FileBrowserActivity"
-            android:label="@string/title_activity_file_browser" >
-        </activity>
-        <activity
-            android:name=".AudiobookActivity"
-            android:label="@string/title_activity_audiobook" >
-        </activity>
-        <activity
-            android:name=".TrackActivity"
-            android:label="@string/title_activity_track" >
-        </activity>
-        <activity
-            android:name=".InputActivity"
-            android:label="@string/title_activity_input" >
-        </activity>
-        <activity
-            android:name=".NewAudiobookActivity"
-            android:label="@string/title_activity_new_audiobook" >
-        </activity>
+        <activity android:name="rd.dap.fragments.BookmarkListFragment" android:label="@string/app_name" />
+        <activity android:name="rd.dap.fragments.AudiobookGridFragment" android:label="@string/app_name" />
+        <activity android:name="rd.dap.fragments.ControllerFragment" android:label="@string/app_name" />
+        <activity android:name=".FileBrowserActivity" android:label="@string/app_name" />
+        <activity android:name=".AudiobookActivity" android:label="@string/app_name" />
+        <activity android:name=".TrackActivity" android:label="@string/app_name" />
+        <activity android:name=".InputActivity" android:label="@string/app_name" />
+        <activity android:name=".NewAudiobookActivity" android:label="@string/app_name" />
 
         <service android:name=".PlayerService" />
-        <service
-            android:name=".support.DriveHandler$DriveService"
-            android:exported="false" />
 
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>
