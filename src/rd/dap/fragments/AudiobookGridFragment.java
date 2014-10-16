@@ -1,16 +1,25 @@
 package rd.dap.fragments;
 
+import static rd.dap.AudiobookActivity.STATE_NEW;
+import static rd.dap.FileBrowserActivity.TYPE_FOLDER;
 import static rd.dap.MainActivity.miniplayer;
 
+import java.io.File;
 import java.util.List;
 
+import rd.dap.AudiobookActivity;
+import rd.dap.FileBrowserActivity;
+import rd.dap.MainActivity;
 import rd.dap.MainActivity.ChangeAudiobookDialogFragment;
 import rd.dap.R;
+import rd.dap.fragments.BookmarkListFragment.BookmarkAdapter;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Data;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -18,6 +27,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -29,33 +41,44 @@ import android.widget.ImageView;
 
 public class AudiobookGridFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener{
 	private static final String TAG = "AudiobookGridActivity";
-	private static ImageAdapter adapter;
+	private static AudiobookAdapter adapter;
 	private GridView grid;
+	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
+	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	
+	public AudiobookGridFragment(){
+		super();
+	}
+	public AudiobookGridFragment(Activity activity){
+		super();
+		adapter = new AudiobookAdapter(activity, R.layout.cover_view, Data.getAudiobooks());
+	}
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
-		adapter = new ImageAdapter(getActivity(), R.layout.cover_view, Data.getAudiobooks());
+		setHasOptionsMenu(true);
+		
+//		adapter = new AudiobookAdapter(getActivity(), R.layout.cover_view, Data.getAudiobooks());
 
-		new AsyncTask<Void, Void, Void>(){
-			@Override
-			protected Void doInBackground(Void... params) {
-				AudiobookManager.getInstance().loadAudiobooks(getActivity()); 
-				return null;
-			}
-			@Override 
-			protected void onPostExecute(Void result){
-				Log.d(TAG, "onPostExecute - audiobooks loaded");
-				getActivity().runOnUiThread(new Runnable() {
-					@Override public void run() {
-						adapter.notifyDataSetChanged();
-					}
-				});
-			}
-		}.execute();
+//		new AsyncTask<Void, Void, Void>(){
+//			@Override
+//			protected Void doInBackground(Void... params) {
+//				AudiobookManager.getInstance().loadAudiobooks(getActivity()); 
+//				return null;
+//			}
+//			@Override 
+//			protected void onPostExecute(Void result){
+//				Log.d(TAG, "onPostExecute - audiobooks loaded");
+//				getActivity().runOnUiThread(new Runnable() {
+//					@Override public void run() {
+//						adapter.notifyDataSetChanged();
+//					}
+//				});
+//			}
+//		}.execute();
 	}
 	
 	@Override
@@ -71,6 +94,70 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 		return v;
 	}
 
+	//Menu
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		inflater.inflate(R.menu.main, menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case R.id.menu_item_new_audiobook:
+			Log.d(TAG, "menu_item_new_audiobook");
+			Intent intent = new Intent(getActivity(), FileBrowserActivity.class);
+			intent.putExtra("type", TYPE_FOLDER);
+			intent.putExtra("message", "Select folder");
+			intent.putExtra("requestcode", REQUEST_NEW_AUDIOBOOK);
+			startActivityForResult(intent, REQUEST_NEW_AUDIOBOOK);
+			break;
+
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		switch(requestCode){
+		case REQUEST_NEW_AUDIOBOOK:
+			Log.d(TAG, "onActivityResult - REQUEST_NEW_AUDIOBOOK");
+			if(data == null) return;
+			String folder_path = data.getStringExtra("result");
+			File folder = new File(folder_path);
+			AudiobookManager manager = AudiobookManager.getInstance();
+			Audiobook audiobook = manager.autoCreateAudiobook(folder, true);
+			Intent intent = new Intent(getActivity(), AudiobookActivity.class);
+			intent.putExtra("state", STATE_NEW);
+			intent.putExtra("audiobook", audiobook);
+			startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK);
+			break;
+		case REQUEST_EDIT_AUDIOBOOK:
+			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUDIOBOOK");
+			
+			//update the lists
+			AudiobookGridFragment audiobookGridFragment = MainActivity.getAudiobookGridFragment();
+			if(audiobookGridFragment != null ) {
+				AudiobookAdapter audiobookAdapter = audiobookGridFragment.getAdapter();
+				if(audiobookAdapter != null) audiobookAdapter.notifyDataSetChanged();
+			}
+			
+			BookmarkListFragment bookmarkListFragment = MainActivity.getBookmarkListFragment();
+			if(bookmarkListFragment != null) {
+				BookmarkAdapter bookmarkAdapter = bookmarkListFragment.getAdapter();
+				if(bookmarkAdapter != null) bookmarkAdapter.notifyDataSetChanged();
+				//just in case the bookmark was there before the audiobook
+			}
+			
+			//update the controller
+			ControllerFragment controllerFragment = MainActivity.getControllerFragment();
+			if(controllerFragment != null) {
+				controllerFragment.displayValues();
+				controllerFragment.displayTracks();
+				controllerFragment.displayProgress();
+			}
+			
+		}
+	}
+	
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 		Log.d(TAG, "onItemClick");
@@ -91,11 +178,11 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 		return true; //consume click
 	}
 
-	public ImageAdapter getAdapter() { return adapter; }
-	public class ImageAdapter extends ArrayAdapter<Audiobook> {
+	public AudiobookAdapter getAdapter() { return adapter; }
+	public class AudiobookAdapter extends ArrayAdapter<Audiobook> {
 		private List<Audiobook> audiobooks;
 
-		public ImageAdapter(Context context, int resource, List<Audiobook> audiobooks) {
+		public AudiobookAdapter(Context context, int resource, List<Audiobook> audiobooks) {
 			super(context, resource, audiobooks);
 			this.audiobooks = audiobooks;
 		}

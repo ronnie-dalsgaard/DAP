@@ -48,42 +48,53 @@ public class BookmarkListFragment extends Fragment implements
 	private boolean bound = false;
 	private ListView list;
 	
+	public BookmarkListFragment(){
+		super();
+	}
+	public BookmarkListFragment(Activity activity){
+		super();
+		adapter = new BookmarkAdapter(activity, R.layout.bookmark_item, Data.getBookmarks());
+	}
+	
+	//TODO only add audiobook on audiobook tab
+	//TODO delete bookmark
 	//TODO up-/download bookmarks
-	//TODO remove all activity titles
+	//TODO Helper texts
 	
 	//TODO constant class (final class + private constructor)
 	//TODO enable delete track
 	//TODO mnually set bookmark
 	
 	//TODO Home folder
+	//TODO when auto-detecting auidobook include subfolders 
 	//TODO auto-detect all audiobooks
 	//TODO Texts as resource
 	//TODO sleeptimer
 	//TODO pregress as progressbar
-	//TODO Helper texts
+	//TODO author heading for audiobooks
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
-		adapter = new BookmarkAdapter(getActivity(), R.layout.bookmark_item, Data.getBookmarks());
+//		adapter = new BookmarkAdapter(getActivity(), R.layout.bookmark_item, Data.getBookmarks());
 		
-		new AsyncTask<Void, Void, Void>(){
-			@Override
-			protected Void doInBackground(Void... params) {
-				BookmarkManager.getInstance().loadBookmarks(getActivity().getFilesDir()); 
-				return null;
-			}
-			@Override 
-			protected void onPostExecute(Void result){
-				getActivity().runOnUiThread(new Runnable() {
-					@Override public void run() {
-						adapter.notifyDataSetChanged();
-					}
-				});
-			}
-		}.execute();
+//		new AsyncTask<Void, Void, Void>(){
+//			@Override
+//			protected Void doInBackground(Void... params) {
+//				BookmarkManager.getInstance().loadBookmarks(getActivity().getFilesDir()); 
+//				return null;
+//			}
+//			@Override 
+//			protected void onPostExecute(Void result){
+//				getActivity().runOnUiThread(new Runnable() {
+//					@Override public void run() {
+//						adapter.notifyDataSetChanged();
+//					}
+//				});
+//			}
+//		}.execute();
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

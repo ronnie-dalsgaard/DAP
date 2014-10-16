@@ -230,6 +230,10 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 		}
 	}
 	public void displayProgress(){
+		if(Data.getAudiobook() == null){
+			if(progress_tv != null) progress_tv.setText(Time.toString(0));
+			return;
+		}
 		if(player == null) return;
 		int progress = player.getCurrentProgress();
 		progress_tv.setText(Time.toString(progress));
@@ -473,7 +477,11 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					progress_tv.setText(Time.toString(player.getCurrentProgress()));
+					if(Data.getAudiobook() == null){
+						progress_tv.setText(Time.toString(0));
+					} else {
+						progress_tv.setText(Time.toString(player.getCurrentProgress()));
+					}
 				}
 			});
 		}

@@ -73,6 +73,7 @@ public class BookmarkManager extends Data{ //Singleton
 		return result && saveBookmarks(context.getFilesDir());
 	}
 	public void removeBookmark(Context context, Bookmark bookmark) { //Overloading
+		if(bookmark == null) return;
 		removeBookmark(context, bookmark.getAuthor(), bookmark.getAlbum());
 	}
 	

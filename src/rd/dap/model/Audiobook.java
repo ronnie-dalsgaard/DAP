@@ -30,8 +30,8 @@ public class Audiobook implements Serializable{
 	public void setAlbum(String album) { this.album = new String(album); }
 	public TrackList getPlaylist() { return new TrackList(playlist); }
 	public void setPlaylist(TrackList playlist) { this.playlist = new TrackList(playlist); }
-	public String getCover() { return new String(cover); }
-	public void setCover(String cover) { this.cover = new String(cover); }
+	public String getCover() { return cover == null ? null : new String(cover); }
+	public void setCover(String cover) { if(cover != null) this.cover = new String(cover); }
 	
 	public String toString(){
 		String out = author + " : " + album;

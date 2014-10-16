@@ -1,14 +1,11 @@
 package rd.dap;
 
 import static rd.dap.AudiobookActivity.STATE_EDIT;
-import static rd.dap.AudiobookActivity.STATE_NEW;
-import static rd.dap.FileBrowserActivity.TYPE_FOLDER;
 
-import java.io.File;
 import java.util.Locale;
 
 import rd.dap.fragments.AudiobookGridFragment;
-import rd.dap.fragments.AudiobookGridFragment.ImageAdapter;
+import rd.dap.fragments.AudiobookGridFragment.AudiobookAdapter;
 import rd.dap.fragments.BookmarkListFragment;
 import rd.dap.fragments.BookmarkListFragment.BookmarkAdapter;
 import rd.dap.fragments.ControllerFragment;
@@ -29,12 +26,11 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 public class MainActivity extends Activity implements ActionBar.TabListener, MiniPlayerObserver {
@@ -44,9 +40,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 	private ViewPager viewPager;
 	private static AudiobookGridFragment audiobookGridFragment;
 	private static BookmarkListFragment bookmarkListFragment;
-	private ControllerFragment controllerFragment;
-	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
-	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
+	private static ControllerFragment controllerFragment;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,14 +51,58 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		Intent serviceIntent = new Intent(this, PlayerService.class);
 		startService(serviceIntent);
 		
-		audiobookGridFragment = new AudiobookGridFragment();
-		bookmarkListFragment = new BookmarkListFragment();
+		audiobookGridFragment = new AudiobookGridFragment(this);
+		bookmarkListFragment = new BookmarkListFragment(this);
 		controllerFragment = new ControllerFragment();
+		
+		//Load Bookmarks
+		new AsyncTask<Activity, Void, Void>(){
+			@Override
+			protected Void doInBackground(Activity... params) {
+				Activity activity = params[0];
+				BookmarkManager.getInstance().loadBookmarks(activity.getFilesDir()); 
+				return null;
+			}
+			@Override 
+			protected void onPostExecute(Void result){
+				runOnUiThread(new Runnable() {
+					@Override public void run() {
+						MainActivity.getBookmarkListFragment().getAdapter().notifyDataSetChanged();
+					}
+				});
+			}
+		}.execute(this);
+		
+		
+		//Load Audiobooks
+		new AsyncTask<Activity, Void, Void>(){
+			@Override
+			protected Void doInBackground(Activity... params) {
+				try { Thread.sleep(3000); } catch(Exception e){/*Ignore*/} //FIXME remove - just for testing
+				Activity activity = params[0];
+				AudiobookManager.getInstance().loadAudiobooks(activity); 
+				return null;
+			}
+			@Override 
+			protected void onPostExecute(Void result){
+				Log.d(TAG, "onPostExecute - audiobooks loaded");
+				runOnUiThread(new Runnable() {
+					@Override public void run() {
+						MainActivity.getAudiobookGridFragment().getAdapter().notifyDataSetChanged();
+						MainActivity.getBookmarkListFragment().getAdapter().notifyDataSetChanged();
+					}
+				});
+			}
+		}.execute(this);
+		
+		
+		
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
+		
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the activity.
 		sectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
@@ -102,49 +141,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 //		miniplayer.setVisibility(View.VISIBLE);
 	}
 
-	//Menu
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()){
-		case R.id.menu_item_new_audiobook:
-			Log.d(TAG, "menu_item_new_audiobook");
-			Intent intent = new Intent(this, FileBrowserActivity.class);
-			intent.putExtra("type", TYPE_FOLDER);
-			intent.putExtra("message", "Select folder");
-			intent.putExtra("requestcode", REQUEST_NEW_AUDIOBOOK);
-			startActivityForResult(intent, REQUEST_NEW_AUDIOBOOK);
-			break;
-
-		}
-		return super.onOptionsItemSelected(item);
-	}
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data){
-		switch(requestCode){
-		case REQUEST_NEW_AUDIOBOOK:
-			Log.d(TAG, "onActivityResult - REQUEST_NEW_AUDIOBOOK");
-			if(data == null) return;
-			String folder_path = data.getStringExtra("result");
-			File folder = new File(folder_path);
-			AudiobookManager manager = AudiobookManager.getInstance();
-			Audiobook audiobook = manager.autoCreateAudiobook(folder, true);
-			Intent intent = new Intent(this, AudiobookActivity.class);
-			intent.putExtra("state", STATE_NEW);
-			intent.putExtra("audiobook", audiobook);
-			startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK);
-			break;
-		case REQUEST_EDIT_AUDIOBOOK:
-			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUDIOBOOK");
-			audiobookGridFragment.getAdapter().notifyDataSetChanged();
-			bookmarkListFragment.getAdapter().notifyDataSetChanged(); //just in case the bookmark was there before the audiobook
-		}
-	}
+	public static AudiobookGridFragment getAudiobookGridFragment() { return audiobookGridFragment; }
+	public static BookmarkListFragment getBookmarkListFragment() { return bookmarkListFragment; }
+	public static ControllerFragment getControllerFragment() { return controllerFragment; }
 	
 	//Tabs
 	@Override
@@ -264,14 +263,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 			.setPositiveButton("Cancel", null) //Do nothing
 			.setNegativeButton("Confirm", new DialogInterface.OnClickListener() {
 				@Override public void onClick(DialogInterface dialog, int which) {
-					//stop and un-set as current
-					miniplayer.getPlayer().pause();
-					Data.setAudiobook(null);
-					Data.setTrack(null);
-					Data.setPosition(-1);
-
-					//update the miniplayers view
-					miniplayer.updateView();
+					if(audiobook.equals(Data.getAudiobook()) && miniplayer != null){
+						//stop and un-set as current
+						miniplayer.getPlayer().pause();
+						Data.setAudiobook(null);
+						Data.setTrack(null);
+						Data.setPosition(-1);
+						
+						//update the miniplayers view
+						miniplayer.updateView();
+					}
 
 					//Remove the audiobook
 					AudiobookManager.getInstance().removeAudiobook(getActivity(), audiobook);
@@ -280,15 +281,19 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 					Log.d(TAG, "Deleting Audiobook:\n"+audiobook);
 					Log.d(TAG, "Deleting Bookmark:\n"+bookmark);
 
-					//update the list
-					ImageAdapter audiobookAdapter = audiobookGridFragment.getAdapter();
+					//update the lists
+					AudiobookAdapter audiobookAdapter = audiobookGridFragment.getAdapter();
 					if(audiobookAdapter != null) audiobookAdapter.notifyDataSetChanged();
 					
 					BookmarkAdapter bookmarkAdapter = bookmarkListFragment.getAdapter();
 					if(bookmarkAdapter != null) bookmarkAdapter.notifyDataSetChanged();
-					else System.out.println("BookmarkAdapter is null");
 					
-					for(Bookmark b : Data.getBookmarks()) System.out.println("%%"+b);
+					//update the controller
+					if(controllerFragment != null){
+						controllerFragment.displayValues();
+						controllerFragment.displayTracks();
+						controllerFragment.displayProgress();
+					}
 				}
 			})
 			.create();

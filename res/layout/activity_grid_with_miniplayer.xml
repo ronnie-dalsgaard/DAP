@@ -6,8 +6,12 @@
 
     <GridView
         android:id="@+id/grid_layout_gv"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/mini_player_width"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:horizontalSpacing="@dimen/margin_small"
+        android:verticalSpacing="@dimen/margin_small"
         android:numColumns="3" >
     </GridView>
 
