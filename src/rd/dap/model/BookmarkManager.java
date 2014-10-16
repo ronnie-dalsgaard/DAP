@@ -9,16 +9,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public class BookmarkManager { //Singleton
+public class BookmarkManager extends Data{ //Singleton
 	private static final String TAG = "BookmarkManager";
 	
 	private static BookmarkManager instance = new BookmarkManager();
-	private ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
 	
 	private BookmarkManager() { }
 	public static BookmarkManager getInstance() { return instance; }
@@ -55,26 +55,26 @@ public class BookmarkManager { //Singleton
 		}
 		return saveBookmarks(filesDir) ? result : null;
 	}
-	public Bookmark getBookmark(File filesDir, String author, String album){
-		loadBookmarks(filesDir);
+	public Bookmark getBookmark(/*File filesDir,*/ String author, String album){
+//		loadBookmarks(filesDir);
 		for(Bookmark bookmark : bookmarks){
 			if(bookmark.matches(author, album)) 
 				return bookmark;
 		}
 		return null;
 	}
-	public Bookmark getBookmark(File filesDir, Audiobook audiobook){ //Overloading
-		return getBookmark(filesDir, audiobook.getAuthor(), audiobook.getAlbum());
+	public Bookmark getBookmark(/*File filesDir,*/ Audiobook audiobook){ //Overloading
+		return getBookmark(/*filesDir,*/ audiobook.getAuthor(), audiobook.getAlbum());
 	}
-	public boolean deleteBookmark(File filesDir, String author, String album){
-		/*
-		 * When comparing bookmarks, trackno and progress is ignored
-		 */
+	public boolean removeBookmark(Context context, String author, String album){
+		// When comparing bookmarks, trackno and progress is ignored
 		Bookmark delete = new Bookmark(author, album, 0, 0);
 		boolean result = bookmarks.remove(delete);
-		return result && saveBookmarks(filesDir);
+		return result && saveBookmarks(context.getFilesDir());
 	}
-	public ArrayList<Bookmark> getBookmarks() { return bookmarks; }
+	public void removeBookmark(Context context, Bookmark bookmark) { //Overloading
+		removeBookmark(context, bookmark.getAuthor(), bookmark.getAlbum());
+	}
 	
 	//Load and save bookmarks
 	public ArrayList<Bookmark> loadBookmarks(File filesDir){
@@ -113,4 +113,5 @@ public class BookmarkManager { //Singleton
 			return false;
 		}
 	}
+	
 }

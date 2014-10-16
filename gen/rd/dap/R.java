@@ -728,7 +728,6 @@ containing a value of this type.
         public static final int vertical_divider=0x7f0200b8;
     }
     public static final class id {
-        public static final int action_settings=0x7f070065;
         public static final int audiobook_basics_album_tv=0x7f070043;
         public static final int audiobook_basics_author_tv=0x7f070042;
         public static final int audiobook_basics_cover_btn=0x7f07003f;
@@ -797,9 +796,7 @@ containing a value of this type.
         public static final int list_layout_lv=0x7f070015;
         public static final int main_miniplayer=0x7f070017;
         public static final int match_parent=0x7f07000c;
-        public static final int menu_item_audiobook_list=0x7f070068;
-        public static final int menu_item_controller=0x7f070066;
-        public static final int menu_item_new_audiobook=0x7f070067;
+        public static final int menu_item_new_audiobook=0x7f070065;
         public static final int miniplayer_album_tv=0x7f07005e;
         public static final int miniplayer_author_tv=0x7f07005d;
         public static final int miniplayer_cover_iv=0x7f07005a;
@@ -868,11 +865,7 @@ containing a value of this type.
         public static final int track_details=0x7f03001b;
     }
     public static final class menu {
-        public static final int bookmark=0x7f0a0000;
-        public static final int main=0x7f0a0001;
-        public static final int main2=0x7f0a0002;
-        public static final int menu_audiobook_list=0x7f0a0003;
-        public static final int menu_controller=0x7f0a0004;
+        public static final int main=0x7f0a0000;
     }
     public static final class string {
         public static final int _progress=0x7f05002b;

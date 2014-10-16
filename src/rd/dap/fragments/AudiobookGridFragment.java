@@ -1,25 +1,16 @@
 package rd.dap.fragments;
 
-import static rd.dap.AudiobookActivity.STATE_EDIT;
-import static rd.dap.AudiobookActivity.STATE_NEW;
 import static rd.dap.MainActivity.miniplayer;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
-import rd.dap.AudiobookActivity;
+import rd.dap.MainActivity.ChangeAudiobookDialogFragment;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Data;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -36,28 +27,23 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObserver,*/ OnItemClickListener, OnItemLongClickListener{
+public class AudiobookGridFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener{
 	private static final String TAG = "AudiobookGridActivity";
-	private static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 	private static ImageAdapter adapter;
 	private GridView grid;
-	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
-	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
-
+	
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
-		adapter = new ImageAdapter(getActivity(), R.layout.cover_view, audiobooks);
+		adapter = new ImageAdapter(getActivity(), R.layout.cover_view, Data.getAudiobooks());
 
 		new AsyncTask<Void, Void, Void>(){
 			@Override
 			protected Void doInBackground(Void... params) {
-				AudiobookManager am = AudiobookManager.getInstance();
-				ArrayList<Audiobook> loadedList = am.loadAudiobooks(getActivity()); 
-				audiobooks.clear();
-				audiobooks.addAll(loadedList);
+				AudiobookManager.getInstance().loadAudiobooks(getActivity()); 
 				return null;
 			}
 			@Override 
@@ -84,18 +70,11 @@ public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObser
 		
 		return v;
 	}
-	
-//	Log.d(TAG, "menu_item_new_audiobook");
-//	intent = new Intent(this, FileBrowserActivity.class);
-//	intent.putExtra("type", TYPE_FOLDER);
-//	intent.putExtra("message", "Select folder");
-//	intent.putExtra("requestcode", REQUEST_NEW_AUDIOBOOK);
-//	startActivityForResult(intent, REQUEST_NEW_AUDIOBOOK);
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 		Log.d(TAG, "onItemClick");
-		Data.setAudiobook(audiobooks.get(index));
+		Data.setAudiobook(Data.getAudiobooks().get(index));
 		Data.setPosition(0);
 		Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()));
 		
@@ -111,31 +90,9 @@ public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObser
 		
 		return true; //consume click
 	}
-	
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data){
-		switch(requestCode){
-		case REQUEST_NEW_AUDIOBOOK:
-			Log.d(TAG, "onActivityResult - REQUEST_NEW_AUDIOBOOK");
-			if(data == null) return;
-			String folder_path = data.getStringExtra("result");
-			File folder = new File(folder_path);
-			AudiobookManager manager = AudiobookManager.getInstance();
-			Audiobook audiobook = manager.autoCreateAudiobook(folder, true);
-			Intent intent = new Intent(getActivity(), AudiobookActivity.class);
-			intent.putExtra("state", STATE_NEW);
-			intent.putExtra("audiobook", audiobook);
-			startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK);
-			break;
-		case REQUEST_EDIT_AUDIOBOOK:
-			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUDIOBOOK");
-			audiobooks.clear();
-			audiobooks.addAll(AudiobookManager.getInstance().getAudiobooks(getActivity()));
-			adapter.notifyDataSetChanged();
-		}
-	}
 
-	class ImageAdapter extends ArrayAdapter<Audiobook> {
+	public ImageAdapter getAdapter() { return adapter; }
+	public class ImageAdapter extends ArrayAdapter<Audiobook> {
 		private List<Audiobook> audiobooks;
 
 		public ImageAdapter(Context context, int resource, List<Audiobook> audiobooks) {
@@ -176,76 +133,6 @@ public class AudiobookGridFragment extends Fragment implements /*MiniPlayerObser
 		public ImageView cover_iv;
 	}
 
-	public static class ChangeAudiobookDialogFragment extends DialogFragment {
-		public static final ChangeAudiobookDialogFragment newInstance(int position){
-			ChangeAudiobookDialogFragment fragment = new ChangeAudiobookDialogFragment();
-			Bundle bundle = new Bundle();
-			bundle.putInt("position", position);
-			fragment.setArguments(bundle);
-			return fragment ;
-		}
-
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			final int position = getArguments().getInt("position");
-			final Audiobook audiobook = audiobooks.get(position);
-
-			return new AlertDialog.Builder(getActivity())
-			.setMessage("Change audiobook")
-			.setPositiveButton("Edit audiobook", new DialogInterface.OnClickListener() {
-				@Override public void onClick(DialogInterface dialog, int which) {
-					Intent intent = new Intent(getActivity(), AudiobookActivity.class);
-					intent.putExtra("state", STATE_EDIT);
-					intent.putExtra("audiobook", audiobook);
-					startActivity(intent);
-				}
-			})
-			.setNegativeButton("Delete audiobook", new DialogInterface.OnClickListener() {
-				@Override public void onClick(DialogInterface dialog, int which) {
-					ConfirmDeleteDialogFragment frag = ConfirmDeleteDialogFragment.newInstance(position);
-					frag.show(getFragmentManager(), "ConfirmDeleteDialogFragment");
-				}
-			})
-			.create();
-		}
-	}
-	public static class ConfirmDeleteDialogFragment extends DialogFragment {
-		public static final ConfirmDeleteDialogFragment newInstance(int position){
-			ConfirmDeleteDialogFragment fragment = new ConfirmDeleteDialogFragment();
-			Bundle bundle = new Bundle();
-			bundle.putInt("position", position);
-			fragment.setArguments(bundle);
-			return fragment ;
-		}
-
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			int position = getArguments().getInt("position");
-			final Audiobook audiobook = audiobooks.get(position);
-			return new AlertDialog.Builder(getActivity())
-			.setMessage("Confirm delete "+audiobook.getAuthor() + " - " + audiobook.getAlbum())
-			.setPositiveButton("Cancel", null) //Do nothing
-			.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-				@Override public void onClick(DialogInterface dialog, int which) {
-					//stop and un-set as current
-					miniplayer.getPlayer().pause();
-					Data.setAudiobook(null);
-					Data.setTrack(null);
-					Data.setPosition(-1);
-
-					//update the miniplayers view
-					miniplayer.updateView();
-
-					//Remove the audiobook
-					AudiobookManager.getInstance().removeAudiobook(getActivity(), audiobook);
-
-					//update the list
-					audiobooks.remove(audiobook);
-					adapter.notifyDataSetChanged();
-				}
-			})
-			.create();
-		}
-	}
+	
 
 }

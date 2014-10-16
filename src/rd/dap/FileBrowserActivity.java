@@ -4,10 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import rd.dap.fragments.FragmentMiniPlayer;
-import rd.dap.model.Data;
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;

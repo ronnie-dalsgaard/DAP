@@ -2,7 +2,6 @@ package rd.dap.fragments;
 
 import static rd.dap.AudiobookActivity.STATE_EDIT;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.AudiobookActivity;
@@ -11,7 +10,7 @@ import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Bookmark;
-import rd.dap.model.BookmarkManager;
+import rd.dap.model.Callback;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.support.DriveHandler;
@@ -245,11 +244,9 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			break;
 
 		case R.id.controller_upload:
-			BookmarkManager manager = BookmarkManager.getInstance();
-			ArrayList<Bookmark> bookmarks = manager. getBookmarks();
 			Gson gson = new Gson();
 			String json = "";
-			for(Bookmark bookmark : bookmarks){
+			for(Bookmark bookmark : Data.getBookmarks()){
 				json += gson.toJson(bookmark) + END + "\n";
 			}
 			System.out.println("JSON:\n"+json);
@@ -257,7 +254,7 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			break;
 			
 		case R.id.controller_download:
-			super.download(new DriveHandler.DapResultCallback<String>() {
+			super.download(new Callback<String>() {
 				@Override public void onResult(String result) {
 					System.out.println("Download callback result\n"+result);
 					Gson gson = new Gson();

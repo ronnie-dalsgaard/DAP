@@ -22,12 +22,12 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public final class AudiobookManager {
+public final class AudiobookManager extends Data{
 	private static final String TAG = "AudiobookManager";
 	private static AudiobookManager instance = new AudiobookManager();
 	private static final File root = Environment.getExternalStorageDirectory();
 	private static final File home = new File(root.getPath() + File.separator +"Audiobooks");
-	private ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
+//	private ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 
 	public static AudiobookManager getInstance(){
 		return instance; //Eager singleton

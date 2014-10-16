@@ -10,6 +10,8 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import rd.dap.model.Callback;
+
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
@@ -65,13 +67,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 	public static final int FAILURE = -1;
 	private enum Mode {DOWNLOAD, UPLOAD};
 	
-	public interface DapResultCallback<T>{
-		public static final String NO_FOLDER = "no_folder";
-		public static final String NO_FILE = "no_file";
-		public void onResult(T result);
-	}
-	
-	protected void download(DapResultCallback<String> resultCallback){
+	protected void download(Callback<String> resultCallback){
 		Log.d(TAG, "download");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
 		common_query_folder(null, Mode.DOWNLOAD, resultCallback);
@@ -82,7 +78,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 		common_query_folder(data, Mode.UPLOAD, null);
 	}
 
-	private void common_query_folder(final String data, final Mode mode, final DapResultCallback<String> resultCallback){
+	private void common_query_folder(final String data, final Mode mode, final Callback<String> resultCallback){
 		Query query = new Query.Builder()
 		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FOLDERNAME))
 		.addFilter(Filters.eq(SearchableField.MIME_TYPE, DriveFolder.MIME_TYPE))
@@ -110,7 +106,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 						
 					} else {
 						switch(mode){
-						case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FOLDER); break;
+						case DOWNLOAD: resultCallback.onResult(Callback.NO_FOLDER); break;
 						case UPLOAD: upload_create_folder(data); break; 
 						}
 						
@@ -118,7 +114,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 					
 				} else {
 					switch(mode){
-					case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FOLDER); break;
+					case DOWNLOAD: resultCallback.onResult(Callback.NO_FOLDER); break;
 					case UPLOAD: upload_create_folder(data); break; 
 					}
 				}
@@ -126,7 +122,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 			}
 		});
 	}
-	private void common_query_file(final DriveFolder folder, final String data, final Mode mode, final DapResultCallback<String> resultCallback){
+	private void common_query_file(final DriveFolder folder, final String data, final Mode mode, final Callback<String> resultCallback){
 		Query query = new Query.Builder()
 		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FILENAME))
 		.addFilter(Filters.eq(SearchableField.MIME_TYPE, "text/plain"))
@@ -154,14 +150,14 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 						
 					} else {
 						switch(mode){
-						case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FILE); break;
+						case DOWNLOAD: resultCallback.onResult(Callback.NO_FILE); break;
 						case UPLOAD: upload_create_contents(folder, data); break; 
 						}
 					}
 					
 				} else {
 					switch(mode){
-					case DOWNLOAD: resultCallback.onResult(DapResultCallback.NO_FILE); break;
+					case DOWNLOAD: resultCallback.onResult(Callback.NO_FILE); break;
 					case UPLOAD: upload_create_contents(folder, data); break; 
 					}
 				}
@@ -169,7 +165,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 			}
 		});
 	}
-	private void common_read(final DriveFile file, final String newData, final Mode mode, final DapResultCallback<String> resultCallback){
+	private void common_read(final DriveFile file, final String newData, final Mode mode, final Callback<String> resultCallback){
 		file.open(client, DriveFile.MODE_READ_ONLY, new DownloadProgressListener() {
 
 			@Override

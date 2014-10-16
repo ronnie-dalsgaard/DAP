@@ -2,7 +2,6 @@ package rd.dap.fragments;
 
 import static rd.dap.MainActivity.miniplayer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import rd.dap.PlayerService;
@@ -43,10 +42,9 @@ import android.widget.TextView;
 public class BookmarkListFragment extends Fragment implements 
 	OnItemClickListener, OnItemLongClickListener, ServiceConnection, PlayerObserver {
 	public static final String TAG = "BookmarkListActivity";
-	public static ArrayAdapter<Bookmark> adapter;
+	public BookmarkAdapter adapter;
 	private PlayerService player;
 	private boolean bound = false;
-	public static ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
 	private ListView list;
 	
 	//TODO up-/download bookmarks
@@ -69,15 +67,12 @@ public class BookmarkListFragment extends Fragment implements
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
-		adapter = new BookmarkAdapter(getActivity(), R.layout.bookmark_item, bookmarks);
+		adapter = new BookmarkAdapter(getActivity(), R.layout.bookmark_item, Data.getBookmarks());
 		
 		new AsyncTask<Void, Void, Void>(){
 			@Override
 			protected Void doInBackground(Void... params) {
-				BookmarkManager bm = BookmarkManager.getInstance();
-				ArrayList<Bookmark> loadedList = bm.loadBookmarks(getActivity().getFilesDir()); 
-				bookmarks.clear();
-				bookmarks.addAll(loadedList);
+				BookmarkManager.getInstance().loadBookmarks(getActivity().getFilesDir()); 
 				return null;
 			}
 			@Override 
@@ -114,7 +109,7 @@ public class BookmarkListFragment extends Fragment implements
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 		Log.d(TAG, "onItemClick");
-		Bookmark bookmark = bookmarks.get(index);
+		Bookmark bookmark = Data.getBookmarks().get(index);
 		AudiobookManager manager = AudiobookManager.getInstance();
 		Audiobook audiobook = manager.getAudiobook(bookmark);
 		Data.setAudiobook(audiobook);
@@ -132,7 +127,8 @@ public class BookmarkListFragment extends Fragment implements
 		return true; //Consume click
 	}	
 
-	class BookmarkAdapter extends ArrayAdapter<Bookmark> {
+	public BookmarkAdapter getAdapter() { return adapter; }
+	public class BookmarkAdapter extends ArrayAdapter<Bookmark> {
 		private List<Bookmark> bookmarks;
 
 		public BookmarkAdapter(Context context, int resource, List<Bookmark> bookmarks) {
@@ -164,20 +160,27 @@ public class BookmarkListFragment extends Fragment implements
 			Bookmark bookmark = bookmarks.get(position);
 			AudiobookManager am = AudiobookManager.getInstance();
 			Audiobook audiobook = am.getAudiobook(bookmark);
-			Track track = audiobook.getPlaylist().get(bookmark.getTrackno());
-			if(audiobook.getCover() != null){
-				String cover = audiobook.getCover();
-				Bitmap bm = BitmapFactory.decodeFile(cover);
-				holder.cover_iv.setImageBitmap(bm);
-			} else {
-				Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);
-				holder.cover_iv.setImageDrawable(drw);
+			Track track = null;
+			if(audiobook != null){ //In case the audiobook have been deleted
+				track = audiobook.getPlaylist().get(bookmark.getTrackno());
+				if(audiobook.getCover() != null){
+					String cover = audiobook.getCover();
+					Bitmap bm = BitmapFactory.decodeFile(cover);
+					holder.cover_iv.setImageBitmap(bm);
+				} else {
+					Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);
+					holder.cover_iv.setImageDrawable(drw);
+				}
 			}
 			holder.author_tv.setText(bookmark.getAuthor());
 			holder.album_tv.setText(bookmark.getAlbum());
-			String title = track.getTitle();
-			if(title.length() > 28) title = title.substring(0, 25) + "...";
-			holder.track_tv.setText(String.format("%02d", bookmark.getTrackno()+1) + " " + title);
+			if(track != null){ //In case the audiobook have been deleted
+				String title = track.getTitle();
+				if(title.length() > 28) title = title.substring(0, 25) + "...";
+				holder.track_tv.setText(String.format("%02d", bookmark.getTrackno()+1) + " " + title);
+			} else {
+				holder.track_tv.setText(String.format("%02d", bookmark.getTrackno()+1));
+			}
 			holder.progress_tv.setText(Time.toShortString(bookmark.getProgress()));
 			
 			return convertView;
