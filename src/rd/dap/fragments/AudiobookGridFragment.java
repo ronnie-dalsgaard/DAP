@@ -15,7 +15,6 @@ import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Data;
-import rd.dap.model.Updater;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
@@ -38,17 +37,13 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class AudiobookGridFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener, Updater{
+public class AudiobookGridFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener {
 	private static final String TAG = "AudiobookGridActivity";
 	private static AudiobookAdapter adapter;
 	private GridView grid;
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private Changer changer;
-	
-	public void update(){
-		adapter.notifyDataSetChanged();
-	}
 	
 	//Fragment must-haves
 	@Override
@@ -89,7 +84,7 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		inflater.inflate(R.menu.main, menu);
+		inflater.inflate(R.menu.audiobooks, menu);
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -154,8 +149,9 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 		Data.setCurrentAudiobook(Data.getAudiobooks().get(index));
 		Data.setCurrentPosition(0);
 		Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurentPosition()));
+
+		changer.updateController();
 		
-//		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.updateView();
 	}

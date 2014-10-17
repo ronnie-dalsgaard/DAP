@@ -13,9 +13,11 @@ import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkManager;
+import rd.dap.model.Callback;
 import rd.dap.model.Data;
+import rd.dap.model.DriveHandler;
 import rd.dap.model.Track;
-import rd.dap.model.Updater;
 import rd.dap.support.Time;
 import android.app.Activity;
 import android.app.Fragment;
@@ -30,6 +32,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -41,20 +46,25 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 public class BookmarkListFragment extends Fragment implements 
-	OnItemClickListener, OnItemLongClickListener, ServiceConnection, PlayerObserver, Updater {
+	OnItemClickListener, OnItemLongClickListener, ServiceConnection, PlayerObserver {
 	public static final String TAG = "BookmarkListActivity";
 	public BookmarkAdapter adapter;
 	private PlayerService player;
 	private boolean bound = false;
 	private ListView list;
 	private Changer changer; //Needed when bookmarks can be added or changed manually
+	private DriveHandler drivehandler;
+	private static final String END = "/END";
 	
-	//TODO up-/download bookmarks
 	//TODO Helper texts
+	//TODO show progress when down-/uploading
 	
 	//TODO constant class (final class + private constructor)
 	//TODO enable delete track
+	//TODO position instead of cover on tracks
 	//TODO manually set bookmark
 	
 	//TODO Home folder
@@ -65,18 +75,15 @@ public class BookmarkListFragment extends Fragment implements
 	//TODO pregress as progressbar
 	//TODO author heading for audiobooks
 	
- 	public void update(){
-		adapter.notifyDataSetChanged();
-	}
-	
 	@Override
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
 		try {
             changer = (Changer) activity;
+            drivehandler = (DriveHandler) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement Callback");
+                    + " must implement Callback and DriveHandler");
         }
 	}
 	
@@ -87,6 +94,8 @@ public class BookmarkListFragment extends Fragment implements
 		super.onCreate(savedInstanceState);
 		
 		adapter = new BookmarkAdapter(getActivity(), R.layout.bookmark_item, Data.getBookmarks());
+		
+		setHasOptionsMenu(true);
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -112,7 +121,77 @@ public class BookmarkListFragment extends Fragment implements
 			}
 		});
 	}
-	
+
+	//Menu
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		inflater.inflate(R.menu.bookmarks, menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case R.id.menu_item_upload:
+			Gson gson = new Gson();
+			String json = "";
+			for(Bookmark bookmark : Data.getBookmarks()){
+				json += gson.toJson(bookmark) + END + "\n";
+			}
+			Log.d(TAG, "onClick - upload: "+json);
+			drivehandler.upload(json); 
+			break;
+
+		case R.id.menu_item_download:
+			drivehandler.download(new Callback<String>() { 
+				@Override public void onResult(String result) {
+					Log.d(TAG, "onClick - download: "+result);
+					if(result == null || result.isEmpty()) return;
+					BookmarkManager bm = BookmarkManager.getInstance();
+					AudiobookManager am = AudiobookManager.getInstance();
+					Gson gson = new Gson();
+					boolean changesHappened = false;
+					for(String line : result.split(END)){
+						System.out.println("Line = "+line);
+						Bookmark fetched = gson.fromJson(line, Bookmark.class);
+						Audiobook fetchedAudiobook = am.getAudiobook(fetched);
+						if(bm.hasBookmark(fetched)){
+							Bookmark exisisting = bm.getBookmark(fetched.getAuthor(), fetched.getAlbum());
+							System.out.println("Bookmark:\n"+exisisting);
+							System.out.println("Fetched:\n"+fetched);
+							System.out.println("fetched.compareTo(existing) = "+fetched.compareTo(exisisting));
+
+							if(fetched.compareTo(exisisting) > 0){
+								exisisting.setTrackno(fetched.getTrackno());
+								exisisting.setProgress(fetched.getProgress());
+								changesHappened = true;
+
+								//fetched is current
+								Audiobook audiobook = am.getAudiobook(fetched);
+								Data.setCurrentAudiobook(audiobook);
+								Data.setCurrentPosition(fetched.getTrackno());
+								Data.setCurrentTrack(audiobook.getPlaylist().get(fetched.getTrackno()));
+
+								//reload using miniplayer as pass-through
+								miniplayer.reload();
+								miniplayer.seekTo(fetched.getProgress());
+							}
+						} else if(fetchedAudiobook != null){
+							bm.createOrUpdateBookmark(getActivity().getFilesDir(), fetched, false);
+							changesHappened = true;
+						}
+					}
+					if(changesHappened){
+						changer.updateBookmarks();
+						changer.updateController();
+					}
+				}
+			});
+			break;
+
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 	//Listener
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
@@ -123,7 +202,7 @@ public class BookmarkListFragment extends Fragment implements
 		Data.setCurrentAudiobook(audiobook);
 		Data.setCurrentPosition(bookmark.getTrackno());
 		Data.setCurrentTrack(audiobook.getPlaylist().get(bookmark.getTrackno()));
-		
+
 		miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.seekTo(bookmark.getProgress());

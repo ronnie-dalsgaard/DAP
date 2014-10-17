@@ -181,6 +181,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	@Override
  	public void onClick(View v) {
 		switch(v.getId()){
+		case R.id.bookmark_info_layout:
 		case COVER_BTN_ID: //id is set programmativcally
 			//Toggle button icon
 			/* Note that the result of isPlaying is the state BEFORE the click,
@@ -199,45 +200,13 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			}
 			break;
 
-		case R.id.miniplayer_info:
-			Log.d(TAG, "Info clicked");
-			if(player != null) {
-				Log.d(TAG, "PLAYER IS NULL");
-				return;
-			}
-			for(MiniPlayerObserver observer : observers){
-				observer.miniplayer_click();
-			}
-
-			//FIXME - this wont work Controller is not an activity but a fragment
-//			Intent intent = new Intent(getActivity(), ControllerActivity.class);
-//			startActivity(intent);
-
 		}
 
 	}
 	@Override
 	public boolean onLongClick(View v) {
 		switch(v.getId()){
-		case R.id.miniplayer_play_btn:
-			player.kill();
-			Log.d(TAG, "Cover long clicked - Play/Pause long pressed (Kill mp)");
-
-			for(MiniPlayerObserver observer : observers){
-				observer.miniplayer_longClick();
-			}
-			break;
-		case R.id.miniplayer_info:
-			Log.d(TAG, "Info long clicked - Audiobook un-selected");
-			Data.setCurrentAudiobook(null);
-			Data.setCurrentTrack(null);
-			reload();
-			updateView();
-
-//			for(MiniPlayerObserver observer : observers){
-//				observer.miniplayer_longClick();
-//			}
-			return true;
+		
 		}
 
 		return true;

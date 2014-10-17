@@ -15,8 +15,8 @@
     <string name="edit_mode_enter">Enter edit mode</string>
     <string name="edit_mode_exit">Exit edit mode</string>
     
-    <string name="tab1">Audiobooks</string>
-    <string name="tab2">Bookmarks</string>
+    <string name="tab1">Bookmarks</string>
+    <string name="tab2">Audiobooks</string>
     <string name="tab3">Controller</string>
 
 </resources>

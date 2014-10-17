@@ -1,7 +1,6 @@
 package rd.dap.fragments;
 
 import static rd.dap.AudiobookActivity.STATE_EDIT;
-import static rd.dap.MainActivity.miniplayer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -11,16 +10,12 @@ import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
 import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
-import rd.dap.model.AudiobookManager;
-import rd.dap.model.Bookmark;
-import rd.dap.model.BookmarkManager;
-import rd.dap.model.Callback;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
-import rd.dap.support.DriveHandler;
 import rd.dap.support.Monitor;
 import rd.dap.support.Time;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,9 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
-public class ControllerFragment extends DriveHandler implements ServiceConnection, OnClickListener {
+public class ControllerFragment extends Fragment/*DriveHandler*/ implements ServiceConnection, OnClickListener {
 
 	private final String TAG = "ControllerActivity";
 	private boolean bound = false;
@@ -54,9 +47,8 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private LinearLayout info_layout, tracks_gv;
 	private TextView author_tv, audiobook_basics_album_tv, title_tv, progress_tv;
-	private ImageButton cover_btn, play_btn, upload_btn, download_btn, next_btn, prev_btn, forward_btn, rewind_btn;
+	private ImageButton cover_btn, next_btn, prev_btn, forward_btn, rewind_btn;
 	private ImageView cover_iv;
-	private static final String END = "/END";
 
 	private static final int REQUEST_FRAGMENT_BASICS_EDIT = 1701;
 	private static final int CELL = 1111;
@@ -101,17 +93,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 		
 		info_layout = (LinearLayout) v.findViewById(R.id.audiobook_basics_info_layout);
 		info_layout.setOnClickListener(this);
-		
-		//Button bar
-		play_btn = (ImageButton) v.findViewById(R.id.controller_play);
-		play_btn.setImageDrawable(null);
-		play_btn.setOnClickListener(this);
-
-		upload_btn = (ImageButton) v.findViewById(R.id.controller_upload);
-		upload_btn.setOnClickListener(this);
-
-		download_btn = (ImageButton) v.findViewById(R.id.controller_download);
-		download_btn.setOnClickListener(this);
 
 		//Tracks
 		next_btn = (ImageButton) v.findViewById(R.id.track_next);
@@ -218,7 +199,7 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			int m = LinearLayout.LayoutParams.MATCH_PARENT;
 			int w = LinearLayout.LayoutParams.WRAP_CONTENT;
 			LinearLayout.LayoutParams row_p = new LinearLayout.LayoutParams(m, w);
-			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 85, 1);
+			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 80, 1);
 			for(int i = 0; i < Data.getCurrentAudiobook().getPlaylist().size(); i++){
 				if(i % COLUMNS == 0){
 					row = new LinearLayout(getActivity());
@@ -259,72 +240,12 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 	public void onClick(View v) {
 		Log.d(TAG, "onClick");
 		switch(v.getId()){
-		
-		//Cases for buttom button bar
-		case R.id.controller_play:
-			play_pause();
-			break;
-
-		case R.id.controller_upload:
-			Gson gson = new Gson();
-			String json = "";
-			for(Bookmark bookmark : Data.getBookmarks()){
-				json += gson.toJson(bookmark) + END + "\n";
-			}
-			Log.d(TAG, "onClick - upload: "+json);
-			upload(json);
-			break;
-			
-		case R.id.controller_download:
-			super.download(new Callback<String>() {
-				@Override public void onResult(String result) {
-					Log.d(TAG, "onClick - download: "+result);
-					if(result == null || result.isEmpty()) return;
-					BookmarkManager bm = BookmarkManager.getInstance();
-					AudiobookManager am = AudiobookManager.getInstance();
-					Gson gson = new Gson();
-					boolean changesHappened = false;
-					for(String line : result.split(END)){
-						System.out.println("Line = "+line);
-						Bookmark fetched = gson.fromJson(line, Bookmark.class);
-						Audiobook fetchedAudiobook = am.getAudiobook(fetched);
-						if(bm.hasBookmark(fetched)){
-							Bookmark exisisting = bm.getBookmark(fetched.getAuthor(), fetched.getAlbum());
-							System.out.println("Bookmark:\n"+exisisting);
-							System.out.println("Fetched:\n"+fetched);
-							System.out.println("fetched.compareTo(existing) = "+fetched.compareTo(exisisting));
-							
-							if(fetched.compareTo(exisisting) > 0){
-								exisisting.setTrackno(fetched.getTrackno());
-								exisisting.setProgress(fetched.getProgress());
-								changesHappened = true;
-								
-								//fetched is current
-								Audiobook audiobook = am.getAudiobook(fetched);
-								Data.setCurrentAudiobook(audiobook);
-								Data.setCurrentPosition(fetched.getTrackno());
-								Data.setCurrentTrack(audiobook.getPlaylist().get(fetched.getTrackno()));
-								
-								//reload using miniplayer as pass-through
-								miniplayer.reload();
-								miniplayer.seekTo(fetched.getProgress());
-							}
-						} else if(fetchedAudiobook != null){
-							bm.createOrUpdateBookmark(getActivity().getFilesDir(), fetched, false);
-							changesHappened = true;
-						}
-					}
-					if(changesHappened){
-						changer.updateBookmarks();
-						changer.updateController();
-					}
-				}
-			});
-			break;
-			
 		//Cases for audiobook basics
 		case R.id.audiobook_basics_cover_btn:
-			play_pause();
+			//Fix view
+			cover_btn.setImageDrawable(!player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
+			//Toggle play/pause
+			player.toggle();
 			break;
 		case R.id.audiobook_basics_info_layout:
 			if(Data.getCurrentAudiobook() == null) return;
@@ -346,7 +267,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			Data.setCurrentTrack(nextTrack);
 			//Fix view
 			displayTracks();
-			play_btn.setImageDrawable(drw_play);
 			cover_btn.setImageDrawable(drw_play_on_cover);
 
 			player.reload();
@@ -363,7 +283,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			Data.setCurrentTrack(previousTrack);
 			//Fix view
 			displayTracks();
-			play_btn.setImageDrawable(drw_play);
 			cover_btn.setImageDrawable(drw_play_on_cover);
 			
 			player.reload();
@@ -379,7 +298,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 					Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurentPosition()));
 					//Fix view
 					displayTracks();
-					play_btn.setImageDrawable(drw_play);
 					cover_btn.setImageDrawable(drw_play_on_cover);
 					
 					player.reload();
@@ -422,21 +340,8 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 		}
 	}
 
-	private void play_pause(){
-		//Fix view
-		play_btn.setImageDrawable(!player.isPlaying() ? drw_pause : drw_play);
-		cover_btn.setImageDrawable(!player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
-		//Toggle play/pause
-		player.toggle();
-	}
-	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.d(TAG, "onActivityResult :: forwarding to super and all fragments!");
-		super.onActivityResult(requestCode, resultCode, data);
-//FIXME		for(Fragment frag : fragments){
-//			frag.onActivityResult(requestCode, resultCode, data);
-//		}
 		switch (requestCode) {
 		case REQUEST_FRAGMENT_BASICS_EDIT:
 			Log.d(TAG, "onActivityResult - REQUEST_FRAGMENT_BASICS_EDIT");
@@ -455,9 +360,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 		//Bind to PlayerService
 		Intent intent = new Intent(getActivity(), PlayerService.class);
 		getActivity().bindService(intent, this, Context.BIND_AUTO_CREATE);
-
-		//connect to Google Drive
-		super.connect();
 	}
 	@Override
 	public void onStop(){
@@ -468,8 +370,6 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 			getActivity().unbindService(this);
 			bound = false;
 		}
-		//disconnet from Google Drive
-		super.disconnect();
 	}
 
 	@Override
@@ -502,10 +402,8 @@ public class ControllerFragment extends DriveHandler implements ServiceConnectio
 				@Override
 				public void run() {
 					if(bound && Data.getCurrentAudiobook() != null){
-						play_btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
 						cover_btn.setImageDrawable(isPlaying ? drw_pause_on_cover : drw_play_on_cover);
 					} else {
-						if(play_btn != null) play_btn.setImageDrawable(null);
 						if(cover_btn != null) cover_btn.setImageDrawable(null);
 						if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 					}

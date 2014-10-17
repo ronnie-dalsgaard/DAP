@@ -11,12 +11,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import rd.dap.model.Callback;
-
+import rd.dap.model.DriveHandler;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
@@ -54,7 +53,7 @@ import com.google.android.gms.drive.query.SearchableField;
 /* Store dele af denne klasse er kopieret fra developer.android.com/google/auth/api-client.html
  * Der er fortaget mindre justeringer.
  */
-public abstract class DriveHandler extends Fragment implements ConnectionCallbacks, OnConnectionFailedListener {
+public abstract class MainDriveHandler extends Activity implements ConnectionCallbacks, OnConnectionFailedListener, DriveHandler {
 	private final String TAG = "DriveHandler";
 	private static GoogleApiClient client = null;
 	private boolean isResolvingError = false;
@@ -67,12 +66,14 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 	public static final int FAILURE = -1;
 	private enum Mode {DOWNLOAD, UPLOAD};
 	
-	protected void download(Callback<String> resultCallback){
+	@Override
+	public void download(Callback<String> resultCallback){
 		Log.d(TAG, "download");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
 		common_query_folder(null, Mode.DOWNLOAD, resultCallback);
 	}
-	protected void upload(final String data){
+	@Override
+	public void upload(final String data){
 		Log.d(TAG, "upload");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
 		common_query_folder(data, Mode.UPLOAD, null);
@@ -359,7 +360,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 		} else if (result.hasResolution()) {
 			try {
 				isResolvingError = true;
-				result.startResolutionForResult(getActivity(), DH_REQUEST_CODE_RESOLVE_ERROR);
+				result.startResolutionForResult(this, DH_REQUEST_CODE_RESOLVE_ERROR);
 			} catch (SendIntentException e) {
 				// There was an error with the resolution intent. Try again.
 				client.connect();
@@ -377,7 +378,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 	}
 	@Override
 	public void onConnectionSuspended(int result) {
-		Toast.makeText(getActivity(), "Connection suspende", Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Connection suspende", Toast.LENGTH_SHORT).show();
 		Log.d(TAG, "onConnectionSuspende: "+result);
 	}
 
@@ -411,15 +412,32 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 
 		@Override
 		public void onDismiss(DialogInterface dialog) {
-			DriveHandler.this.onDialogDismissed();
+			MainDriveHandler.this.onDialogDismissed();
 		}
 	}
 
+	@Override
+	public void onStart(){
+		Log.d(TAG, "onStart");
+		super.onStart();
+		
+		//connect to Google Drive
+		connect();
+	}
+	@Override
+	public void onStop(){
+		Log.d(TAG, "onStop");
+		super.onStop();
+		
+		//disconnet from Google Drive
+		disconnect();
+	}
+	
 	public void connect() {
-		int playServiceAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
+		int playServiceAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 		switch(playServiceAvailable){
 		case ConnectionResult.SUCCESS:
-			client = new GoogleApiClient.Builder(getActivity())
+			client = new GoogleApiClient.Builder(this)
 			.addApi(Drive.API)
 			.addScope(Drive.SCOPE_FILE)
 			.addConnectionCallbacks(this)
@@ -433,7 +451,7 @@ public abstract class DriveHandler extends Fragment implements ConnectionCallbac
 		case ConnectionResult.SERVICE_MISSING:
 		case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
 		case ConnectionResult.SERVICE_DISABLED:
-			GooglePlayServicesUtil.getErrorDialog(playServiceAvailable, getActivity(), DH_REQUEST_CODE_ERROR_DIALOG);
+			GooglePlayServicesUtil.getErrorDialog(playServiceAvailable, this, DH_REQUEST_CODE_ERROR_DIALOG);
 			break;
 		}
 	}

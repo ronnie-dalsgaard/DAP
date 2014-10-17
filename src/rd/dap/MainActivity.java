@@ -13,9 +13,9 @@ import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
+import rd.dap.support.MainDriveHandler;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -27,7 +27,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 
-public class MainActivity extends Activity implements ActionBar.TabListener, MiniPlayerObserver, Changer {
+public class MainActivity extends MainDriveHandler implements ActionBar.TabListener, MiniPlayerObserver, Changer {
 	private static final String TAG = "MainActivity";
 	public static FragmentMiniPlayer miniplayer = null;
 	private SectionsPagerAdapter sectionsPagerAdapter;
@@ -105,11 +105,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 			@Override public void onPageSelected(int position) {
 				actionBar.setSelectedNavigationItem(position);
 				
-				if(position == 2){
-					miniplayer.setVisibility(View.GONE);
-				} else {
-					miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
-				}
+				miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
 			}
 		});
 
@@ -124,8 +120,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		FragmentManager fm = getFragmentManager();
 		miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.main_miniplayer);
 		miniplayer.addObserver(this);
-//		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
-//		miniplayer.setVisibility(View.VISIBLE);
 	}
 
 	//CALLBACK
@@ -197,8 +191,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		@Override
 		public Fragment getItem(int position) {
 			switch(position){
-			case 0: return audiobookGridFragment;
-			case 1: return bookmarkListFragment;
+			case 0: return bookmarkListFragment;
+			case 1: return audiobookGridFragment;
 			case 2: return controllerFragment;
 			}
 			return null;
@@ -218,11 +212,4 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 		}
 	}
 
-
-	//Edit bookmark dialogs
-	public static class ChangeBookmarkDialogFragment extends DialogFragment {
-		
-	}
-	
-	
 }

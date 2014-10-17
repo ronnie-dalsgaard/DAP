@@ -1,85 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/mini_player_width"
     android:layout_height="match_parent"
-    android:gravity="start"
-    android:padding="2dp" >
-
-    <ScrollView
-        android:layout_width="@dimen/mini_player_width"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/controller_buttons"
-        android:layout_centerHorizontal="true" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <include layout="@layout/fragment_audiobook_basics"/>
-
-            <include
-                android:id="@+id/controller_divider_1"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                layout="@layout/divider_horizontal" />
-            
-            <include layout="@layout/fragment_track"/>
-
-            <include
-                android:id="@+id/controller_divider_2"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                layout="@layout/divider_horizontal" />
-
-            <include layout="@layout/fragment_seeker"/>
-            
-             <include
-                android:id="@+id/controller_divider_3"
-                android:layout_width="match_parent"
-                android:layout_height="1dp" 
-                layout="@layout/divider_horizontal" />
-        </LinearLayout>
-    </ScrollView>
+    android:layout_centerHorizontal="true" >
 
     <LinearLayout
-        android:id="@+id/controller_buttons"
-        android:layout_width="@dimen/mini_player_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/miniplayer_bg"
-        android:divider="@drawable/vertical_divider"
-        android:orientation="horizontal"
-        android:showDividers="middle" >
+        android:orientation="vertical" >
 
-        <ImageButton
-            android:id="@+id/controller_upload"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/btn_height"
-            android:layout_weight="1"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_upload" />
+        <include layout="@layout/fragment_audiobook_basics" />
 
-        <ImageButton
-            android:id="@+id/controller_play"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/btn_height"
-            android:layout_weight="2"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_play" />
+        <include
+            android:id="@+id/controller_divider_1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            layout="@layout/divider_horizontal" />
 
-        <ImageButton
-            android:id="@+id/controller_download"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/btn_height"
-            android:layout_weight="1"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/ic_action_download" />
+        <include layout="@layout/fragment_track" />
+
+        <include
+            android:id="@+id/controller_divider_2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            layout="@layout/divider_horizontal" />
+
+        <include layout="@layout/fragment_seeker" />
+
+        <include
+            android:id="@+id/controller_divider_3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            layout="@layout/divider_horizontal" />
     </LinearLayout>
 
-</RelativeLayout>
+</ScrollView>
