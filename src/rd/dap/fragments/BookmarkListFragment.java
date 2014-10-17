@@ -4,16 +4,19 @@ import static rd.dap.MainActivity.miniplayer;
 
 import java.util.List;
 
-import rd.dap.MainActivity.ChangeBookmarkDialogFragment;
 import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.PlayerService.PlayerObserver;
 import rd.dap.R;
+import rd.dap.dialogs.ChangeBookmarkDialogFragment;
+import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
+import rd.dap.model.Callback;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
+import rd.dap.model.Updater;
 import rd.dap.support.Time;
 import android.app.Activity;
 import android.app.Fragment;
@@ -40,19 +43,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class BookmarkListFragment extends Fragment implements 
-	OnItemClickListener, OnItemLongClickListener, ServiceConnection, PlayerObserver {
+	OnItemClickListener, OnItemLongClickListener, ServiceConnection, PlayerObserver, Updater {
 	public static final String TAG = "BookmarkListActivity";
 	public BookmarkAdapter adapter;
 	private PlayerService player;
 	private boolean bound = false;
 	private ListView list;
+	private Changer changer; //Needed when bookmarks can be added or changed manually
 	
 	//TODO up-/download bookmarks
 	//TODO Helper texts
 	
 	//TODO constant class (final class + private constructor)
 	//TODO enable delete track
-	//TODO mnually set bookmark
+	//TODO manually set bookmark
 	
 	//TODO Home folder
 	//TODO when auto-detecting auidobook include subfolders 
@@ -61,7 +65,22 @@ public class BookmarkListFragment extends Fragment implements
 	//TODO sleeptimer
 	//TODO pregress as progressbar
 	//TODO author heading for audiobooks
-
+	
+ 	public void update(){
+		adapter.notifyDataSetChanged();
+	}
+	
+	@Override
+	public void onAttach(Activity activity){
+		super.onAttach(activity);
+		try {
+            changer = (Changer) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement Callback");
+        }
+	}
+	
 	//Fragment must-haves
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -79,8 +98,6 @@ public class BookmarkListFragment extends Fragment implements
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(this);
 		list.setOnItemLongClickListener(this);
-		
-		System.out.println(Data.getBookmarks());
 		
 		return v;
 	}

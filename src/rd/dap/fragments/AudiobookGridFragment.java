@@ -9,13 +9,13 @@ import java.util.List;
 
 import rd.dap.AudiobookActivity;
 import rd.dap.FileBrowserActivity;
-import rd.dap.MainActivity;
-import rd.dap.MainActivity.ChangeAudiobookDialogFragment;
 import rd.dap.R;
-import rd.dap.fragments.BookmarkListFragment.BookmarkAdapter;
+import rd.dap.dialogs.ChangeAudiobookDialogFragment;
+import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Data;
+import rd.dap.model.Updater;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
@@ -38,12 +38,13 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class AudiobookGridFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener{
+public class AudiobookGridFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener, Updater{
 	private static final String TAG = "AudiobookGridActivity";
 	private static AudiobookAdapter adapter;
 	private GridView grid;
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
+	private Changer changer;
 	
 	//Constructors
 	public AudiobookGridFragment(){
@@ -52,6 +53,10 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 	public AudiobookGridFragment(Activity activity){
 		super();
 		
+	}
+	
+	public void update(){
+		adapter.notifyDataSetChanged();
 	}
 	
 	//Fragment must-haves
@@ -77,6 +82,17 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 		return v;
 	}
 
+	@Override 
+	public void onAttach(Activity activity){
+		super.onAttach(activity);
+		try {
+            changer = (Changer) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement Callback");
+        }
+	}
+	
 	//Menu
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -117,26 +133,24 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUDIOBOOK");
 			
 			//update the lists
-			AudiobookGridFragment audiobookGridFragment = MainActivity.getAudiobookGridFragment();
-			if(audiobookGridFragment != null ) {
-				AudiobookAdapter audiobookAdapter = audiobookGridFragment.getAdapter();
-				if(audiobookAdapter != null) audiobookAdapter.notifyDataSetChanged();
-			}
+			changer.updateAudiobooks();
+			changer.updateBookmarks();
+			changer.updateController();
 			
-			BookmarkListFragment bookmarkListFragment = MainActivity.getBookmarkListFragment();
-			if(bookmarkListFragment != null) {
-				BookmarkAdapter bookmarkAdapter = bookmarkListFragment.getAdapter();
-				if(bookmarkAdapter != null) bookmarkAdapter.notifyDataSetChanged();
-				//just in case the bookmark was there before the audiobook
-			}
-			
-			//update the controller
-			ControllerFragment controllerFragment = MainActivity.getControllerFragment();
-			if(controllerFragment != null) {
-				controllerFragment.displayValues();
-				controllerFragment.displayTracks();
-				controllerFragment.displayProgress();
-			}
+//			BookmarkListFragment bookmarkListFragment = MainActivity.getBookmarkListFragment();
+//			if(bookmarkListFragment != null) {
+//				BookmarkAdapter bookmarkAdapter = bookmarkListFragment.getAdapter();
+//				if(bookmarkAdapter != null) bookmarkAdapter.notifyDataSetChanged();
+//				//just in case the bookmark was there before the audiobook
+//			}
+//			
+//			//update the controller
+//			ControllerFragment controllerFragment = MainActivity.getControllerFragment();
+//			if(controllerFragment != null) {
+//				controllerFragment.displayValues();
+//				controllerFragment.displayTracks();
+//				controllerFragment.displayProgress();
+//			}
 			
 		}
 	}
