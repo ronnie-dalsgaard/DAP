@@ -192,8 +192,8 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 		public Fragment getItem(int position) {
 			switch(position){
 			case 0: return bookmarkListFragment;
-			case 1: return audiobookGridFragment;
-			case 2: return controllerFragment;
+			case 1: return controllerFragment;
+			case 2: return audiobookGridFragment;
 			}
 			return null;
 		}

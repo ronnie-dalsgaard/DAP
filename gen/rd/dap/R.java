@@ -792,8 +792,10 @@ containing a value of this type.
         public static final int list_layout_lv=0x7f070015;
         public static final int main_miniplayer=0x7f070017;
         public static final int match_parent=0x7f07000c;
+        public static final int menu_item_countdown=0x7f07005c;
         public static final int menu_item_download=0x7f07005a;
         public static final int menu_item_new_audiobook=0x7f070058;
+        public static final int menu_item_timer=0x7f07005b;
         public static final int menu_item_upload=0x7f070059;
         public static final int monochrome=0x7f070013;
         public static final int none=0x7f070000;
@@ -855,6 +857,7 @@ containing a value of this type.
     public static final class menu {
         public static final int audiobooks=0x7f0a0000;
         public static final int bookmarks=0x7f0a0001;
+        public static final int details=0x7f0a0002;
     }
     public static final class string {
         public static final int _progress=0x7f05002b;

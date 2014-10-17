@@ -4,16 +4,18 @@ import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
 
+
+
 public abstract class Monitor extends Thread {
 	private static final String TAG = "Monitor";
 	public static final int DEFAULT_DELAY = 1000;
 	public int delay = DEFAULT_DELAY;
 	private boolean alive = true;
 	
-	private static final int SEC = 1000;
-	private static final int MIN = 60*SEC;
-	private static final int HOUR = 60*MIN;
-	private static final int DAY = 24*HOUR;
+	public static final int SEC = 1000;
+	public static final int MIN = 60*SEC;
+	public static final int HOUR = 60*MIN;
+	public static final int DAY = 24*HOUR;
 	
 	public Monitor(int delay, TimeUnit unit){
 		switch(unit){

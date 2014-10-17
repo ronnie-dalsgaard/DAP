@@ -476,8 +476,10 @@ int id input_lv 0x7f070050
 int id list_layout_lv 0x7f070015
 int id main_miniplayer 0x7f070017
 int id match_parent 0x7f07000c
+int id menu_item_countdown 0x7f07005c
 int id menu_item_download 0x7f07005a
 int id menu_item_new_audiobook 0x7f070058
+int id menu_item_timer 0x7f07005b
 int id menu_item_upload 0x7f070059
 int id monochrome 0x7f070013
 int id none 0x7f070000
@@ -533,6 +535,7 @@ int layout item_track 0x7f030019
 int layout track_details 0x7f03001a
 int menu audiobooks 0x7f0a0000
 int menu bookmarks 0x7f0a0001
+int menu details 0x7f0a0002
 int string _progress 0x7f05002b
 int string accept 0x7f050002
 int string action_settings 0x7f05002d

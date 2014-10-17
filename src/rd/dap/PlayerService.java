@@ -23,14 +23,14 @@ public class PlayerService extends Service implements OnErrorListener {
 	private final IBinder binder = new DAPBinder();
 	private long laststart = 0;
 	private static Monitor_Bookmarks monitor = null;
-	
+
 	//Observer pattern - Miniplayer is observable
-		private ArrayList<PlayerObserver> observers = new ArrayList<PlayerObserver>();
-		public interface PlayerObserver{
-			public void updateBookmark(Bookmark bookmark);
-		}
-		public void addObserver(PlayerObserver observer) { observers.add(observer); }
-	
+	private ArrayList<PlayerObserver> observers = new ArrayList<PlayerObserver>();
+	public interface PlayerObserver{
+		public void updateBookmark(Bookmark bookmark);
+	}
+	public void addObserver(PlayerObserver observer) { observers.add(observer); }
+
 	@Override
 	public void onCreate(){
 		Log.d(TAG, "onCreate");
@@ -46,7 +46,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		super.onDestroy();
 		kill();
 	}
-	
+
 	public void toggle(){
 		if(Data.getCurrentAudiobook() == null) return;
 		if(Data.getCurrentTrack() == null) return;
@@ -89,10 +89,10 @@ public class PlayerService extends Service implements OnErrorListener {
 	}
 	public void seekTo(int position){
 		if(mp == null) return;
-//		boolean wasPlaying = mp.isPlaying();
-//		mp.pause();
+		//		boolean wasPlaying = mp.isPlaying();
+		//		mp.pause();
 		mp.seekTo(position);
-//		if(wasPlaying) mp.start();
+		//		if(wasPlaying) mp.start();
 	}
 	public void reset(){
 		if (mp != null) {
@@ -120,7 +120,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		try{
 			return mp.isPlaying();
 		} catch(IllegalStateException e){
-//			Log.d(TAG, "exception occured -> isPlaying is false");
+			//			Log.d(TAG, "exception occured -> isPlaying is false");
 			return false;
 		}
 	}
@@ -137,7 +137,6 @@ public class PlayerService extends Service implements OnErrorListener {
 		}
 		stopSelf();
 	}
-	
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -167,7 +166,7 @@ public class PlayerService extends Service implements OnErrorListener {
 			super(delay, unit);
 			this.filesDir = filesDir;
 		}
-
+		
 		@Override
 		public void execute() {
 			if(mp == null) {
@@ -189,7 +188,7 @@ public class PlayerService extends Service implements OnErrorListener {
 				Log.d(TAG, "Unable to update bookmarks, since position is missing");
 				return;
 			}
-			
+
 			BookmarkManager manager = BookmarkManager.getInstance();
 			String author = Data.getCurrentAudiobook().getAuthor();
 			String album = Data.getCurrentAudiobook().getAlbum();
@@ -198,11 +197,11 @@ public class PlayerService extends Service implements OnErrorListener {
 			boolean force = false; //only update bookmark if progress is greater than previously recorded
 			Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
 			Log.d(TAG, "Bookmark created or updated\n"+bookmark);
-			
-			for(PlayerObserver observer : observers){
-				observer.updateBookmark(bookmark);
-			}
-			
+
+//			for(PlayerObserver observer : observers){
+//				observer.updateBookmark(bookmark);
+//			}
+
 			go_again = mp.isPlaying();
 		}
 	}

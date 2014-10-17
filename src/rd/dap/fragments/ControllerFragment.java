@@ -28,6 +28,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -44,11 +47,14 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	private PlayerService player;
 	private Monitor controllerMonitor, progressMonitor;
 	private Changer changer;
+	private boolean timerOn = false;
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private LinearLayout info_layout, tracks_gv;
 	private TextView author_tv, audiobook_basics_album_tv, title_tv, progress_tv;
 	private ImageButton cover_btn, next_btn, prev_btn, forward_btn, rewind_btn;
 	private ImageView cover_iv;
+	private Timer timer;
+	private Menu menu;
 
 	private static final int REQUEST_FRAGMENT_BASICS_EDIT = 1701;
 	private static final int CELL = 1111;
@@ -58,6 +64,8 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
+
+		setHasOptionsMenu(true);
 
 		if(noCover == null || drw_play == null || drw_pause == null
 				|| drw_play_on_cover == null || drw_pause_on_cover == null){
@@ -70,7 +78,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 
 		controllerMonitor = new ControllerMonitor(1, TimeUnit.SECONDS);
 		controllerMonitor.start();
-		
+
 		progressMonitor = new ProgressMonitor(1, TimeUnit.SECONDS);
 		progressMonitor.start();
 	}
@@ -78,19 +86,19 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
 		View v = (ViewGroup) inflater.inflate(R.layout.controller, container, false);
-		
+
 		cover_iv = (ImageView) v.findViewById(R.id.audiobook_basics_cover_iv);
 		author_tv = (TextView) v.findViewById(R.id.audiobook_basics_author_tv);
 		audiobook_basics_album_tv = (TextView) v.findViewById(R.id.audiobook_basics_album_tv);
 		if(Data.getCurrentAudiobook() != null){
 			displayValues();
 		}
-		
+
 		//Audiobook basics
 		cover_btn = (ImageButton) v.findViewById(R.id.audiobook_basics_cover_btn);
 		cover_btn.setImageDrawable(null);
 		cover_btn.setOnClickListener(this);
-		
+
 		info_layout = (LinearLayout) v.findViewById(R.id.audiobook_basics_info_layout);
 		info_layout.setOnClickListener(this);
 
@@ -109,64 +117,89 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 		tracks_gv = (LinearLayout) v.findViewById(R.id.tracks_grid);
 
 		displayTracks();
-		
+
 		//Seeker
 		forward_btn = (ImageButton) v.findViewById(R.id.seeker_fast_forward);
 		forward_btn.setOnClickListener(this);
 
 		rewind_btn = (ImageButton) v.findViewById(R.id.seeker_rewind);
 		rewind_btn.setOnClickListener(this);
-		
+
 		progress_tv = (TextView) v.findViewById(R.id.seeker_progress_tv);
 		progress_tv.setText(Time.toString(0));
 		progress_tv.setOnClickListener(this);
-		
+
 		displayProgress();
-		
+
 		return v;
-		
-		
+
+
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		// Just for test
-//		final Audiobook audiobook = Data.getAudiobook();
-//		ImageButton t1 = (ImageButton) findViewById(R.id.controller_test1);
-//		t1.setOnClickListener(new OnClickListener() {
-//			@Override public void onClick(View v) {
-//				Gson gson = new Gson();
-//				Toast.makeText(ControllerActivity.this, gson.toJson(audiobook), Toast.LENGTH_SHORT).show();
-//			}
-//		});
-//
-//		ImageButton t2 = (ImageButton) findViewById(R.id.controller_test2);
-//		t2.setOnClickListener(new OnClickListener() {
-//			@Override public void onClick(View v) {
-//				ArrayList<Bookmark> list = BookmarkManager.getInstance().loadBookmarks(getFilesDir());
-//				String str = "";
-//				for(Bookmark b : list) str += b.toString() + "\n";
-//				Toast.makeText(ControllerActivity.this, str, Toast.LENGTH_LONG).show();
-//			}
-//		});
-//
-//		ImageButton t3 = (ImageButton) findViewById(R.id.controller_test3);
-//		t3.setOnClickListener(new OnClickListener() {
-//			@Override public void onClick(View arg0) {
-//				Intent intent = new Intent(ControllerActivity.this, AudiobookGridFragment.class);
-//				ControllerActivity.this.startActivity(intent);
-//			}
-//		});
+		//		final Audiobook audiobook = Data.getAudiobook();
+		//		ImageButton t1 = (ImageButton) findViewById(R.id.controller_test1);
+		//		t1.setOnClickListener(new OnClickListener() {
+		//			@Override public void onClick(View v) {
+		//				Gson gson = new Gson();
+		//				Toast.makeText(ControllerActivity.this, gson.toJson(audiobook), Toast.LENGTH_SHORT).show();
+		//			}
+		//		});
+		//
+		//		ImageButton t2 = (ImageButton) findViewById(R.id.controller_test2);
+		//		t2.setOnClickListener(new OnClickListener() {
+		//			@Override public void onClick(View v) {
+		//				ArrayList<Bookmark> list = BookmarkManager.getInstance().loadBookmarks(getFilesDir());
+		//				String str = "";
+		//				for(Bookmark b : list) str += b.toString() + "\n";
+		//				Toast.makeText(ControllerActivity.this, str, Toast.LENGTH_LONG).show();
+		//			}
+		//		});
+		//
+		//		ImageButton t3 = (ImageButton) findViewById(R.id.controller_test3);
+		//		t3.setOnClickListener(new OnClickListener() {
+		//			@Override public void onClick(View arg0) {
+		//				Intent intent = new Intent(ControllerActivity.this, AudiobookGridFragment.class);
+		//				ControllerActivity.this.startActivity(intent);
+		//			}
+		//		});
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 	@Override 
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
 		try {
-            changer = (Changer) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Callback");
-        }
+			changer = (Changer) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+					+ " must implement Callback");
+		}
 	}
-	
+
+	//Menu
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		this.menu = menu;
+		// Inflate the menu; this adds items to the action bar if it is present.
+		inflater.inflate(R.menu.details, menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case R.id.menu_item_timer: 
+			if(!timerOn){
+				MenuItem menuitem = menu.getItem(1);
+				System.out.println("###" + menuitem.getTitle());
+				timer = new Timer(15, TimeUnit.SECONDS, menuitem);
+				timer.start();
+			} else {
+				timer.kill();
+			}
+			timerOn = !timerOn;
+			break;
+		}
+		return true;
+	}
+
 	public void displayValues(){
 		if(Data.getCurrentAudiobook() == null) return;
 		if(Data.getCurrentTrack() == null) return;
@@ -235,7 +268,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 		int progress = player.getCurrentProgress();
 		progress_tv.setText(Time.toString(progress));
 	}
-	
+
 	@Override
 	public void onClick(View v) {
 		Log.d(TAG, "onClick");
@@ -254,13 +287,13 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			intent.putExtra("audiobook", Data.getCurrentAudiobook());
 			startActivityForResult(intent, REQUEST_FRAGMENT_BASICS_EDIT);
 			break;
-			
-		//Cases for Tracks
+
+			//Cases for Tracks
 		case R.id.track_next:
 			if(player == null) return;
 			//if currently playing the last track - do nothing
 			if(Data.getCurrentAudiobook().getPlaylist().getLast().equals(Data.getCurrentTrack())) return;
-			
+
 			int nextPosition = Data.getCurentPosition()+1;
 			Track nextTrack = Data.getCurrentAudiobook().getPlaylist().get(nextPosition);
 			Data.setCurrentPosition(nextPosition);
@@ -276,7 +309,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			if(player == null) return;
 			//if currently playing the first track - do nothing
 			if(Data.getCurrentAudiobook().getPlaylist().getFirst().equals(Data.getCurrentTrack())) return;
-			
+
 			int previousPosition = Data.getCurentPosition()-1;
 			Track previousTrack = Data.getCurrentAudiobook().getPlaylist().get(previousPosition);
 			Data.setCurrentPosition(previousPosition);
@@ -284,7 +317,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			//Fix view
 			displayTracks();
 			cover_btn.setImageDrawable(drw_play_on_cover);
-			
+
 			player.reload();
 			break;
 
@@ -299,14 +332,14 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 					//Fix view
 					displayTracks();
 					cover_btn.setImageDrawable(drw_play_on_cover);
-					
+
 					player.reload();
 					break;
 				}
 			} catch (Exception e) { break; }
 			break;
-			
-		//Cases for seeker
+
+			//Cases for seeker
 		case R.id.seeker_fast_forward:
 			if(player == null) return;
 			if(Data.getCurrentAudiobook() == null) return;
@@ -314,7 +347,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			int ff_position = player.getCurrentProgress();
 			int ff_duration = player.getDuration();
 			int ff_newPos = 0;
-			
+
 			ff_newPos = Math.min(ff_position + (60 * 1000), ff_duration);
 			if(ff_position == -1 || ff_duration == -1) return; 
 			player.seekTo(ff_newPos);
@@ -334,7 +367,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			player.seekTo(rew_newPos);
 			progress_tv.setText(Time.toString(rew_newPos));
 			break;
-			
+
 		case R.id.seeker_progress_tv:
 			break;
 		}
@@ -352,7 +385,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			}
 		}
 	}
-	
+
 	@Override
 	public void onStart(){
 		Log.d(TAG, "onStart");
@@ -434,4 +467,65 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			});
 		}
 	}
+	class Timer extends Monitor {
+		private long endTime;
+		private MenuItem item;
+		private String _delay;
+		
+		public Timer(int delay, TimeUnit unit, final MenuItem item) {
+			super(1, TimeUnit.SECONDS);
+			
+			switch(unit){
+			case MILLISECONDS: /*Do nothing*/ break;
+			case SECONDS: delay = delay * SEC; break;
+			case MINUTES: delay = delay * MIN; break;
+			case HOURS: delay = delay * HOUR; break;
+			case DAYS: delay = delay * DAY; break;
+			case MICROSECONDS: //fall through
+			case NANOSECONDS: throw new RuntimeException("Countdown must be miliseconds or more");
+			}
+			
+			endTime = System.currentTimeMillis() + delay;
+			
+			this.item = item;
+			_delay = Time.toString(delay);
+			getActivity().runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					item.setTitle(_delay);
+				}
+			});
+		}
+
+		@Override
+		public void execute() {
+			final long timeleft = endTime - System.currentTimeMillis();
+			getActivity().runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					item.setTitle(Time.toString(timeleft));
+				}
+			});
+			if(timeleft <= 0){
+				player.pause();
+				kill();
+			}
+		}
+		
+		@Override
+		public void kill(){
+			getActivity().runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					item.setTitle(_delay);
+				}
+			});
+			timerOn = false;
+			super.kill();
+		}
+	}
+
 }
