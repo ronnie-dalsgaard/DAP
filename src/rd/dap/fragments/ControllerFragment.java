@@ -189,7 +189,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			if(!timerOn){
 				MenuItem menuitem = menu.getItem(1);
 				System.out.println("###" + menuitem.getTitle());
-				timer = new Timer(15, TimeUnit.SECONDS, menuitem);
+				timer = new Timer(15, TimeUnit.MINUTES, menuitem);
 				timer.start();
 			} else {
 				timer.kill();
