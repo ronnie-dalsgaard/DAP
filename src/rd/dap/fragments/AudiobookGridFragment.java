@@ -46,15 +46,6 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private Changer changer;
 	
-	//Constructors
-	public AudiobookGridFragment(){
-		super();
-	}
-	public AudiobookGridFragment(Activity activity){
-		super();
-		
-	}
-	
 	public void update(){
 		adapter.notifyDataSetChanged();
 	}
@@ -82,6 +73,7 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 		return v;
 	}
 
+	//Callback
 	@Override 
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
@@ -159,9 +151,9 @@ public class AudiobookGridFragment extends Fragment implements OnItemClickListen
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
 		Log.d(TAG, "onItemClick");
-		Data.setAudiobook(Data.getAudiobooks().get(index));
-		Data.setPosition(0);
-		Data.setTrack(Data.getAudiobook().getPlaylist().get(Data.getPosition()));
+		Data.setCurrentAudiobook(Data.getAudiobooks().get(index));
+		Data.setCurrentPosition(0);
+		Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurentPosition()));
 		
 //		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();

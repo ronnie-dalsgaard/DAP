@@ -2,7 +2,7 @@ package rd.dap.model;
 
 import rd.dap.support.Time;
 
-public class Bookmark {
+public class Bookmark implements Comparable<Bookmark>{
 	private String author, album;
 	private int trackno, progress;
 	// trackno is actually position (0-indexed)
@@ -26,21 +26,46 @@ public class Bookmark {
 	public final int getProgress() { return progress; }
 	public final void setProgress(int progress) { this.progress = progress; }
 	
-	public boolean matches(String author, String album) {
-		if(this.author == author && this.album == album) return true;
-		if(author == null || album == null) return false; //this is an asumption
-		if(author.equals(this.author) && album.equals(this.album)) return true;
-		return false;
+	public boolean isSame(Bookmark bookmark){
+		return isSame(bookmark.author, bookmark.album);
 	}
-	
+	public boolean isSame(String author, String album){ //almost identical to equals
+		if (this.album == null) {
+			if (album != null) return false;
+		} else if (!this.album.equals(album)) return false;
+		if (this.author == null) {
+			if (author != null) return false;
+		} else if (!this.author.equals(author)) return false;
+		return true;
+	}
+	@Override
+	public int compareTo(Bookmark other) {
+		if(this.equals(other)) return 0;
+		if(this.isSame(other)){
+			//sort by progress
+			if(this.trackno == other.trackno){
+				return this.progress - other.progress;
+			}
+			return this.trackno - other.trackno;
+		} else {
+			//sort alphabetically
+			if(this.author.compareTo(other.author) == 0){
+				return this.album.compareTo(other.album);
+			}
+			return this.author.compareTo(other.author);
+		}
+	}
 	@Override
 	public int hashCode() {
-		final int prime = 67;
+		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((album == null) ? 0 : album.hashCode());
 		result = prime * result + ((author == null) ? 0 : author.hashCode());
+		result = prime * result + progress;
+		result = prime * result + trackno;
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -60,8 +85,14 @@ public class Bookmark {
 				return false;
 		} else if (!author.equals(other.author))
 			return false;
+		if (progress != other.progress)
+			return false;
+		if (trackno != other.trackno)
+			return false;
 		return true;
 	}
+
+	@Override
 	public String toString(){
 		return author + " - " + album + " -> (" + trackno + ") " + Time.toString(progress);
 	}

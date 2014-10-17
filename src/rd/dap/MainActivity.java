@@ -108,7 +108,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Min
 				if(position == 2){
 					miniplayer.setVisibility(View.GONE);
 				} else {
-					miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+					miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
 				}
 			}
 		});

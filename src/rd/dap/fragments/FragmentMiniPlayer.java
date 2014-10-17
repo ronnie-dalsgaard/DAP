@@ -134,19 +134,19 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 	
 	public void updateView(){
 		if(bookmark_layout != null){
-			bookmark_layout.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+			bookmark_layout.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
 		}
-		if(Data.getAudiobook() == null || Data.getTrack() == null){
+		if(Data.getCurrentAudiobook() == null || Data.getCurrentTrack() == null){
 			Log.d(TAG, "Unable to update view - no audiobook selected!");
 			return;
 		}
-		author_tv.setText(Data.getAudiobook().getAuthor());
-		album_tv.setText(Data.getAudiobook().getAlbum());
-		String title = Data.getTrack().getTitle();
+		author_tv.setText(Data.getCurrentAudiobook().getAuthor());
+		album_tv.setText(Data.getCurrentAudiobook().getAlbum());
+		String title = Data.getCurrentTrack().getTitle();
 		if(title.length() > 28) title = title.substring(0, 25) + "...";
-		track_tv.setText(String.format("%02d", Data.getPosition()+1) + " " + title);
-		String cover = Data.getTrack().getCover();
-		if(cover == null) cover = Data.getAudiobook().getCover();
+		track_tv.setText(String.format("%02d", Data.getCurentPosition()+1) + " " + title);
+		String cover = Data.getCurrentTrack().getCover();
+		if(cover == null) cover = Data.getCurrentAudiobook().getCover();
 		if(cover != null) {
 			Bitmap bitmap = BitmapFactory.decodeFile(cover);
 			iv.setImageBitmap(bitmap);
@@ -229,8 +229,8 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			break;
 		case R.id.miniplayer_info:
 			Log.d(TAG, "Info long clicked - Audiobook un-selected");
-			Data.setAudiobook(null);
-			Data.setTrack(null);
+			Data.setCurrentAudiobook(null);
+			Data.setCurrentTrack(null);
 			reload();
 			updateView();
 
@@ -274,7 +274,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if(bound && Data.getAudiobook() != null){
+					if(bound && Data.getCurrentAudiobook() != null){
 						btn.setImageDrawable(isPlaying ? drw_pause : drw_play);
 					} else {
 						btn.setImageDrawable(null);

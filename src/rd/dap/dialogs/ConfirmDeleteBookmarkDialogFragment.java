@@ -32,6 +32,7 @@ public class ConfirmDeleteBookmarkDialogFragment extends DialogFragment {
 		super.onAttach(activity);
 		try {
             changer = (Changer) activity;
+            Log.d(TAG, "Changer attached");
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement Callback");
@@ -51,14 +52,14 @@ public class ConfirmDeleteBookmarkDialogFragment extends DialogFragment {
 		.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
 			@Override public void onClick(DialogInterface dialog, int which) {
 				Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-				if(audiobook != null && audiobook.equals(Data.getAudiobook())){
+				if(audiobook != null && audiobook.equals(Data.getCurrentAudiobook())){
 					FragmentMiniPlayer miniplayer = changer.getMiniplayer();
 					if(miniplayer != null){
 						//stop and un-set as current
 						miniplayer.getPlayer().pause();
-						Data.setAudiobook(null);
-						Data.setTrack(null);
-						Data.setPosition(-1);
+						Data.setCurrentAudiobook(null);
+						Data.setCurrentTrack(null);
+						Data.setCurrentPosition(-1);
 
 						//update the miniplayers view
 						miniplayer.updateView();
@@ -72,6 +73,8 @@ public class ConfirmDeleteBookmarkDialogFragment extends DialogFragment {
 				changer.updateAudiobooks();
 				changer.updateBookmarks();
 				changer.updateController();
+				
+				System.out.println(Data.getBookmarks());
 				
 			}
 		})

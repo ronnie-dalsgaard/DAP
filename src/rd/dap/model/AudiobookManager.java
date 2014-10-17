@@ -27,7 +27,6 @@ public final class AudiobookManager extends Data{
 	private static AudiobookManager instance = new AudiobookManager();
 	private static final File root = Environment.getExternalStorageDirectory();
 	private static final File home = new File(root.getPath() + File.separator +"Audiobooks");
-//	private ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 
 	public static AudiobookManager getInstance(){
 		return instance; //Eager singleton
@@ -42,7 +41,7 @@ public final class AudiobookManager extends Data{
 	}
 	public Audiobook getAudiobook(Bookmark bookmark){
 		for(Audiobook audiobook : audiobooks){
-			if(bookmark.matches(audiobook.getAuthor(), audiobook.getAlbum())){
+			if(bookmark.isSame(audiobook.getAuthor(), audiobook.getAlbum())){
 				return audiobook;
 			}
 		}

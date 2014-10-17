@@ -24,11 +24,18 @@ public class BookmarkManager extends Data{ //Singleton
 	public static BookmarkManager getInstance() { return instance; }
 	
 	//CRUD bookmarks
+	public Bookmark createOrUpdateBookmark(File filesDir, Bookmark bookmark, boolean force){
+		String author = bookmark.getAuthor();
+		String album = bookmark.getAlbum();
+		int trackno = bookmark.getTrackno();
+		int progress = bookmark.getProgress();
+		return createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
+	}
 	public Bookmark createOrUpdateBookmark(File filesDir, String author, String album, int trackno, int progress, boolean force){
 		boolean found = false;
 		Bookmark result = null;
 		for(Bookmark bookmark : bookmarks){
-			if(bookmark.matches(author, album)){
+			if(bookmark.isSame(author, album)){
 				result = bookmark;
 				found = true;
 				if(force){ //set bookmark no matter the trackno and progress
@@ -55,26 +62,40 @@ public class BookmarkManager extends Data{ //Singleton
 		}
 		return saveBookmarks(filesDir) ? result : null;
 	}
-	public Bookmark getBookmark(/*File filesDir,*/ String author, String album){
-//		loadBookmarks(filesDir);
+	public Bookmark getBookmark(String author, String album){
 		for(Bookmark bookmark : bookmarks){
-			if(bookmark.matches(author, album)) 
+			if(bookmark.isSame(author, album)) 
 				return bookmark;
 		}
 		return null;
 	}
-	public Bookmark getBookmark(/*File filesDir,*/ Audiobook audiobook){ //Overloading
-		return getBookmark(/*filesDir,*/ audiobook.getAuthor(), audiobook.getAlbum());
+	public Bookmark getBookmark(Audiobook audiobook){ //Overloading
+		return getBookmark(audiobook.getAuthor(), audiobook.getAlbum());
 	}
 	public boolean removeBookmark(Context context, String author, String album){
-		// When comparing bookmarks, trackno and progress is ignored
+		if(author == null || album == null) return false;
 		Bookmark delete = new Bookmark(author, album, 0, 0);
-		boolean result = bookmarks.remove(delete);
-		return result && saveBookmarks(context.getFilesDir());
+		return removeBookmark(context, delete);
 	}
-	public void removeBookmark(Context context, Bookmark bookmark) { //Overloading
-		if(bookmark == null) return;
-		removeBookmark(context, bookmark.getAuthor(), bookmark.getAlbum());
+	public boolean removeBookmark(Context context, Bookmark delete) { //Overloading
+		if(delete == null) return false;
+		Bookmark tmp = null;
+		for(Bookmark bookmark : bookmarks){
+			if(delete.isSame(bookmark)){
+				tmp = bookmark;
+				break;
+			}
+		}
+		if(tmp != null) return bookmarks.remove(tmp);
+		return false;
+	}
+	
+	public boolean hasBookmark(Bookmark bookmark){
+		if(bookmark == null) return false;
+		for(Bookmark b : bookmarks){
+			if(bookmark.isSame(b)) return true;
+		}
+		return false;
 	}
 	
 	//Load and save bookmarks

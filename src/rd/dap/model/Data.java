@@ -5,21 +5,21 @@ import java.util.ArrayList;
 public class Data {
 	protected static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
 	protected static ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
-	private static Audiobook audiobook;
-	private static int position;
-	private static Track track;
+	private static Audiobook currentAudiobook;
+	private static int currentPosition;
+	private static Track currentTrack;
 
 	public static ArrayList<Audiobook> getAudiobooks() { return audiobooks; }
 	
 	public static ArrayList<Bookmark> getBookmarks() { return bookmarks; }
 	
-	public static Audiobook getAudiobook() { return audiobook; }
-	public static void setAudiobook(Audiobook audiobook) { Data.audiobook = audiobook; }
+	public static Audiobook getCurrentAudiobook() { return currentAudiobook; }
+	public static void setCurrentAudiobook(Audiobook audiobook) { Data.currentAudiobook = audiobook; }
 	
-	public static int getPosition() { return position; }
-	public static void setPosition(int position) { Data.position = position; }
+	public static int getCurentPosition() { return currentPosition; }
+	public static void setCurrentPosition(int position) { Data.currentPosition = position; }
 	
-	public static Track getTrack() { return track; }
-	public static void setTrack(Track track) { Data.track = track; }
+	public static Track getCurrentTrack() { return currentTrack; }
+	public static void setCurrentTrack(Track track) { Data.currentTrack = track; }
 	
 }

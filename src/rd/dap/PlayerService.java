@@ -48,21 +48,21 @@ public class PlayerService extends Service implements OnErrorListener {
 	}
 	
 	public void toggle(){
-		if(Data.getAudiobook() == null) return;
-		if(Data.getTrack() == null) return;
-		if(Data.getPosition() < 0) return;
+		if(Data.getCurrentAudiobook() == null) return;
+		if(Data.getCurrentTrack() == null) return;
+		if(Data.getCurentPosition() < 0) return;
 		if(mp == null){
-			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getTrack().getPath())));
+			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));
 		}
 		if(mp.isPlaying()) mp.pause();
 		else mp.start();
 	}
 	public void play(){
-		if(Data.getAudiobook() == null) return;
-		if(Data.getTrack() == null) return;
-		if(Data.getPosition() < 0) return;
+		if(Data.getCurrentAudiobook() == null) return;
+		if(Data.getCurrentTrack() == null) return;
+		if(Data.getCurentPosition() < 0) return;
 		if(mp == null){
-			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getTrack().getPath())));
+			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));
 		}
 		if(!mp.isPlaying()) mp.start();
 	}
@@ -99,16 +99,16 @@ public class PlayerService extends Service implements OnErrorListener {
 			mp.release();
 			mp = null;
 		}
-		Data.setAudiobook(null);
-		Data.setTrack(null);
-		Data.setPosition(-1);
+		Data.setCurrentAudiobook(null);
+		Data.setCurrentTrack(null);
+		Data.setCurrentPosition(-1);
 	}
 	public void reload(){
 		if(mp != null){
 			mp.release();
 		} 
-		if(Data.getTrack() == null) return;
-		mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getTrack().getPath())));		
+		if(Data.getCurrentTrack() == null) return;
+		mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));		
 	}
 	public boolean isPlaying(){ 
 		if(mp == null) {
@@ -130,7 +130,7 @@ public class PlayerService extends Service implements OnErrorListener {
 			mp.release();
 			mp = null;
 		}
-		Data.setAudiobook(null);
+		Data.setCurrentAudiobook(null);
 		if(monitor != null){
 			monitor.kill();
 			monitor = null;
@@ -177,23 +177,23 @@ public class PlayerService extends Service implements OnErrorListener {
 			if(!go_again && !mp.isPlaying()){
 				return;
 			}
-			if(Data.getAudiobook() == null) {
+			if(Data.getCurrentAudiobook() == null) {
 				Log.d(TAG, "Unable to update bookmarks, since audiobook is missing");
 				return;
 			}
-			if(Data.getTrack() == null) {
+			if(Data.getCurrentTrack() == null) {
 				Log.d(TAG, "Unable to update bookmarks, since track is missing");
 				return;
 			}
-			if(Data.getPosition() < 0) {
+			if(Data.getCurentPosition() < 0) {
 				Log.d(TAG, "Unable to update bookmarks, since position is missing");
 				return;
 			}
 			
 			BookmarkManager manager = BookmarkManager.getInstance();
-			String author = Data.getAudiobook().getAuthor();
-			String album = Data.getAudiobook().getAlbum();
-			int trackno = Data.getPosition();
+			String author = Data.getCurrentAudiobook().getAuthor();
+			String album = Data.getCurrentAudiobook().getAlbum();
+			int trackno = Data.getCurentPosition();
 			int progress = mp.getCurrentPosition();
 			boolean force = false; //only update bookmark if progress is greater than previously recorded
 			Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);

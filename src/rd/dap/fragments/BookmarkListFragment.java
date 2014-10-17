@@ -13,7 +13,6 @@ import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
-import rd.dap.model.Callback;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.model.Updater;
@@ -121,11 +120,11 @@ public class BookmarkListFragment extends Fragment implements
 		Bookmark bookmark = Data.getBookmarks().get(index);
 		AudiobookManager manager = AudiobookManager.getInstance();
 		Audiobook audiobook = manager.getAudiobook(bookmark);
-		Data.setAudiobook(audiobook);
-		Data.setPosition(bookmark.getTrackno());
-		Data.setTrack(audiobook.getPlaylist().get(bookmark.getTrackno()));
+		Data.setCurrentAudiobook(audiobook);
+		Data.setCurrentPosition(bookmark.getTrackno());
+		Data.setCurrentTrack(audiobook.getPlaylist().get(bookmark.getTrackno()));
 		
-		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
+		miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.seekTo(bookmark.getProgress());
 		miniplayer.updateView();

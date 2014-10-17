@@ -49,14 +49,14 @@ public class ConfirmDeleteAudiobookDialogFragment extends DialogFragment {
 		.setNegativeButton("Cancel", null) //Do nothing
 		.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
 			@Override public void onClick(DialogInterface dialog, int which) {
-				if(audiobook.equals(Data.getAudiobook())){
+				if(audiobook.equals(Data.getCurrentAudiobook())){
 					FragmentMiniPlayer miniplayer = changer.getMiniplayer();
 					if(miniplayer != null){
 						//stop and un-set as current
 						miniplayer.getPlayer().pause();
-						Data.setAudiobook(null);
-						Data.setTrack(null);
-						Data.setPosition(-1);
+						Data.setCurrentAudiobook(null);
+						Data.setCurrentTrack(null);
+						Data.setCurrentPosition(-1);
 
 						//update the miniplayers view
 						miniplayer.updateView();
