@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.Space;
 import android.widget.TextView;
 
@@ -132,37 +133,6 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 		displayProgress();
 
 		return v;
-
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////
-		// Just for test
-		//		final Audiobook audiobook = Data.getAudiobook();
-		//		ImageButton t1 = (ImageButton) findViewById(R.id.controller_test1);
-		//		t1.setOnClickListener(new OnClickListener() {
-		//			@Override public void onClick(View v) {
-		//				Gson gson = new Gson();
-		//				Toast.makeText(ControllerActivity.this, gson.toJson(audiobook), Toast.LENGTH_SHORT).show();
-		//			}
-		//		});
-		//
-		//		ImageButton t2 = (ImageButton) findViewById(R.id.controller_test2);
-		//		t2.setOnClickListener(new OnClickListener() {
-		//			@Override public void onClick(View v) {
-		//				ArrayList<Bookmark> list = BookmarkManager.getInstance().loadBookmarks(getFilesDir());
-		//				String str = "";
-		//				for(Bookmark b : list) str += b.toString() + "\n";
-		//				Toast.makeText(ControllerActivity.this, str, Toast.LENGTH_LONG).show();
-		//			}
-		//		});
-		//
-		//		ImageButton t3 = (ImageButton) findViewById(R.id.controller_test3);
-		//		t3.setOnClickListener(new OnClickListener() {
-		//			@Override public void onClick(View arg0) {
-		//				Intent intent = new Intent(ControllerActivity.this, AudiobookGridFragment.class);
-		//				ControllerActivity.this.startActivity(intent);
-		//			}
-		//		});
-		///////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 	@Override 
 	public void onAttach(Activity activity){
@@ -188,7 +158,6 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 		case R.id.menu_item_timer: 
 			if(!timerOn){
 				MenuItem menuitem = menu.getItem(1);
-				System.out.println("###" + menuitem.getTitle());
 				timer = new Timer(15, TimeUnit.MINUTES, menuitem);
 				timer.start();
 			} else {
@@ -229,10 +198,10 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			tracks_gv.removeAllViews();
 			final int COLUMNS = 8;
 			LinearLayout row = null;
-			int m = LinearLayout.LayoutParams.MATCH_PARENT;
-			int w = LinearLayout.LayoutParams.WRAP_CONTENT;
-			LinearLayout.LayoutParams row_p = new LinearLayout.LayoutParams(m, w);
-			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 80, 1);
+			int m = LayoutParams.MATCH_PARENT;
+			int w = LayoutParams.WRAP_CONTENT;
+			LayoutParams row_p = new LinearLayout.LayoutParams(m, w);
+			LayoutParams p = new LinearLayout.LayoutParams(0, 80, 1);
 			for(int i = 0; i < Data.getCurrentAudiobook().getPlaylist().size(); i++){
 				if(i % COLUMNS == 0){
 					row = new LinearLayout(getActivity());

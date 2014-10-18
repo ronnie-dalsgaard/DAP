@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import rd.dap.dialogs.Changer;
 import rd.dap.fragments.AudiobookGridFragment;
-import rd.dap.fragments.AudiobookGridFragment.AudiobookAdapter;
 import rd.dap.fragments.BookmarkListFragment;
 import rd.dap.fragments.BookmarkListFragment.BookmarkAdapter;
 import rd.dap.fragments.ControllerFragment;
@@ -126,9 +125,7 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 	public FragmentMiniPlayer getMiniplayer() { return miniplayer; }
 	public void updateAudiobooks() { 
 		if(audiobookGridFragment == null) return;
-		AudiobookAdapter adapter = audiobookGridFragment.getAdapter();
-		if(adapter == null) return;
-		adapter.notifyDataSetChanged();
+		audiobookGridFragment.displayAudiobooks();
 	}
 	public void updateBookmarks() { 
 		if(bookmarkListFragment == null) return;
@@ -146,6 +143,11 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 	
 //	public static BookmarkListFragment getBookmarkListFragment() { return bookmarkListFragment; }
 	public static ControllerFragment getControllerFragment() { return controllerFragment; }
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		Log.d(TAG, "onActivityResult");
+	}
 	
 	//Tabs
 	@Override

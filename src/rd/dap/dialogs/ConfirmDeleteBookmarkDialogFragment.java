@@ -74,8 +74,6 @@ public class ConfirmDeleteBookmarkDialogFragment extends DialogFragment {
 				changer.updateBookmarks();
 				changer.updateController();
 				
-				System.out.println(Data.getBookmarks());
-				
 			}
 		})
 		.create();

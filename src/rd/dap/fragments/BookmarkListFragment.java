@@ -207,6 +207,10 @@ public class BookmarkListFragment extends Fragment implements
 		miniplayer.reload();
 		miniplayer.seekTo(bookmark.getProgress());
 		miniplayer.updateView();
+		
+		changer.updateAudiobooks();
+		changer.updateBookmarks();
+		changer.updateController();
 	}
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {

@@ -14,6 +14,8 @@ import android.util.Log;
 
 public class ChangeAudiobookDialogFragment extends DialogFragment {
 	private static final String TAG = "ChangeAudiobookDialogFragment";
+	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
+	private static final int REQUEST_DELETE_AUDIOBOOK = 9003;
 
 	public static final ChangeAudiobookDialogFragment newInstance(int position){
 		Log.d(TAG, "newInstance");
@@ -36,10 +38,12 @@ public class ChangeAudiobookDialogFragment extends DialogFragment {
 			
 			@Override 
 			public void onClick(DialogInterface dialog, int which) {
+				Log.d(TAG, "onClick - Edit audiobook");
 				Intent intent = new Intent(getActivity(), AudiobookActivity.class);
 				intent.putExtra("state", STATE_EDIT);
 				intent.putExtra("audiobook", audiobook);
-				startActivity(intent);
+//				startActivity(intent);
+				startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK); 
 			}
 		})
 		.setNegativeButton("Delete audiobook", new DialogInterface.OnClickListener() {
@@ -52,5 +56,9 @@ public class ChangeAudiobookDialogFragment extends DialogFragment {
 			}
 		})
 		.create();
+	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		Log.d(TAG, "onActivityResult");
 	}
 }
