@@ -7,17 +7,19 @@ import java.util.concurrent.TimeUnit;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
+import rd.dap.model.Track;
 import rd.dap.support.Monitor;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-public class PlayerService extends Service implements OnErrorListener {
+public class PlayerService extends Service implements OnErrorListener, OnCompletionListener {
 	private static final String TAG = "PlayerService";
 	private static MediaPlayer mp = null;
 	private final IBinder binder = new DAPBinder();
@@ -35,6 +37,7 @@ public class PlayerService extends Service implements OnErrorListener {
 	public void onCreate(){
 		Log.d(TAG, "onCreate");
 		super.onCreate();
+		
 		if(monitor == null){
 			monitor = new Monitor_Bookmarks(10, TimeUnit.SECONDS, getFilesDir());
 			monitor.start();
@@ -53,6 +56,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(Data.getCurentPosition() < 0) return;
 		if(mp == null){
 			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));
+			mp.setOnCompletionListener(this);
 		}
 		if(mp.isPlaying()) mp.pause();
 		else mp.start();
@@ -63,6 +67,7 @@ public class PlayerService extends Service implements OnErrorListener {
 		if(Data.getCurentPosition() < 0) return;
 		if(mp == null){
 			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));
+			mp.setOnCompletionListener(this);
 		}
 		if(!mp.isPlaying()) mp.start();
 	}
@@ -108,7 +113,8 @@ public class PlayerService extends Service implements OnErrorListener {
 			mp.release();
 		} 
 		if(Data.getCurrentTrack() == null) return;
-		mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));		
+		mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));
+		mp.setOnCompletionListener(this);
 	}
 	public boolean isPlaying(){ 
 		if(mp == null) {
@@ -136,6 +142,19 @@ public class PlayerService extends Service implements OnErrorListener {
 			monitor = null;
 		}
 		stopSelf();
+	}
+	
+	@Override
+	public void onCompletion(MediaPlayer arg0) {
+		
+		if(!Data.getCurrentAudiobook().getPlaylist().getLast().equals(Data.getCurrentTrack())){
+			int nextPosition = Data.getCurentPosition() + 1;
+			Data.setCurrentPosition(nextPosition);
+			Track nextTrack = Data.getCurrentAudiobook().getPlaylist().get(nextPosition);
+			Data.setCurrentTrack(nextTrack);
+			reload();
+			play();
+		}		
 	}
 	
 	@Override
@@ -198,11 +217,8 @@ public class PlayerService extends Service implements OnErrorListener {
 			Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
 			Log.d(TAG, "Bookmark created or updated\n"+bookmark);
 
-//			for(PlayerObserver observer : observers){
-//				observer.updateBookmark(bookmark);
-//			}
-
 			go_again = mp.isPlaying();
 		}
 	}
+	
 }

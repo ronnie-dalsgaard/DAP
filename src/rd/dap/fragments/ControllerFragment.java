@@ -79,9 +79,6 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 
 		controllerMonitor = new ControllerMonitor(1, TimeUnit.SECONDS);
 		controllerMonitor.start();
-
-		progressMonitor = new ProgressMonitor(1, TimeUnit.SECONDS);
-		progressMonitor.start();
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -410,28 +407,8 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 						if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 					}
 					displayValues();
-				}
-			});
-		}
-	}
-	class ProgressMonitor extends Monitor{
-		public ProgressMonitor(int delay, TimeUnit unit) {
-			super(delay, unit);
-		}
-
-		@Override
-		public void execute() {
-			if(progress_tv == null) return;
-			if(player == null) return;
-			if(getActivity() == null) return;
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if(Data.getCurrentAudiobook() == null){
-						progress_tv.setText(Time.toString(0));
-					} else {
-						progress_tv.setText(Time.toString(player.getCurrentProgress()));
-					}
+					displayTracks();
+					displayProgress();
 				}
 			});
 		}
