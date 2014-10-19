@@ -74,20 +74,22 @@ public class BookmarkManager extends Data{ //Singleton
 	}
 	public boolean removeBookmark(Context context, String author, String album){
 		if(author == null || album == null) return false;
-		Bookmark delete = new Bookmark(author, album, 0, 0);
-		return removeBookmark(context, delete);
+		Bookmark delete = null;
+		for(Bookmark bookmark : bookmarks){
+			if(author.equals(bookmark.getAuthor()) && album.equals(bookmark.getAlbum())){
+				delete = bookmark;
+			}
+		}
+		if(delete != null){
+			boolean result = bookmarks.remove(delete);
+			saveBookmarks(context.getFilesDir());
+			return result;
+		}
+		return false;
 	}
 	public boolean removeBookmark(Context context, Bookmark delete) { //Overloading
 		if(delete == null) return false;
-		Bookmark tmp = null;
-		for(Bookmark bookmark : bookmarks){
-			if(delete.isSame(bookmark)){
-				tmp = bookmark;
-				break;
-			}
-		}
-		if(tmp != null) return bookmarks.remove(tmp);
-		return false;
+		return removeBookmark(context, delete.getAuthor(), delete.getAlbum());
 	}
 	
 	public boolean hasBookmark(Bookmark bookmark){

@@ -46,7 +46,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	private final String TAG = "ControllerActivity";
 	private boolean bound = false;
 	private PlayerService player;
-	private Monitor controllerMonitor, progressMonitor;
+	private Monitor controllerMonitor;
 	private Changer changer;
 	private boolean timerOn = false;
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
@@ -157,10 +157,10 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 				MenuItem menuitem = menu.getItem(1);
 				timer = new Timer(15, TimeUnit.MINUTES, menuitem);
 				timer.start();
+				timerOn = true;
 			} else {
 				timer.kill();
 			}
-			timerOn = !timerOn;
 			break;
 		}
 		return true;
