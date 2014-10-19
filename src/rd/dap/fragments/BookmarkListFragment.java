@@ -8,8 +8,6 @@ import rd.dap.PlayerService;
 import rd.dap.PlayerService.DAPBinder;
 import rd.dap.PlayerService.PlayerObserver;
 import rd.dap.R;
-import rd.dap.dialogs.ChangeBookmarkDialogFragment;
-import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
@@ -18,8 +16,10 @@ import rd.dap.model.Callback;
 import rd.dap.model.Data;
 import rd.dap.model.DriveHandler;
 import rd.dap.model.Track;
+import rd.dap.support.Changer;
 import rd.dap.support.Time;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,15 +36,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -215,8 +220,11 @@ public class BookmarkListFragment extends Fragment implements
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 		Log.d(TAG, "onItemLongClick");
-		ChangeBookmarkDialogFragment frag = ChangeBookmarkDialogFragment.newInstance(position);
-		frag.show(getFragmentManager(), "ChagenBookmarkDialog");
+		
+		Bookmark bookmark = Data.getBookmarks().get(position);
+		changeBookmarkDialog(bookmark);
+//		ChangeBookmarkDialogFragment frag = ChangeBookmarkDialogFragment.newInstance(position);
+//		frag.show(getFragmentManager(), "ChagenBookmarkDialog");
 		return true; //Consume click
 	}	
 
@@ -317,5 +325,133 @@ public class BookmarkListFragment extends Fragment implements
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		bound = false;
+	}
+	
+	
+	private void changeBookmarkDialog(final Bookmark bookmark){
+		final Dialog dialog = new Dialog(getActivity());
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View dv = inflater.inflate(R.layout.dialog, list, false);
+
+		//Title
+		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
+		title_tv.setText("Change bookmark");
+
+		//Message
+		TextView msg_tv = (TextView) dv.findViewById(R.id.dialog_msg_tv);
+		msg_tv.setText(bookmark.getAuthor() + "\n" + bookmark.getAlbum());
+
+		//Exit button
+		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
+		exit_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Left button
+		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
+		left_btn.setText("Delete");
+		left_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+				deleteBookmarkDialog(bookmark);
+			}
+		});
+
+		//Right button
+		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
+		right_btn.setText("Edit");
+		right_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				dialog.dismiss();
+
+				Toast.makeText(getActivity(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
+//				Intent intent = new Intent(getActivity(), AudiobookActivity.class);
+//				intent.putExtra("state", STATE_EDIT);
+//				intent.putExtra("audiobook", bookmark);
+//				startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK); 
+			}
+		});
+
+
+		dialog.setContentView(dv);
+		dialog.show();
+	}
+	private void deleteBookmarkDialog(final Bookmark bookmark){
+		final Dialog dialog = new Dialog(getActivity());
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View dv = inflater.inflate(R.layout.dialog, list, false);
+
+		//Title
+		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
+		title_tv.setText("Delete audiobooke");
+
+		//Message
+		TextView msg_tv = (TextView) dv.findViewById(R.id.dialog_msg_tv);
+		msg_tv.setText(bookmark.getAuthor() + "\n" + bookmark.getAlbum());
+
+		//Exit button
+		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
+		exit_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Left button
+		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
+		left_btn.setText("Cancel");
+		left_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Right button
+		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
+		right_btn.setText("Confirm");
+		right_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				dialog.dismiss();
+				
+				if(bookmark.equals(Data.getCurrentAudiobook())){
+					if(miniplayer != null){
+						//stop and un-set as current
+						miniplayer.getPlayer().pause();
+						Data.setCurrentAudiobook(null);
+						Data.setCurrentTrack(null);
+						Data.setCurrentPosition(-1);
+
+						//update the miniplayers view
+						miniplayer.updateView();
+					}
+				}
+
+				//Remove the audiobook
+				BookmarkManager.getInstance().removeBookmark(getActivity(), bookmark);
+				Log.d(TAG, "Deleting Bookmark:\n"+bookmark);
+				
+				changer.updateBookmarks();
+				changer.updateController();
+			}
+		});
+
+		dialog.setContentView(dv);
+		dialog.show();
 	}
 }

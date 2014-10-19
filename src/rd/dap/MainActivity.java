@@ -2,7 +2,6 @@ package rd.dap;
 
 import java.util.Locale;
 
-import rd.dap.dialogs.Changer;
 import rd.dap.fragments.AudiobookGridFragment;
 import rd.dap.fragments.BookmarkListFragment;
 import rd.dap.fragments.BookmarkListFragment.BookmarkAdapter;
@@ -12,6 +11,7 @@ import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
+import rd.dap.support.Changer;
 import rd.dap.support.MainDriveHandler;
 import android.app.ActionBar;
 import android.app.Activity;

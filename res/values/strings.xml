@@ -14,9 +14,9 @@
     <string name="action_settings">Settings</string>
     <string name="edit_mode_enter">Enter edit mode</string>
     <string name="edit_mode_exit">Exit edit mode</string>
-    
     <string name="tab1">Bookmarks</string>
     <string name="tab2">Details</string>
     <string name="tab3">Audiobooks</string>
+    <string name="title_activity_change_audiobook_dialog">ChangeAudiobookDialogActivity</string>
 
 </resources>

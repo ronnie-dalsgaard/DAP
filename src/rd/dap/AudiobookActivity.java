@@ -9,6 +9,7 @@ import java.util.List;
 
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
+import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.support.Time;
 import android.app.Activity;
@@ -108,9 +109,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		position--;
 		if(position == TYPE_AUTHOR){
 			ArrayList<String> list = new ArrayList<String>();
-			list.add("Dennis Jürgensen");
-			list.add("Rick Riordan");
-			list.add("John G. Hemry");
+			list.addAll(Data.getAuthors());
 			Intent intent = new Intent(AudiobookActivity.this, InputActivity.class);
 			intent.putExtra("list", list);
 			intent.putExtra("value", audiobook.getAuthor());
@@ -118,9 +117,6 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 			startActivityForResult(intent, REQUEST_EDIT_AUTHOR);
 		} else if(position == TYPE_ALBUM) {
 			ArrayList<String> list = new ArrayList<String>();
-//			list.add("Dennis Jürgensen");
-//			list.add("Rick Riordan");
-//			list.add("John G. Hemry");
 			Intent intent = new Intent(AudiobookActivity.this, InputActivity.class);
 			intent.putExtra("list", list);
 			intent.putExtra("value", audiobook.getAlbum());

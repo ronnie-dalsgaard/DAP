@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent"
+    android:gravity="center" >
+
+    <RelativeLayout
+        android:id="@+id/dialog_base"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/black" >
+
+        <TextView
+            android:id="@+id/dialog_title_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_big"
+            android:text="Title"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <ImageButton
+            android:id="@+id/dialog_exit_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_margin="@dimen/margin_big"
+            android:background="@color/transparent"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_cancel" />
+
+        <include
+            android:id="@+id/dialog_divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/dialog_title_tv"
+            layout="@layout/divider_horizontal" />
+
+        <TextView
+            android:id="@+id/dialog_msg_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dialog_divider1"
+            android:layout_margin="@dimen/margin_small"
+            android:gravity="center_horizontal"
+            android:text="Message" />
+
+        <include
+            android:id="@+id/dialog_divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/dialog_msg_tv"
+            layout="@layout/divider_horizontal" />
+
+        <LinearLayout
+            android:id="@+id/dialog_button_bar"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dialog_divider2"
+            android:divider="@drawable/vertical_divider" >
+
+            <Button
+                android:id="@+id/dialog_left_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Button 1"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/dialog_right_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Button 2"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

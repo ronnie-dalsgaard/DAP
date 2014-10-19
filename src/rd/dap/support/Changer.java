@@ -1,4 +1,4 @@
-package rd.dap.dialogs;
+package rd.dap.support;
 
 import rd.dap.fragments.FragmentMiniPlayer;
 

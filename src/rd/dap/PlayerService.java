@@ -214,9 +214,10 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 			int trackno = Data.getCurentPosition();
 			int progress = mp.getCurrentPosition();
 			boolean force = false; //only update bookmark if progress is greater than previously recorded
-			Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
-			Log.d(TAG, "Bookmark created or updated\n"+bookmark);
-
+			if(trackno > 0 || progress > 0){
+				Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
+				Log.d(TAG, "Bookmark created or updated\n"+bookmark);
+			}
 			go_again = mp.isPlaying();
 		}
 	}

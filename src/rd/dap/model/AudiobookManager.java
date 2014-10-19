@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import rd.dap.support.AlbumFolderFilter;
 import rd.dap.support.Mp3FileFilter;
@@ -35,8 +36,10 @@ public final class AudiobookManager extends Data{
 	private AudiobookManager(){};
 	
 	//CRUD Audiobook
-	public void addAudiobook(Context context, Audiobook audiobook){ 
+	public void addAudiobook(Context context, Audiobook audiobook){
+		if(Data.getAudiobooks().contains(audiobook)) return;
 		audiobooks.add(audiobook);
+		authors.add(audiobook.getAuthor());
 		saveAudiobooks(context);
 	}
 	public Audiobook getAudiobook(Bookmark bookmark){
@@ -52,12 +55,16 @@ public final class AudiobookManager extends Data{
 		for(Audiobook element : getAudiobooks(context)){
 			if(element.equals(original_audiobook)){
 				element.setAudiobook(audiobook);
+				
+				authors.remove(original_audiobook.getAuthor());
+				authors.add(audiobook.getAuthor());
 			}
 		}
 		saveAudiobooks(context);
 	}
 	public void removeAudiobook(Context context, Audiobook audiobook) { 
 		audiobooks.remove(audiobook);
+		authors.remove(audiobook.getAuthor());
 		saveAudiobooks(context);
 	}
 	
@@ -78,9 +85,25 @@ public final class AudiobookManager extends Data{
 			Toast.makeText(context, "Unable to save audiobooks", Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
+		
+		
+		String authors_json = gson.toJson(authors);
+		//Create a file for authors
+		File authors_file = new File(context.getFilesDir(), "authors.dap"); //FIXME filename as constant
+		try {
+			FileWriter writer = new FileWriter(authors_file, false);
+			BufferedWriter out = new BufferedWriter(writer);
+			out.write(authors_json);
+			out.close();
+		} catch (IOException e) {
+			Toast.makeText(context, "Unable to save audiobooks", Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
 	}
 	public ArrayList<Audiobook> loadAudiobooks(Context context){
 		Log.d(TAG, "loadAudiobooks");
+		
+		//Audiobooks
 		File file = new File(context.getFilesDir(), "audiobooks.dap");
 		try {
 			FileInputStream stream = new FileInputStream(file);
@@ -94,6 +117,22 @@ public final class AudiobookManager extends Data{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//Authors
+		File authors_file = new File(context.getFilesDir(), "authors.dap");
+		try {
+			FileInputStream stream = new FileInputStream(authors_file);
+			InputStreamReader reader = new InputStreamReader(stream);
+			BufferedReader in = new BufferedReader(reader);
+			Gson gson = new Gson();
+			HashSet<String> set = gson.fromJson(in, new TypeToken<HashSet<String>>(){}.getType());
+			authors.clear();
+			authors.addAll(set);
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		return audiobooks;
 	}
 	

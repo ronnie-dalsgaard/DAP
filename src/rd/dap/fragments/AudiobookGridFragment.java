@@ -1,5 +1,6 @@
 package rd.dap.fragments;
 
+import static rd.dap.AudiobookActivity.STATE_EDIT;
 import static rd.dap.AudiobookActivity.STATE_NEW;
 import static rd.dap.FileBrowserActivity.TYPE_FOLDER;
 import static rd.dap.MainActivity.miniplayer;
@@ -11,13 +12,16 @@ import java.util.HashSet;
 import rd.dap.AudiobookActivity;
 import rd.dap.FileBrowserActivity;
 import rd.dap.R;
-import rd.dap.dialogs.ChangeAudiobookDialogFragment;
-import rd.dap.dialogs.Changer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
+import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
+import rd.dap.support.Changer;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,6 +37,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -47,17 +54,17 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private Changer changer;
 	private static final int COLUMNS = 3;
-	
+
 	//Fragment must-haves
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
-		
-		
-		
-//		adapter = new AudiobookAdapter(getActivity(), R.layout.cover_view, authors);
-		
+
+
+
+		//		adapter = new AudiobookAdapter(getActivity(), R.layout.cover_view, authors);
+
 		setHasOptionsMenu(true);
 	}
 	@Override
@@ -66,18 +73,18 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 
 		layout = new LinearLayout(getActivity());
 		layout.setOrientation(LinearLayout.VERTICAL);
-		
+
 		int width = (int) getResources().getDimension(R.dimen.mini_player_width);
 		int height = LayoutParams.WRAP_CONTENT;
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
 		params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-		
+
 		ScrollView scroller = new ScrollView(getActivity());
 		scroller.addView(layout);
-		
+
 		RelativeLayout base = new RelativeLayout(getActivity());
 		base.addView(scroller, params);
-		
+
 		displayAudiobooks();
 
 		return base;
@@ -119,7 +126,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 
 				LinearLayout table = new LinearLayout(getActivity());
 				table.setOrientation(LinearLayout.VERTICAL);
-				
+
 				ArrayList<Audiobook> books_by_author = new ArrayList<Audiobook>();
 
 				for(Audiobook audiobook : Data.getAudiobooks()){
@@ -171,19 +178,19 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 			}
 		}
 	}
-	
+
 	//Callback
 	@Override 
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
 		try {
-            changer = (Changer) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Callback");
-        }
+			changer = (Changer) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+					+ " must implement Callback");
+		}
 	}
-	
+
 	//Menu
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -223,14 +230,14 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 			break;
 		case REQUEST_EDIT_AUDIOBOOK:
 			Log.d(TAG, "onActivityResult - REQUEST_EDIT_AUDIOBOOK");
-			
+
 			//update the lists
 			changer.updateAudiobooks();
 			changer.updateBookmarks();
 			changer.updateController();
 		}
 	}
-	
+
 	//Listeners
 
 	@Override
@@ -240,9 +247,9 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 		Data.setCurrentAudiobook(audiobook);
 		Data.setCurrentPosition(0);
 		Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurentPosition()));
-		
+
 		changer.updateController();
-		
+
 		miniplayer.reload();
 		miniplayer.updateView();
 	}
@@ -250,18 +257,139 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 	public boolean onLongClick(View view) {
 		Log.d(TAG, "onItemLongClick");
 		Audiobook clicked = (Audiobook) view.getTag();
-		int position = -1;
-		for(int i = 0; i < Data.getAudiobooks().size(); i++){
-			if(Data.getAudiobooks().get(i).equals(clicked)){
-				position = i;
-			}
-		}
-		
-		ChangeAudiobookDialogFragment frag = ChangeAudiobookDialogFragment.newInstance(position);
-		frag.setTargetFragment(this, REQUEST_EDIT_AUDIOBOOK);
-		frag.show(getFragmentManager(), "ChagenAudiobookDialog");
-		
+		changeAudiobookDialog(clicked);
+
 		return true; //consume click
+	}
+
+	private void changeAudiobookDialog(final Audiobook audiobook){
+		final Dialog dialog = new Dialog(getActivity());
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View dv = inflater.inflate(R.layout.dialog, layout, false);
+
+		//Title
+		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
+		title_tv.setText("Change audiobook");
+
+		//Message
+		TextView msg_tv = (TextView) dv.findViewById(R.id.dialog_msg_tv);
+		msg_tv.setText(audiobook.getAuthor() + "\n" + audiobook.getAlbum());
+
+		//Exit button
+		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
+		exit_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Left button
+		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
+		left_btn.setText("Delete");
+		left_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+				deleteAudiobookDialog(audiobook);
+			}
+		});
+
+		//Right button
+		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
+		right_btn.setText("Edit");
+		right_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				dialog.dismiss();
+
+				Intent intent = new Intent(getActivity(), AudiobookActivity.class);
+				intent.putExtra("state", STATE_EDIT);
+				intent.putExtra("audiobook", audiobook);
+				startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK); 
+			}
+		});
+
+
+		dialog.setContentView(dv);
+		dialog.show();
+	}
+	private void deleteAudiobookDialog(final Audiobook audiobook){
+		final Dialog dialog = new Dialog(getActivity());
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View dv = inflater.inflate(R.layout.dialog, layout, false);
+
+		//Title
+		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
+		title_tv.setText("Delete audiobooke");
+
+		//Message
+		TextView msg_tv = (TextView) dv.findViewById(R.id.dialog_msg_tv);
+		msg_tv.setText(audiobook.getAuthor() + "\n" + audiobook.getAlbum());
+
+		//Exit button
+		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
+		exit_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Left button
+		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
+		left_btn.setText("Cancel");
+		left_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Right button
+		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
+		right_btn.setText("Confirm");
+		right_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				dialog.dismiss();
+				
+				if(audiobook.equals(Data.getCurrentAudiobook())){
+					if(miniplayer != null){
+						//stop and un-set as current
+						miniplayer.getPlayer().pause();
+						Data.setCurrentAudiobook(null);
+						Data.setCurrentTrack(null);
+						Data.setCurrentPosition(-1);
+
+						//update the miniplayers view
+						miniplayer.updateView();
+					}
+				}
+
+				//Remove the audiobook
+				AudiobookManager.getInstance().removeAudiobook(getActivity(), audiobook);
+				Bookmark bookmark = BookmarkManager.getInstance().getBookmark(audiobook);
+				BookmarkManager.getInstance().removeBookmark(getActivity(), bookmark);
+				Log.d(TAG, "Deleting Audiobook:\n"+audiobook);
+				Log.d(TAG, "Deleting Bookmark:\n"+bookmark);
+				
+				changer.updateAudiobooks();
+				changer.updateBookmarks();
+				changer.updateController();
+			}
+		});
+
+		dialog.setContentView(dv);
+		dialog.show();
 	}
 
 }
