@@ -154,7 +154,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
-		
+		if(Data.getCurrentAudiobook() == null) return;
 		if(!Data.getCurrentAudiobook().getPlaylist().getLast().equals(Data.getCurrentTrack())){
 			int nextPosition = Data.getCurentPosition() + 1;
 			Data.setCurrentPosition(nextPosition);

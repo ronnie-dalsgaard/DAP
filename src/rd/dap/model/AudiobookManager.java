@@ -42,13 +42,21 @@ public final class AudiobookManager extends Data{
 		authors.add(audiobook.getAuthor());
 		saveAudiobooks(context);
 	}
-	public Audiobook getAudiobook(Bookmark bookmark){
+	public Audiobook getAudiobook(String author, String album){
+		if(author == null) return null;
+		if(album == null) return null;
 		for(Audiobook audiobook : audiobooks){
-			if(bookmark.isSame(audiobook.getAuthor(), audiobook.getAlbum())){
+			if(author.equals(audiobook.getAuthor()) 
+					&& album.equals(audiobook.getAlbum())){
 				return audiobook;
 			}
 		}
 		return null;
+	}
+	public Audiobook getAudiobook(Bookmark bookmark){
+		String author = bookmark.getAuthor();
+		String album = bookmark.getAlbum();
+		return getAudiobook(author, album);
 	}
 	public ArrayList<Audiobook> getAudiobooks(Context context){ return audiobooks; }
 	public void updateAudiobook(Context context, Audiobook audiobook, Audiobook original_audiobook) {

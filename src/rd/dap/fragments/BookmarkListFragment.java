@@ -25,6 +25,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -60,6 +62,7 @@ public class BookmarkListFragment extends Fragment implements
 	private PlayerService player;
 	private boolean bound = false;
 	private ListView list;
+	private Activity activity;
 	private Changer changer; //Needed when bookmarks can be added or changed manually
 	private DriveHandler drivehandler;
 	private static final String END = "/END";
@@ -83,6 +86,7 @@ public class BookmarkListFragment extends Fragment implements
 	@Override
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
+		this.activity = activity;
 		try {
             changer = (Changer) activity;
             drivehandler = (DriveHandler) activity;
@@ -118,7 +122,6 @@ public class BookmarkListFragment extends Fragment implements
 	//Helper method
 	public void updateBookmark(Bookmark bookmark){
 		Log.d(TAG, "updateBookmark");
-		Activity activity = getActivity();
 		if(activity == null) return;
 		activity.runOnUiThread(new Runnable() {
 			@Override public void run() {
@@ -208,6 +211,12 @@ public class BookmarkListFragment extends Fragment implements
 		Data.setCurrentPosition(bookmark.getTrackno());
 		Data.setCurrentTrack(audiobook.getPlaylist().get(bookmark.getTrackno()));
 
+		SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
+		Editor editor = pref.edit();
+		editor.putString("author", audiobook.getAuthor());
+		editor.putString("album", audiobook.getAlbum());
+		editor.commit();
+		
 		miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
 		miniplayer.reload();
 		miniplayer.seekTo(bookmark.getProgress());
@@ -223,8 +232,6 @@ public class BookmarkListFragment extends Fragment implements
 		
 		Bookmark bookmark = Data.getBookmarks().get(position);
 		changeBookmarkDialog(bookmark);
-//		ChangeBookmarkDialogFragment frag = ChangeBookmarkDialogFragment.newInstance(position);
-//		frag.show(getFragmentManager(), "ChagenBookmarkDialog");
 		return true; //Consume click
 	}	
 
@@ -240,7 +247,6 @@ public class BookmarkListFragment extends Fragment implements
 		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent){
-			Log.d(TAG, "getView");
 			ViewHolder holder;
 			if(convertView == null){
 				LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -429,19 +435,30 @@ public class BookmarkListFragment extends Fragment implements
 			public void onClick(View arg0) {
 				dialog.dismiss();
 				
-				if(bookmark.equals(Data.getCurrentAudiobook())){
-					if(miniplayer != null){
-						//stop and un-set as current
-						miniplayer.getPlayer().pause();
-						Data.setCurrentAudiobook(null);
-						Data.setCurrentTrack(null);
-						Data.setCurrentPosition(-1);
+				System.out.println("Confirm delete bookmark: "+bookmark);
+				Audiobook current = Data.getCurrentAudiobook();
+				if(current != null){
+					String author = current.getAuthor();
+					String album = current.getAlbum();
+				
+					if(bookmark.isSame(author, album)){
+						System.out.println("bookmark is current");
+						if(miniplayer != null){
+							System.out.println("miniplayer exists");
+							//stop and un-set as current
+							miniplayer.getPlayer().pause();
+							Data.setCurrentAudiobook(null);
+							Data.setCurrentTrack(null);
+							Data.setCurrentPosition(-1);
 
-						//update the miniplayers view
-						miniplayer.updateView();
+							//update the miniplayers view
+							miniplayer.updateView();
+							System.out.println("current audiobook: "+Data.getCurrentAudiobook());
+							miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
+						}
+						if(changer != null) changer.updateController();
 					}
 				}
-
 				//Remove the audiobook
 				BookmarkManager.getInstance().removeBookmark(getActivity(), bookmark);
 				Log.d(TAG, "Deleting Bookmark:\n"+bookmark);

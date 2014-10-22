@@ -1,6 +1,7 @@
 package rd.dap.activities;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
 import rd.dap.fragments.AudiobookGridFragment;
@@ -9,13 +10,16 @@ import rd.dap.fragments.BookmarkListFragment.BookmarkAdapter;
 import rd.dap.fragments.ControllerFragment;
 import rd.dap.fragments.FragmentMiniPlayer;
 import rd.dap.fragments.FragmentMiniPlayer.MiniPlayerObserver;
+import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
+import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
 import rd.dap.services.HeadSetReceiver;
 import rd.dap.services.PlayerService;
 import rd.dap.support.Changer;
 import rd.dap.support.MainDriveHandler;
+import rd.dap.support.Monitor;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
@@ -24,6 +28,7 @@ import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.AsyncTask;
@@ -41,6 +46,7 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 	private AudiobookGridFragment audiobookGridFragment;
 	private BookmarkListFragment bookmarkListFragment;
 	private static ControllerFragment controllerFragment;
+	private static Monitor monitor;
 	
 
 	@Override
@@ -91,23 +97,49 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 
 		
 		//Load Audiobooks and Bookmarks
-		new AsyncTask<Activity, Void, Void>(){
+		new AsyncTask<Activity, Void, Bookmark>(){
 			Activity activity;
 			@Override
-			protected Void doInBackground(Activity... params) {
+			protected Bookmark doInBackground(Activity... params) {
 				activity = params[0];
 				AudiobookManager.getInstance().loadAudiobooks(activity);
 				BookmarkManager.getInstance().loadBookmarks(activity.getFilesDir()); 
-				return null;
+				
+				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+				String author = pref.getString("author", null);
+				String album = pref.getString("album", null);
+				Bookmark bookmark = null;
+				if(author != null && album != null){
+					BookmarkManager bm = BookmarkManager.getInstance();
+					AudiobookManager am = AudiobookManager.getInstance();
+					
+					bookmark = bm.getBookmark(author, album);
+					if(bookmark != null){
+						Audiobook audiobook = am.getAudiobook(bookmark);
+						Data.setCurrentAudiobook(audiobook);
+						int position = bookmark.getTrackno();
+						Data.setCurrentTrack(audiobook.getPlaylist().get(position));
+						Data.setCurrentPosition(position);
+					}
+				}
+				return bookmark;
 			}
 			@Override 
-			protected void onPostExecute(Void result){
+			protected void onPostExecute(final Bookmark bookmark){
 				Log.d(TAG, "onPostExecute - audiobooks loaded");
+				
 				runOnUiThread(new Runnable() {
 					
 					@Override 
 					public void run() {
 						try{
+							if(bookmark != null){
+								miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
+								miniplayer.reload();
+								miniplayer.seekTo(bookmark.getProgress());
+								miniplayer.updateView();
+							}
+							
 							Changer changer = (Changer)activity;
 							changer.updateAudiobooks();
 							changer.updateBookmarks();
@@ -120,8 +152,11 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 			}
 		}.execute(this);
 		
-		
-		
+		//Start monitor
+		if(monitor == null){
+			monitor = new displayMonitor(this);
+			monitor.start();
+		}
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
@@ -262,4 +297,34 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 		}
 	}
 
+	
+	class displayMonitor extends Monitor{
+		private Activity activity;
+		
+		public displayMonitor(Activity activity) {
+			super(1, TimeUnit.SECONDS);
+			this.activity = activity;
+		}
+
+		@Override
+		public void execute() {
+			if(activity == null) return;
+			activity.runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					System.out.println("Current = "+Data.getCurrentAudiobook());
+					
+					if(miniplayer != null){
+						miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
+						miniplayer.updateView();
+					}
+					updateAudiobooks();
+					updateBookmarks();
+					updateController();
+				}
+			});
+		}
+		
+	}
 }

@@ -77,8 +77,8 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
 		}
 
-		controllerMonitor = new ControllerMonitor(1, TimeUnit.SECONDS);
-		controllerMonitor.start();
+//		controllerMonitor = new ControllerMonitor(1, TimeUnit.SECONDS);
+//		controllerMonitor.start();
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -167,7 +167,18 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	}
 
 	public void displayValues(){
-		if(Data.getCurrentAudiobook() == null) return;
+		if(Data.getCurrentAudiobook() == null){
+			//Cover
+			if(cover_iv != null) cover_iv.setImageDrawable(noCover);
+			
+			//Author
+			if(author_tv != null) author_tv.setText("Author");
+
+			//Album
+			if(audiobook_basics_album_tv != null) audiobook_basics_album_tv.setText("Album");
+			
+			return;
+		}
 		if(Data.getCurrentTrack() == null) return;
 		//Cover
 		String cover = Data.getCurrentTrack().getCover();
@@ -186,7 +197,15 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 		if(audiobook_basics_album_tv != null) audiobook_basics_album_tv.setText(Data.getCurrentAudiobook().getAlbum());
 	}
 	public void displayTracks(){
-		if(Data.getCurentPosition() == -1 || Data.getCurrentTrack() == null || Data.getCurrentAudiobook() == null) return;
+		if(Data.getCurrentAudiobook() == null){
+			if(title_tv != null) title_tv.setText("Title");
+			if(tracks_gv != null) tracks_gv.removeAllViews();
+			return;
+		}
+		if(Data.getCurentPosition() == -1)return;
+		if(Data.getCurrentTrack() == null) return;
+		Activity activity = getActivity();
+		if(activity == null) return;
 		//Title
 		if(title_tv != null) title_tv.setText(Data.getCurrentTrack().getTitle());
 
@@ -201,11 +220,11 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			LayoutParams p = new LinearLayout.LayoutParams(0, 80, 1);
 			for(int i = 0; i < Data.getCurrentAudiobook().getPlaylist().size(); i++){
 				if(i % COLUMNS == 0){
-					row = new LinearLayout(getActivity());
+					row = new LinearLayout(activity);
 					row.setOrientation(LinearLayout.HORIZONTAL);
 					tracks_gv.addView(row, row_p);
 				}
-				TextView cell = new TextView(getActivity());
+				TextView cell = new TextView(activity);
 				cell.setTextColor(getResources().getColor(R.color.white));
 				cell.setGravity(Gravity.CENTER);
 				cell.setText(String.format("%02d", i+1));
@@ -218,7 +237,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 				row.addView(cell, p);
 			}
 			if(Data.getCurrentAudiobook().getPlaylist().size() % COLUMNS > 0){
-				Space space = new Space(getActivity());
+				Space space = new Space(activity);
 				int weight = COLUMNS - (Data.getCurrentAudiobook().getPlaylist().size() % COLUMNS);
 				LinearLayout.LayoutParams space_p = new LinearLayout.LayoutParams(0, 75, weight);
 				row.addView(space, space_p);

@@ -53,6 +53,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 	private static final int REQUEST_NEW_AUDIOBOOK = 9001;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private Changer changer;
+	private Activity activity;
 	private static final int COLUMNS = 3;
 
 	//Fragment must-haves
@@ -91,7 +92,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 	}
 
 	public void displayAudiobooks(){
-		Log.d(TAG, "displayAudiobooks");
+		if(activity == null) return;
 		if(layout != null){
 			layout.removeAllViews();
 			HashSet<String> authors_set = new HashSet<String>();
@@ -106,21 +107,21 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 			int width = LayoutParams.MATCH_PARENT;
 			int height = LayoutParams.WRAP_CONTENT;
 			LayoutParams table_params = new LayoutParams(width, height);
-			int buttomMargin = (int) getResources().getDimension(R.dimen.margin_big);
+			int buttomMargin = (int) activity.getResources().getDimension(R.dimen.margin_big);
 			table_params.setMargins(0, 0, 0, buttomMargin);
 
 			LayoutParams row_params = new LayoutParams(width, height);
 
-			width = (int)getResources().getDimension(R.dimen.cover_width_big);
-			height = (int)getResources().getDimension(R.dimen.cover_height_big);
+			width = (int)activity.getResources().getDimension(R.dimen.cover_width_big);
+			height = (int)activity.getResources().getDimension(R.dimen.cover_height_big);
 			LayoutParams cover_params = new LayoutParams(width, height);
 
 			LayoutParams element_params = new LayoutParams(0, height, 1);
 
 			for(String author : authors){
 				TextView author_tv = new TextView(getActivity());
-				author_tv.setTextAppearance(getActivity(), android.R.style.TextAppearance_Large);
-				author_tv.setTextColor(getResources().getColor(R.color.white));
+				author_tv.setTextAppearance(activity, android.R.style.TextAppearance_Large);
+				author_tv.setTextColor(activity.getResources().getColor(R.color.white));
 				author_tv.setText(author);
 				layout.addView(author_tv);
 
@@ -141,13 +142,13 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 					Audiobook audiobook = books_by_author.get(i);
 
 					if(i % COLUMNS == 0){
-						row = new LinearLayout(getActivity());
+						row = new LinearLayout(activity);
 						row.setOrientation(LinearLayout.HORIZONTAL);
 						table.addView(row, row_params);
 					}
 
-					ImageView cover_iv = new ImageView(getActivity());
-					LinearLayout element = new LinearLayout(getActivity());
+					ImageView cover_iv = new ImageView(activity);
+					LinearLayout element = new LinearLayout(activity);
 					element.setGravity(Gravity.CENTER_HORIZONTAL);
 					element.setTag(audiobook);
 					element.setOnClickListener(this);
@@ -158,7 +159,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 						Bitmap bm = BitmapFactory.decodeFile(cover);
 						cover_iv.setImageBitmap(bm);
 					} else {
-						Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);
+						Drawable drw = activity.getResources().getDrawable(R.drawable.ic_action_help);
 						cover_iv.setImageDrawable(drw);
 					}
 
@@ -169,7 +170,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 				int missing = COLUMNS - (books_by_author.size() % COLUMNS);
 				if(missing < COLUMNS){
 					for(int i = 0; i < missing; i++){
-						View dummy = new View(getActivity());
+						View dummy = new View(activity);
 						row.addView(dummy, element_params);
 					}
 				}
@@ -183,6 +184,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 	@Override 
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
+		this.activity = activity;
 		try {
 			changer = (Changer) activity;
 		} catch (ClassCastException e) {

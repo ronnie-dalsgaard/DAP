@@ -165,9 +165,11 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		}
 	}
 	public void reload(){
+		if(player == null) return;
 		player.reload();
 	}
 	public void seekTo(int progress){
+		if(player == null) return;
 		player.seekTo(progress);
 		for(MiniPlayerObserver observer : observers){
 			observer.miniplayer_seekTo(progress);
