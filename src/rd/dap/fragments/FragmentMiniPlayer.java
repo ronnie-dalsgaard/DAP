@@ -3,10 +3,10 @@ package rd.dap.fragments;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import rd.dap.PlayerService;
-import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
 import rd.dap.model.Data;
+import rd.dap.services.PlayerService;
+import rd.dap.services.PlayerService.DAPBinder;
 import rd.dap.support.Monitor;
 import rd.dap.support.Time;
 import android.app.Fragment;

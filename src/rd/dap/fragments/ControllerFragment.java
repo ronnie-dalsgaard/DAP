@@ -1,16 +1,16 @@
 package rd.dap.fragments;
 
-import static rd.dap.AudiobookActivity.STATE_EDIT;
+import static rd.dap.activities.AudiobookActivity.STATE_EDIT;
 
 import java.util.concurrent.TimeUnit;
 
-import rd.dap.AudiobookActivity;
-import rd.dap.PlayerService;
-import rd.dap.PlayerService.DAPBinder;
 import rd.dap.R;
+import rd.dap.activities.AudiobookActivity;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Data;
 import rd.dap.model.Track;
+import rd.dap.services.PlayerService;
+import rd.dap.services.PlayerService.DAPBinder;
 import rd.dap.support.Changer;
 import rd.dap.support.Monitor;
 import rd.dap.support.Time;
@@ -227,17 +227,24 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	}
 	public void displayProgress(){
 		if(Data.getCurrentAudiobook() == null){
-			if(progress_tv != null) progress_tv.setText(Time.toString(0));
+			if(progress_tv != null) {
+				progress_tv.setText(Time.toString(0));
+			}
 			return;
 		}
 		if(player == null) return;
 		int progress = player.getCurrentProgress();
-		progress_tv.setText(Time.toString(progress));
+		String str = Time.toString(progress);
+		long duration = Data.getCurrentTrack().getDuration();
+		if(duration > 0) str += " / " + Time.toString(duration);
+		progress_tv.setText(str);
 	}
 
 	@Override
 	public void onClick(View v) {
 		Log.d(TAG, "onClick");
+		String str = "";
+		long duration = -1;
 		switch(v.getId()){
 		//Cases for audiobook basics
 		case R.id.audiobook_basics_cover_btn:
@@ -317,7 +324,11 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			ff_newPos = Math.min(ff_position + (60 * 1000), ff_duration);
 			if(ff_position == -1 || ff_duration == -1) return; 
 			player.seekTo(ff_newPos);
-			progress_tv.setText(Time.toString(ff_newPos));
+			
+			str = Time.toString(ff_newPos);
+			duration = Data.getCurrentTrack().getDuration();
+			if(duration > 0) str += " / " + Time.toString(duration);
+			progress_tv.setText(str);
 			break;
 
 		case R.id.seeker_rewind:
@@ -331,7 +342,11 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			rew_newPos = Math.max(rew_position - (60 * 1000), 0);
 			if(rew_position == -1 || rew_duration == -1) return; 
 			player.seekTo(rew_newPos);
-			progress_tv.setText(Time.toString(rew_newPos));
+			
+			str = Time.toString(rew_newPos);
+			duration = Data.getCurrentTrack().getDuration();
+			if(duration > 0) str += " / " + Time.toString(duration);
+			progress_tv.setText(str);
 			break;
 
 		case R.id.seeker_progress_tv:

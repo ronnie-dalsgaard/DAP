@@ -69,7 +69,7 @@ public final class AudiobookManager extends Data{
 	}
 	
 	//Load and save
-	private void saveAudiobooks(Context context){
+	public void saveAudiobooks(Context context){
 		Log.d(TAG, "saveAudiobooks");
 		Gson gson = new Gson();
 		String json = gson.toJson(audiobooks);

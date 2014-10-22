@@ -1,17 +1,17 @@
 package rd.dap.fragments;
 
-import static rd.dap.AudiobookActivity.STATE_EDIT;
-import static rd.dap.AudiobookActivity.STATE_NEW;
-import static rd.dap.FileBrowserActivity.TYPE_FOLDER;
-import static rd.dap.MainActivity.miniplayer;
+import static rd.dap.activities.AudiobookActivity.STATE_EDIT;
+import static rd.dap.activities.AudiobookActivity.STATE_NEW;
+import static rd.dap.activities.FileBrowserActivity.TYPE_FOLDER;
+import static rd.dap.activities.MainActivity.miniplayer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import rd.dap.AudiobookActivity;
-import rd.dap.FileBrowserActivity;
 import rd.dap.R;
+import rd.dap.activities.AudiobookActivity;
+import rd.dap.activities.FileBrowserActivity;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
@@ -262,8 +262,10 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 		return true; //consume click
 	}
 
+	
+	Dialog dialog;
 	private void changeAudiobookDialog(final Audiobook audiobook){
-		final Dialog dialog = new Dialog(getActivity());
+		dialog = new Dialog(getActivity());
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View dv = inflater.inflate(R.layout.dialog, layout, false);
@@ -319,7 +321,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 		dialog.show();
 	}
 	private void deleteAudiobookDialog(final Audiobook audiobook){
-		final Dialog dialog = new Dialog(getActivity());
+		dialog = new Dialog(getActivity());
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View dv = inflater.inflate(R.layout.dialog, layout, false);
@@ -391,5 +393,11 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 		dialog.setContentView(dv);
 		dialog.show();
 	}
-
+	@Override
+	public void onPause(){
+		Log.d(TAG, "onPause");
+		super.onPause();
+		if(dialog == null) return;
+		dialog.dismiss();
+	}
 }

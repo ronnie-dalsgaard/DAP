@@ -9,7 +9,7 @@ public class Track implements Serializable{
 	private static final long serialVersionUID = 1547714780068230994L;
 	private String path; //mandatory
 	private String title = "";
-	private long duration = -1; //duration in milis
+	private int duration = -1; //duration in milis
 	private String cover = null;
 	
 	public Track(){} //default constructor
@@ -30,8 +30,8 @@ public class Track implements Serializable{
 	public void setTitle(String title) { this.title = new String(title); }
 	public String getPath() { return new String(path); }
 	public void setPath(String path) { this.path = new String(path); }
-	public long getDuration() { return duration; }
-	public void setDuration(long duration) { this.duration = duration; }
+	public int getDuration() { return duration; }
+	public void setDuration(int duration) { this.duration = duration; }
 	public String getCover() { return new String(cover); }
 	public void setCover(String cover) { this.cover = new String(cover); }
 	

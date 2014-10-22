@@ -1,12 +1,9 @@
 package rd.dap.fragments;
 
-import static rd.dap.MainActivity.miniplayer;
+import static rd.dap.activities.MainActivity.miniplayer;
 
 import java.util.List;
 
-import rd.dap.PlayerService;
-import rd.dap.PlayerService.DAPBinder;
-import rd.dap.PlayerService.PlayerObserver;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -16,6 +13,9 @@ import rd.dap.model.Callback;
 import rd.dap.model.Data;
 import rd.dap.model.DriveHandler;
 import rd.dap.model.Track;
+import rd.dap.services.PlayerService;
+import rd.dap.services.PlayerService.DAPBinder;
+import rd.dap.services.PlayerService.PlayerObserver;
 import rd.dap.support.Changer;
 import rd.dap.support.Time;
 import android.app.Activity;
