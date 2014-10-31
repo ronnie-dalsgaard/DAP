@@ -158,7 +158,13 @@ public final class AudiobookManager extends Data{
 		}
 		if(cover != null) { audiobook.setCover(cover); }
 
-		ArrayList<File> filelist = new ArrayList<File>(Arrays.asList(album_folder.listFiles(new Mp3FileFilter())));
+		ArrayList<File> filelist;
+		if(incl_subfolders){
+			filelist = collectFiles(new ArrayList<File>(), album_folder, new Mp3FileFilter());
+		} else {
+			filelist = new ArrayList<File>(Arrays.asList(album_folder.listFiles(new Mp3FileFilter())));			
+		}
+		
 		TrackList playlist = new TrackList();
 		//TODO sort by filename
 		for(File file : filelist){

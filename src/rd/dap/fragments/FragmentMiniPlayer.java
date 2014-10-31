@@ -144,7 +144,7 @@ public class FragmentMiniPlayer extends Fragment implements OnClickListener, OnL
 		album_tv.setText(Data.getCurrentAudiobook().getAlbum());
 		String title = Data.getCurrentTrack().getTitle();
 		if(title.length() > 28) title = title.substring(0, 25) + "...";
-		track_tv.setText(String.format("%02d", Data.getCurentPosition()+1) + " " + title);
+		track_tv.setText(String.format("%02d", Data.getCurrentPosition()+1) + " " + title);
 		String cover = Data.getCurrentTrack().getCover();
 		if(cover == null) cover = Data.getCurrentAudiobook().getCover();
 		if(cover != null) {

@@ -18,7 +18,7 @@ public class Data {
 	public static Audiobook getCurrentAudiobook() { return currentAudiobook; }
 	public static void setCurrentAudiobook(Audiobook audiobook) { Data.currentAudiobook = audiobook; }
 	
-	public static int getCurentPosition() { return currentPosition; }
+	public static int getCurrentPosition() { return currentPosition; }
 	public static void setCurrentPosition(int position) { Data.currentPosition = position; }
 	
 	public static Track getCurrentTrack() { return currentTrack; }

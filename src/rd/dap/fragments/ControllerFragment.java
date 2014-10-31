@@ -51,11 +51,12 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	private boolean timerOn = false;
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private LinearLayout info_layout, tracks_gv;
-	private TextView author_tv, audiobook_basics_album_tv, title_tv, progress_tv;
+	private TextView author_tv, album_tv, title_tv, progress_tv;
 	private ImageButton cover_btn, next_btn, prev_btn, forward_btn, rewind_btn;
 	private ImageView cover_iv;
 	private Timer timer;
 	private Menu menu;
+	private Activity activity;
 
 	private static final int REQUEST_FRAGMENT_BASICS_EDIT = 1701;
 	private static final int CELL = 1111;
@@ -87,7 +88,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 
 		cover_iv = (ImageView) v.findViewById(R.id.audiobook_basics_cover_iv);
 		author_tv = (TextView) v.findViewById(R.id.audiobook_basics_author_tv);
-		audiobook_basics_album_tv = (TextView) v.findViewById(R.id.audiobook_basics_album_tv);
+		album_tv = (TextView) v.findViewById(R.id.audiobook_basics_album_tv);
 		if(Data.getCurrentAudiobook() != null){
 			displayValues();
 		}
@@ -134,6 +135,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	@Override 
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
+		this.activity = activity;
 		try {
 			changer = (Changer) activity;
 		} catch (ClassCastException e) {
@@ -167,7 +169,9 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 	}
 
 	public void displayValues(){
+		Log.d(TAG, "displayValues");
 		if(Data.getCurrentAudiobook() == null){
+			System.out.println("displayValues: "+"no current audiobook");
 			//Cover
 			if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 			
@@ -175,11 +179,13 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			if(author_tv != null) author_tv.setText("Author");
 
 			//Album
-			if(audiobook_basics_album_tv != null) audiobook_basics_album_tv.setText("Album");
+			if(album_tv != null) album_tv.setText("Album");
 			
 			return;
 		}
 		if(Data.getCurrentTrack() == null) return;
+		System.out.println("displayValues: "+"current track exists\n"+Data.getCurrentAudiobook());
+		if(cover_iv == null) System.out.println("cover_iv == null");
 		//Cover
 		String cover = Data.getCurrentTrack().getCover();
 		if(cover == null) cover = Data.getCurrentAudiobook().getCover();
@@ -191,10 +197,12 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 		}
 
 		//Author
+		if(author_tv == null) System.out.println("author_tv == null");
 		if(author_tv != null) author_tv.setText(Data.getCurrentAudiobook().getAuthor());
 
 		//Album
-		if(audiobook_basics_album_tv != null) audiobook_basics_album_tv.setText(Data.getCurrentAudiobook().getAlbum());
+		if(album_tv == null) System.out.println("audiobook_basics_album_tv == null");
+		if(album_tv != null) album_tv.setText(Data.getCurrentAudiobook().getAlbum());
 	}
 	public void displayTracks(){
 		if(Data.getCurrentAudiobook() == null){
@@ -202,7 +210,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			if(tracks_gv != null) tracks_gv.removeAllViews();
 			return;
 		}
-		if(Data.getCurentPosition() == -1)return;
+		if(Data.getCurrentPosition() == -1)return;
 		if(Data.getCurrentTrack() == null) return;
 		Activity activity = getActivity();
 		if(activity == null) return;
@@ -228,7 +236,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 				cell.setTextColor(getResources().getColor(R.color.white));
 				cell.setGravity(Gravity.CENTER);
 				cell.setText(String.format("%02d", i+1));
-				if(i == Data.getCurentPosition()){
+				if(i == Data.getCurrentPosition()){
 					cell.setBackground(getResources().getDrawable(R.drawable.circle));
 				}
 				cell.setId(CELL);
@@ -286,7 +294,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			//if currently playing the last track - do nothing
 			if(Data.getCurrentAudiobook().getPlaylist().getLast().equals(Data.getCurrentTrack())) return;
 
-			int nextPosition = Data.getCurentPosition()+1;
+			int nextPosition = Data.getCurrentPosition()+1;
 			Track nextTrack = Data.getCurrentAudiobook().getPlaylist().get(nextPosition);
 			Data.setCurrentPosition(nextPosition);
 			Data.setCurrentTrack(nextTrack);
@@ -302,7 +310,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 			//if currently playing the first track - do nothing
 			if(Data.getCurrentAudiobook().getPlaylist().getFirst().equals(Data.getCurrentTrack())) return;
 
-			int previousPosition = Data.getCurentPosition()-1;
+			int previousPosition = Data.getCurrentPosition()-1;
 			Track previousTrack = Data.getCurrentAudiobook().getPlaylist().get(previousPosition);
 			Data.setCurrentPosition(previousPosition);
 			Data.setCurrentTrack(previousTrack);
@@ -320,7 +328,7 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 				int i = ((Integer)v.getTag()).intValue();
 				if(i >= 0 && i < Data.getCurrentAudiobook().getPlaylist().size()){
 					Data.setCurrentPosition(i);
-					Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurentPosition()));
+					Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurrentPosition()));
 					//Fix view
 					displayTracks();
 					cover_btn.setImageDrawable(drw_play_on_cover);
@@ -430,8 +438,8 @@ public class ControllerFragment extends Fragment/*DriveHandler*/ implements Serv
 		public void execute() {
 			isPlaying = player != null && player.isPlaying();
 
-			if(getActivity() == null) return;
-			getActivity().runOnUiThread(new Runnable() {
+			if(activity == null) return;
+			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					if(bound && Data.getCurrentAudiobook() != null){

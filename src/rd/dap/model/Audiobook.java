@@ -35,7 +35,7 @@ public class Audiobook implements Serializable{
 	
 	public String toString(){
 		String out = author + " : " + album;
-		out += "Track count = " + playlist.size();
+		out += " Track count = " + playlist.size();
 		return out;
 	}
 	@Override

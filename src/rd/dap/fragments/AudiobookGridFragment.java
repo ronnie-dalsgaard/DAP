@@ -119,7 +119,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 			LayoutParams element_params = new LayoutParams(0, height, 1);
 
 			for(String author : authors){
-				TextView author_tv = new TextView(getActivity());
+				TextView author_tv = new TextView(activity);
 				author_tv.setTextAppearance(activity, android.R.style.TextAppearance_Large);
 				author_tv.setTextColor(activity.getResources().getColor(R.color.white));
 				author_tv.setText(author);
@@ -248,7 +248,7 @@ public class AudiobookGridFragment extends Fragment implements OnClickListener, 
 		Audiobook audiobook = (Audiobook) view.getTag();
 		Data.setCurrentAudiobook(audiobook);
 		Data.setCurrentPosition(0);
-		Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurentPosition()));
+		Data.setCurrentTrack(Data.getCurrentAudiobook().getPlaylist().get(Data.getCurrentPosition()));
 
 		changer.updateController();
 

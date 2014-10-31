@@ -313,8 +313,6 @@ public class MainActivity extends MainDriveHandler implements ActionBar.TabListe
 				
 				@Override
 				public void run() {
-					System.out.println("Current = "+Data.getCurrentAudiobook());
-					
 					if(miniplayer != null){
 						miniplayer.setVisibility(Data.getCurrentAudiobook() == null ? View.GONE : View.VISIBLE);
 						miniplayer.updateView();
