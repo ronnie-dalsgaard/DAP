@@ -3,7 +3,7 @@ package rd.dap.fragments;
 import static rd.dap.activities.AudiobookActivity.STATE_EDIT;
 import static rd.dap.activities.AudiobookActivity.STATE_NEW;
 import static rd.dap.activities.FileBrowserActivity.TYPE_FOLDER;
-import static rd.dap.activities.MainActivity.miniplayer;
+import static rd.dap.activities.old_MainActivity.miniplayer;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package rd.dap.fragments;
 
-import static rd.dap.activities.MainActivity.miniplayer;
+import static rd.dap.activities.old_MainActivity.miniplayer;
 
 import java.util.List;
 

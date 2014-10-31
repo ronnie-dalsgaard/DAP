@@ -18,5 +18,6 @@
     <string name="tab2">Details</string>
     <string name="tab3">Audiobooks</string>
     <string name="title_activity_change_audiobook_dialog">ChangeAudiobookDialogActivity</string>
+    <string name="title_activity_main">MainActivity</string>
 
 </resources>
