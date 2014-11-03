@@ -113,4 +113,14 @@ public class Time {
 
 		return f2or3d.format(minutes) + ":" + f2d.format(seconds);
 	}
+
+	public static int toMillis(int value, TimeUnit unit){
+		switch(unit){
+		case DAYS: value *= 24;
+		case HOURS: value *= 60;
+		case MINUTES: value *= 60;
+		case SECONDS: return value * 1000;
+		default: return -1;
+		}
+	}
 }

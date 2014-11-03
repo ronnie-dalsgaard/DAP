@@ -8,7 +8,6 @@ import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
-import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.services.HeadSetReceiver;
 import rd.dap.services.PlayerService;
@@ -42,14 +41,13 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.Space;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements OnClickListener, ServiceConnection{
+public class MainActivity extends Activity implements OnClickListener, ServiceConnection, PlayerService.PlayerObserver {
 	private static final String TAG = "MainActivity";
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private static Monitor monitor;
 	private PlayerService player;
 	private boolean bound = false;
 	private static final int CELL = 1111;
-//	private Bookmark bookmark = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -123,8 +121,12 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		final String album = pref.getString("album", null);
 		BookmarkManager bm = BookmarkManager.getInstance();
 		Bookmark bookmark = bm.getBookmark(author, album);
-		Data.setCurrentBookmark(bookmark);
-		displayBookmark();
+		if(player != null && player.getAudiobook() == null) {
+			Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+			if(audiobook != null) {
+				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+			}
+		}
 		/*
 		 * Initially the bookmarks will not have been loaded at this point in time.
 		 * Therefore the bookmark will also be displayed after bookmarks and 
@@ -156,8 +158,12 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 					@Override 
 					public void run() {
 						if(bookmark != null){
-							Data.setCurrentBookmark(bookmark);
-							displayBookmark();
+							if(player != null && player.getAudiobook() == null) {
+								Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+								if(audiobook != null) {
+									player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+								}
+							}
 						}
 					}
 
@@ -174,24 +180,16 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	}
 	
 	//Update views
-	private void displayBookmark() {
-		Bookmark bookmark = Data.getCurrentBookmark();
-		if(bookmark == null) return;
-		System.out.println("Bookmark:\n"+bookmark);
-		Audiobook audiobook = Data.getCurrentAudiobook();
-		System.out.println("Audiobook:\n"+audiobook);
-		if(audiobook == null) return;
-		Track track = Data.getCurrentTrack();
-		if(track == null) return;
+	private void displayInfo(Audiobook audiobook, Track track){
 		
 		//Author
 		TextView author_tv = (TextView) findViewById(R.id.audiobook_basics_author_tv);
 		if(author_tv != null) author_tv.setText(audiobook.getAuthor());
-		
+
 		//Album
 		TextView album_tv = (TextView) findViewById(R.id.audiobook_basics_album_tv);
 		if(album_tv != null) album_tv.setText(audiobook.getAlbum());
-		
+
 		//Cover
 		ImageView cover_iv = (ImageView) findViewById(R.id.audiobook_basics_cover_iv);
 		String cover = track.getCover();
@@ -202,26 +200,15 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		} else {
 			if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 		}
-		
-		
-		displayPlayButton(false);
-		displayTracks();
-		displayTime();
 	}
-	private void displayTracks(){
-		Bookmark bookmark = Data.getCurrentBookmark();
-		if(bookmark == null) return;
+	private void displayTracks(Audiobook audiobook, Track track, int trackno){
 		TextView title_tv = (TextView) findViewById(R.id.track_title);
 		LinearLayout tracks_gv = (LinearLayout) findViewById(R.id.controller_tracks_grid);
-		Audiobook audiobook = Data.getCurrentAudiobook();
 		if(audiobook == null){
 			if(title_tv != null) title_tv.setText("Title");
 			if(tracks_gv != null) tracks_gv.removeAllViews();
 			return;
 		}
-		int trackno = bookmark.getTrackno();
-		Track track = Data.getCurrentTrack();
-		if(track == null) return;
 		
 		//Title
 		String _trackno = String.format(Locale.US, "%02d", trackno+1);
@@ -263,14 +250,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			}
 		}
 	}
-	private void displayTime(){
-		Bookmark bookmark = Data.getCurrentBookmark();
-		if(bookmark == null) return;
-		Audiobook audiobook = Data.getCurrentAudiobook();
-		if(audiobook == null) return;
-		Track track = Data.getCurrentTrack();
-		if(track == null) return;
-
+	private void displayTime(Track track){
 		//Progress
 		TextView progress_tv = (TextView) findViewById(R.id.seeker_progress_tv);
 
@@ -285,18 +265,13 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			progress_tv.setText(_progress);
 		}
 	}
-	private void displayPlayButton(boolean invert){
-		Bookmark bookmark = Data.getCurrentBookmark();
+	private void displayPlayButton(){
 		//Cover button
 		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
-		if(player == null || bookmark == null) {
+		if(player == null || player.getAudiobook() == null) {
 			cover_btn.setImageDrawable(null);
 		} else {
-			if(invert) { 
-				cover_btn.setImageDrawable(!player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
-			} else {
-				cover_btn.setImageDrawable(player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
-			}
+			cover_btn.setImageDrawable(player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
 		}
 	}
 	
@@ -321,27 +296,40 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	
 	@Override
 	public void onClick(View v) {
+		int currentProgress, progress;
 		switch(v.getId()){
 		case R.id.audiobook_basics_cover_btn: 
-			if(player != null) {
-				displayPlayButton(true);
-				/*
-				 * The playbutton is inverted because there is a delay, so 
-				 * at this time the state is NOT PLAYING, but very soon to 
-				 * be PLAYING. The button should reflect the PLAYING state.
-				 * The toggle command comes after to ensure that the state
-				 * is completely certain.
-				 */
-				player.toggle();
-			}
+			if(player == null) break;
+			player.toggle();
 			break;
-		case R.id.track_next: break;
-		case R.id.track_previous: break;
-		case R.id.seeker_fast_forward: break;
-		case R.id.seeker_rewind: break;
+		case R.id.track_next:
+			if(player == null) break;
+			player.next();
+			break;
+		case R.id.track_previous: 
+			if(player == null) break;
+			player.prev();
+			break;
+		case R.id.seeker_fast_forward: 
+			if(player == null) break;
+			currentProgress = player.getCurrentProgress();
+			progress = currentProgress + Time.toMillis(1, TimeUnit.MINUTES);
+			int duration = player.getDuration();
+			player.seekTo(Math.min(progress, duration));
+			break;
+		case R.id.seeker_rewind: 
+			if(player == null) break;
+			currentProgress = player.getCurrentProgress();
+			progress = currentProgress - Time.toMillis(1, TimeUnit.MINUTES);
+			player.seekTo(Math.max(progress, 0));
+			break;
+		case CELL:
+			if(player == null) break;
+			Audiobook audiobook = player.getAudiobook();
+			int trackno = (int) v.getTag();
+			player.set(audiobook, trackno, 0);
 		}
 	}
-
 	
 	@Override
 	public void onStart(){
@@ -367,7 +355,9 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		player = binder.getPlayerService();
 		bound = true;
 		
-		displayPlayButton(false);
+		player.addObserver(this);
+		
+		displayPlayButton();
 	}
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
@@ -391,10 +381,58 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 				
 				@Override
 				public void run() {
-					//update Views
+					if(player == null) return;
+					Audiobook audiobook = player.getAudiobook();
+					if(audiobook == null) return;
+					int trackno = player.getTrackno();
+					Track track = audiobook.getPlaylist().get(trackno);
+					displayTime(track);
 				}
 			});
 		}
 		
+	}
+
+	
+	@Override
+	public void updateBookmark(Bookmark bookmark) { }
+
+	@Override
+	public void complete(int new_trackno) { }
+
+	@Override
+	public void set(Audiobook audiobook, int trackno, int progress){
+		Track track = audiobook.getPlaylist().get(trackno);
+		displayInfo(audiobook, track);
+		displayPlayButton();
+		displayTracks(audiobook, track, trackno);
+		displayTime(track);
+	}
+	@Override
+	public void play() { 
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		cover_btn.setImageDrawable(drw_pause_on_cover);
+	}
+
+	@Override
+	public void pause() { 
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		cover_btn.setImageDrawable(drw_play_on_cover);
+	}
+
+
+	@Override
+	public void next(Audiobook audiobook, Track track, int trackno) { 
+		displayTracks(audiobook, track, trackno);
+		displayTime(track);
+	}
+	@Override
+	public void prev(Audiobook audiobook, Track track, int trackno) { 
+		displayTracks(audiobook, track, trackno);
+		displayTime(track);
+	}
+	@Override
+	public void seek(Track track){
+		displayTime(track);
 	}
 }
