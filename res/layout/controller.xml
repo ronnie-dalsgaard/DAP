@@ -16,27 +16,23 @@
 
             <include layout="@layout/fragment_audiobook_basics" />
 
-            <include
-                android:id="@+id/controller_divider_1"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                layout="@layout/divider_horizontal" />
+            <include layout="@layout/divider_horizontal" />
 
             <include layout="@layout/fragment_track" />
 
-            <include
-                android:id="@+id/controller_divider_2"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                layout="@layout/divider_horizontal" />
+            <include layout="@layout/divider_horizontal" />
 
             <include layout="@layout/fragment_seeker" />
 
-            <include
-                android:id="@+id/controller_divider_3"
+            <include layout="@layout/divider_horizontal" />
+            
+            <LinearLayout
+                android:id="@+id/controller_tracks_grid"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                layout="@layout/divider_horizontal" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+            
+            <include layout="@layout/divider_horizontal" />
         </LinearLayout>
     </ScrollView>
 

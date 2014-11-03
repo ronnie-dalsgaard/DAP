@@ -8,7 +8,6 @@ import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
-import rd.dap.model.Track;
 import rd.dap.support.Monitor;
 import android.app.Service;
 import android.content.Intent;
@@ -51,9 +50,8 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	}
 
 	public void toggle(){
-		if(Data.getCurrentAudiobook() == null) return;
-		if(Data.getCurrentTrack() == null) return;
-		if(Data.getCurrentPosition() < 0) return;
+		if(Data.getCurrentBookmark() == null) return;
+		
 		if(mp == null){
 			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));
 			setDurationToTrack();
@@ -63,9 +61,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 		else mp.start();
 	}
 	public void play(){
-		if(Data.getCurrentAudiobook() == null) return;
-		if(Data.getCurrentTrack() == null) return;
-		if(Data.getCurrentPosition() < 0) return;
+		if(Data.getCurrentBookmark() == null) return;
 		if(mp == null){
 			mp = MediaPlayer.create(this, Uri.fromFile(new File(Data.getCurrentTrack().getPath())));
 			setDurationToTrack();
@@ -111,9 +107,8 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 			mp.release();
 			mp = null;
 		}
-		Data.setCurrentAudiobook(null);
-		Data.setCurrentTrack(null);
-		Data.setCurrentPosition(-1);
+		
+		Data.setCurrentBookmark(null);
 	}
 	public void reload(){
 		if(mp != null){
@@ -144,7 +139,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 			mp.release();
 			mp = null;
 		}
-		Data.setCurrentAudiobook(null);
+		Data.setCurrentBookmark(null);
 		if(monitor != null){
 			monitor.kill();
 			monitor = null;
@@ -154,12 +149,10 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
-		if(Data.getCurrentAudiobook() == null) return;
+		if(Data.getCurrentBookmark() == null) return;
 		if(!Data.getCurrentAudiobook().getPlaylist().getLast().equals(Data.getCurrentTrack())){
-			int nextPosition = Data.getCurrentPosition() + 1;
-			Data.setCurrentPosition(nextPosition);
-			Track nextTrack = Data.getCurrentAudiobook().getPlaylist().get(nextPosition);
-			Data.setCurrentTrack(nextTrack);
+			int nextPosition = Data.getCurrentBookmark().getTrackno() +1;
+			Data.getCurrentBookmark().setTrackno(nextPosition);
 			reload();
 			play();
 		}		
@@ -203,23 +196,15 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 			if(!go_again && !mp.isPlaying()){
 				return;
 			}
-			if(Data.getCurrentAudiobook() == null) {
-				Log.d(TAG, "Unable to update bookmarks, since audiobook is missing");
-				return;
-			}
-			if(Data.getCurrentTrack() == null) {
-				Log.d(TAG, "Unable to update bookmarks, since track is missing");
-				return;
-			}
-			if(Data.getCurrentPosition() < 0) {
-				Log.d(TAG, "Unable to update bookmarks, since position is missing");
+			if(Data.getCurrentBookmark() == null) {
+				Log.d(TAG, "Unable to update bookmarks");
 				return;
 			}
 
 			BookmarkManager manager = BookmarkManager.getInstance();
-			String author = Data.getCurrentAudiobook().getAuthor();
-			String album = Data.getCurrentAudiobook().getAlbum();
-			int trackno = Data.getCurrentPosition();
+			String author = Data.getCurrentBookmark().getAuthor();
+			String album = Data.getCurrentBookmark().getAlbum();
+			int trackno = Data.getCurrentBookmark().getTrackno();
 			int progress = mp.getCurrentPosition();
 			boolean force = false; //only update bookmark if progress is greater than previously recorded
 			if(trackno > 0 || progress > 0){

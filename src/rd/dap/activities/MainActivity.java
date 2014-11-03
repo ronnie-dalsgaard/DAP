@@ -1,47 +1,78 @@
 package rd.dap.activities;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
-import rd.dap.activities.old_MainActivity.displayMonitor;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Data;
+import rd.dap.model.Track;
 import rd.dap.services.HeadSetReceiver;
 import rd.dap.services.PlayerService;
-import rd.dap.support.Changer;
+import rd.dap.services.PlayerService.DAPBinder;
 import rd.dap.support.Monitor;
+import rd.dap.support.Time;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.Space;
+import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnClickListener, ServiceConnection{
 	private static final String TAG = "MainActivity";
+	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private static Monitor monitor;
+	private PlayerService player;
+	private boolean bound = false;
+	private static final int CELL = 1111;
+//	private Bookmark bookmark = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.controller);
+		
+		//No cover
+		if(noCover == null || drw_play == null || drw_pause == null
+				|| drw_play_on_cover == null || drw_pause_on_cover == null){
+			noCover = getResources().getDrawable(R.drawable.ic_action_help);
+			drw_play = getResources().getDrawable(R.drawable.ic_action_play);
+			drw_pause = getResources().getDrawable(R.drawable.ic_action_pause);
+			drw_play_on_cover = getResources().getDrawable(R.drawable.ic_action_play_over_video);
+			drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
+		}
 
+		//Set stream for hardware volume buttons
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
+		// Request audio focus for playback
 		final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		final ComponentName receiver = new ComponentName(getPackageName(), HeadSetReceiver.class.getName());
 
-		// Request audio focus for playback
 		final OnAudioFocusChangeListener l = new OnAudioFocusChangeListener() {
 
 			@Override
@@ -65,14 +96,41 @@ public class MainActivity extends Activity {
 		}
 		Log.d(TAG, "Audio focus gained");
 
-
-
-
-
+		//Start playerservice
 		Intent serviceIntent = new Intent(this, PlayerService.class);
 		startService(serviceIntent);
+		
+		//Buttons
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		cover_btn.setImageDrawable(null);
+		cover_btn.setOnClickListener(this);
+		
+		ImageButton next_btn = (ImageButton) findViewById(R.id.track_next);
+		next_btn.setOnClickListener(this);
 
+		ImageButton prev_btn = (ImageButton) findViewById(R.id.track_previous);
+		prev_btn.setOnClickListener(this);
+		
+		ImageButton forward_btn = (ImageButton) findViewById(R.id.seeker_fast_forward);
+		forward_btn.setOnClickListener(this);
 
+		ImageButton rewind_btn = (ImageButton) findViewById(R.id.seeker_rewind);
+		rewind_btn.setOnClickListener(this);
+
+		//Current bookmark
+		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+		final String author = pref.getString("author", null);
+		final String album = pref.getString("album", null);
+		BookmarkManager bm = BookmarkManager.getInstance();
+		Bookmark bookmark = bm.getBookmark(author, album);
+		Data.setCurrentBookmark(bookmark);
+		displayBookmark();
+		/*
+		 * Initially the bookmarks will not have been loaded at this point in time.
+		 * Therefore the bookmark will also be displayed after bookmarks and 
+		 * audiobooks are loaded. 
+		 */
+		
 		//Load Audiobooks and Bookmarks
 		new AsyncTask<Activity, Void, Bookmark>(){
 			Activity activity;
@@ -82,24 +140,12 @@ public class MainActivity extends Activity {
 				AudiobookManager.getInstance().loadAudiobooks(activity);
 				BookmarkManager.getInstance().loadBookmarks(activity.getFilesDir()); 
 
-				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-				String author = pref.getString("author", null);
-				String album = pref.getString("album", null);
-				Bookmark bookmark = null;
 				if(author != null && album != null){
 					BookmarkManager bm = BookmarkManager.getInstance();
-					AudiobookManager am = AudiobookManager.getInstance();
-
-					bookmark = bm.getBookmark(author, album);
-					if(bookmark != null){
-						Audiobook audiobook = am.getAudiobook(bookmark);
-						Data.setCurrentAudiobook(audiobook);
-						int trackno = bookmark.getTrackno();
-						Data.setCurrentTrack(audiobook.getPlaylist().get(trackno));
-						Data.setCurrentPosition(trackno);
-					}
+					Bookmark bookmark = bm.getBookmark(author, album);
+					return bookmark;
 				}
-				return bookmark;
+				return null;
 			}
 			@Override 
 			protected void onPostExecute(final Bookmark bookmark){
@@ -110,9 +156,11 @@ public class MainActivity extends Activity {
 					@Override 
 					public void run() {
 						if(bookmark != null){
-							//displayBookmark
+							Data.setCurrentBookmark(bookmark);
+							displayBookmark();
 						}
 					}
+
 				});
 			}
 		}.execute(this);
@@ -124,14 +172,141 @@ public class MainActivity extends Activity {
 		}
 
 	}
+	
+	//Update views
+	private void displayBookmark() {
+		Bookmark bookmark = Data.getCurrentBookmark();
+		if(bookmark == null) return;
+		System.out.println("Bookmark:\n"+bookmark);
+		Audiobook audiobook = Data.getCurrentAudiobook();
+		System.out.println("Audiobook:\n"+audiobook);
+		if(audiobook == null) return;
+		Track track = Data.getCurrentTrack();
+		if(track == null) return;
+		
+		//Author
+		TextView author_tv = (TextView) findViewById(R.id.audiobook_basics_author_tv);
+		if(author_tv != null) author_tv.setText(audiobook.getAuthor());
+		
+		//Album
+		TextView album_tv = (TextView) findViewById(R.id.audiobook_basics_album_tv);
+		if(album_tv != null) album_tv.setText(audiobook.getAlbum());
+		
+		//Cover
+		ImageView cover_iv = (ImageView) findViewById(R.id.audiobook_basics_cover_iv);
+		String cover = track.getCover();
+		if(cover == null) cover = audiobook.getCover();
+		if(cover != null) {
+			Bitmap bitmap = BitmapFactory.decodeFile(cover);
+			if(cover_iv != null) cover_iv.setImageBitmap(bitmap);
+		} else {
+			if(cover_iv != null) cover_iv.setImageDrawable(noCover);
+		}
+		
+		
+		displayPlayButton(false);
+		displayTracks();
+		displayTime();
+	}
+	private void displayTracks(){
+		Bookmark bookmark = Data.getCurrentBookmark();
+		if(bookmark == null) return;
+		TextView title_tv = (TextView) findViewById(R.id.track_title);
+		LinearLayout tracks_gv = (LinearLayout) findViewById(R.id.controller_tracks_grid);
+		Audiobook audiobook = Data.getCurrentAudiobook();
+		if(audiobook == null){
+			if(title_tv != null) title_tv.setText("Title");
+			if(tracks_gv != null) tracks_gv.removeAllViews();
+			return;
+		}
+		int trackno = bookmark.getTrackno();
+		Track track = Data.getCurrentTrack();
+		if(track == null) return;
+		
+		//Title
+		String _trackno = String.format(Locale.US, "%02d", trackno+1);
+		if(title_tv != null) title_tv.setText(_trackno + " " + track.getTitle());
 
+		//Tracks
+		if(tracks_gv != null){
+			int trackCount = audiobook.getPlaylist().size();
+			tracks_gv.removeAllViews();
+			final int COLUMNS = 8;
+			LinearLayout row = null;
+			int m = LayoutParams.MATCH_PARENT;
+			int w = LayoutParams.WRAP_CONTENT;
+			LayoutParams row_p = new LinearLayout.LayoutParams(m, w);
+			LayoutParams p = new LinearLayout.LayoutParams(0, 80, 1);
+			for(int i = 0; i < trackCount; i++){
+				if(i % COLUMNS == 0){
+					row = new LinearLayout(this);
+					row.setOrientation(LinearLayout.HORIZONTAL);
+					tracks_gv.addView(row, row_p);
+				}
+				TextView cell = new TextView(this);
+				cell.setTextColor(getResources().getColor(R.color.white));
+				cell.setGravity(Gravity.CENTER);
+				cell.setText(String.format("%02d", i+1));
+				if(i == trackno){
+					cell.setBackground(getResources().getDrawable(R.drawable.circle));
+				}
+				cell.setId(CELL);
+				cell.setTag(i); //Autoboxing
+				cell.setOnClickListener(this);
+				row.addView(cell, p);
+			}
+			if(trackCount % COLUMNS > 0){
+				Space space = new Space(this);
+				int weight = COLUMNS - (trackCount % COLUMNS);
+				LinearLayout.LayoutParams space_p = new LinearLayout.LayoutParams(0, 75, weight);
+				row.addView(space, space_p);
+			}
+		}
+	}
+	private void displayTime(){
+		Bookmark bookmark = Data.getCurrentBookmark();
+		if(bookmark == null) return;
+		Audiobook audiobook = Data.getCurrentAudiobook();
+		if(audiobook == null) return;
+		Track track = Data.getCurrentTrack();
+		if(track == null) return;
+
+		//Progress
+		TextView progress_tv = (TextView) findViewById(R.id.seeker_progress_tv);
+
+		if(player == null) {
+			progress_tv.setText(Time.toString(0));			
+		} else {
+			int progress = player.getCurrentProgress();
+			String _progress = Time.toString(progress);
+			long duration = track.getDuration();
+			String _duration = Time.toString(duration);
+			if(duration > 0) _progress += " / " + _duration;
+			progress_tv.setText(_progress);
+		}
+	}
+	private void displayPlayButton(boolean invert){
+		Bookmark bookmark = Data.getCurrentBookmark();
+		//Cover button
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		if(player == null || bookmark == null) {
+			cover_btn.setImageDrawable(null);
+		} else {
+			if(invert) { 
+				cover_btn.setImageDrawable(!player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
+			} else {
+				cover_btn.setImageDrawable(player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
+			}
+		}
+	}
+	
+	//Menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
@@ -144,6 +319,63 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	@Override
+	public void onClick(View v) {
+		switch(v.getId()){
+		case R.id.audiobook_basics_cover_btn: 
+			if(player != null) {
+				displayPlayButton(true);
+				/*
+				 * The playbutton is inverted because there is a delay, so 
+				 * at this time the state is NOT PLAYING, but very soon to 
+				 * be PLAYING. The button should reflect the PLAYING state.
+				 * The toggle command comes after to ensure that the state
+				 * is completely certain.
+				 */
+				player.toggle();
+			}
+			break;
+		case R.id.track_next: break;
+		case R.id.track_previous: break;
+		case R.id.seeker_fast_forward: break;
+		case R.id.seeker_rewind: break;
+		}
+	}
+
+	
+	@Override
+	public void onStart(){
+		Log.d(TAG, "onStart");
+		super.onStart();
+		//Bind to PlayerService
+		Intent intent = new Intent(this, PlayerService.class);
+		bindService(intent, this, Context.BIND_AUTO_CREATE);	
+	}
+	@Override
+	public void onStop(){
+		Log.d(TAG, "onStop");
+		super.onStop();
+		//Unbind from PlayerService
+		if(bound){
+			unbindService(this);
+			bound = false;
+		}
+	}
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder service) {
+		DAPBinder binder = (DAPBinder) service;
+		player = binder.getPlayerService();
+		bound = true;
+		
+		displayPlayButton(false);
+	}
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		bound = false;
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		if(cover_btn != null) cover_btn.setImageDrawable(null);
+	}
+
 	class displayMonitor extends Monitor{
 		private Activity activity;
 		

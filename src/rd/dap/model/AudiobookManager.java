@@ -54,6 +54,7 @@ public final class AudiobookManager extends Data{
 		return null;
 	}
 	public Audiobook getAudiobook(Bookmark bookmark){
+		if(bookmark == null) return null;
 		String author = bookmark.getAuthor();
 		String album = bookmark.getAlbum();
 		return getAudiobook(author, album);
