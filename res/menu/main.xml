@@ -3,9 +3,14 @@
     tools:context="rd.dap.MainActivity" >
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/action_settings"/>
+        android:id="@+id/menu_item_timer"
+        android:showAsAction="always"
+        android:title="Sleep"
+        android:icon="@drawable/ic_action_time" />
+    
+    <item 
+        android:id="@+id/menu_item_countdown"
+        android:showAsAction="always"
+        android:title="15:00" />
 
 </menu>

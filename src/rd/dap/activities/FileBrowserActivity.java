@@ -66,7 +66,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 		}
 
 		ListView listview = (ListView) findViewById(R.id.list_layout_lv);
-		LayoutInflater inflater = (LayoutInflater) getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+		LayoutInflater inflater = LayoutInflater.from(this);
 		TextView v = (TextView) inflater.inflate(R.layout.file_browser_message, listview, false);
 		v.setText(message);
 		listview.addHeaderView(v);
@@ -160,7 +160,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 		public View getView(final int position, View convertView, ViewGroup parent){
 			ViewHolder holder;
 			if(convertView == null){
-				LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LayoutInflater inflater = LayoutInflater.from(getContext());
 				convertView = inflater.inflate(R.layout.file_browser_file_item, parent, false);
 				//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 

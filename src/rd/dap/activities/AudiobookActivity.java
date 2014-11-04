@@ -74,7 +74,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		list.setOnItemClickListener(this);
 		
 		//Header
-		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = LayoutInflater.from(this);
 		LinearLayout header = (LinearLayout) inflater.inflate(R.layout.audiobook_header_buttons, list, false);
 		list.addHeaderView(header);
 
@@ -188,7 +188,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Log.d(TAG, "getView");
 			int type = getItemViewType(position);
-			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater inflater = LayoutInflater.from(getContext());
 			switch(type){
 			case TYPE_AUTHOR:
 				AuthorViewHolder authorHolder;

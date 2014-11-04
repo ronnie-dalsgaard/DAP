@@ -2,12 +2,9 @@ package rd.dap.services;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
-import rd.dap.model.Bookmark;
-import rd.dap.model.BookmarkManager;
 import rd.dap.model.Track;
 import rd.dap.support.Monitor;
 import android.app.Service;
@@ -25,32 +22,26 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	private static MediaPlayer mp = null;
 	private final IBinder binder = new DAPBinder();
 	private long laststart = 0;
-	private static Monitor_Bookmarks monitor = null;
 	private Audiobook audiobook;
 	private int trackno;
 
 	//Observer pattern - Miniplayer is observable
 	private ArrayList<PlayerObserver> observers = new ArrayList<PlayerObserver>();
 	public interface PlayerObserver{
-		public void updateBookmark(Bookmark bookmark);
-		public void complete(int new_trackno);
 		public void set(Audiobook audiobook, int trackno, int progress);
 		public void play();
 		public void pause();
 		public void next(Audiobook audiobook, Track track, int trackno);
 		public void prev(Audiobook audiobook, Track track, int trackno);
 		public void seek(Track track);
+		public void complete(Audiobook audiobook, int new_trackno);
+		public void updateBookmark(String author, String album, int trackno, int progress);
 	}
 	public void addObserver(PlayerObserver observer) { observers.add(observer); }
 
 	@Override
 	public void onCreate(){
 		Log.d(TAG, "onCreate");
-		
-		if(monitor == null){
-			monitor = new Monitor_Bookmarks(10, TimeUnit.SECONDS, getFilesDir());
-			monitor.start();
-		}
 	}
 	@Override
 	public void onDestroy(){
@@ -60,6 +51,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	}
 
 	public void set(Audiobook audiobook, int trackno, int progress){
+		Log.d(TAG, "set");
 		if(audiobook == null) return;
 		this.audiobook = audiobook;
 		this.trackno = trackno;
@@ -68,10 +60,6 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 		if(mp != null){
 			mp.release();
 			mp = null;
-		}
-		if(monitor != null){
-			monitor.kill();
-			monitor = null;
 		}
 
 		mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
@@ -118,18 +106,19 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 			for(PlayerObserver obs : observers) { obs.pause(); }
 		}
 	}
-	public void next(){
-		if(audiobook == null) return;
+	public int next(){
+		if(audiobook == null) return -1;
 		Track track = audiobook.getPlaylist().get(trackno);
-		if(track == null) return;		
+		if(track == null) return -1;		
 		
-		if(audiobook.getPlaylist().getLast().equals(track)) return;
+		if(audiobook.getPlaylist().getLast().equals(track)) return 0;
 		
 		trackno++;
 		Track new_track = audiobook.getPlaylist().get(trackno);
 		int progress = 0;
 		set(audiobook, trackno, progress);
 		for(PlayerObserver obs : observers) { obs.next(audiobook, new_track, trackno); }
+		return trackno;
 	}
 	public void prev(){
 		if(audiobook == null) return;
@@ -187,18 +176,15 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 			mp.release();
 			mp = null;
 		}
-		if(monitor != null){
-			monitor.kill();
-			monitor = null;
-		}
 		stopSelf();
 	}
 	
 	@Override
-	public void onCompletion(MediaPlayer arg0) {
-		next();
+	public void onCompletion(MediaPlayer mp) {
+		int new_track = next();
 		play();
-		for(PlayerObserver obs : observers) { obs.complete(trackno); }
+		
+		for(PlayerObserver obs : observers) { obs.complete(audiobook, new_track); }
 	}
 	
 	@Override
@@ -218,43 +204,6 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 		Log.e(TAG, "An error occured in the MediaPlayer and" +
 				" was cought by PlayerSerice: what="+what+", extra="+extra);
 		return true; //Keep going
-	}
-
-	class Monitor_Bookmarks extends Monitor {
-		private static final String TAG = "Monitor_bookmarks";
-		private File filesDir;
-		private boolean go_again = true;
-
-		public Monitor_Bookmarks(int delay, TimeUnit unit, File filesDir) {
-			super(delay, unit);
-			this.filesDir = filesDir;
-		}
-		
-		@Override
-		public void execute() {
-			if(mp == null) {
-				Log.d(TAG, "Unable to update bookmarks, since mediaplayer is unset");
-				return;
-			}
-			if(!go_again && !mp.isPlaying()){
-				return;
-			}
-			if(audiobook == null) {
-				Log.d(TAG, "Unable to update bookmarks");
-				return;
-			}
-
-			BookmarkManager manager = BookmarkManager.getInstance();
-			String author = audiobook.getAuthor();
-			String album = audiobook.getAlbum();
-			int progress = mp.getCurrentPosition();
-			boolean force = false; //only update bookmark if progress is greater than previously recorded
-			if(trackno > 0 || progress > 0){
-				Bookmark bookmark = manager.createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
-				Log.d(TAG, "Bookmark created or updated\n"+bookmark);
-			}
-			go_again = mp.isPlaying();
-		}
 	}
 	
 }

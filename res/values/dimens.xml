@@ -10,6 +10,8 @@
     
     <dimen name="cover_width_small">32dp</dimen>
     <dimen name="cover_height_small">48dp</dimen>
+    <dimen name="cover_width_medium">48dp</dimen>
+    <dimen name="cover_height_medium">64dp</dimen>
     <dimen name="cover_width">64dp</dimen>
     <dimen name="cover_height">96dp</dimen>
     <dimen name="cover_width_big">96dp</dimen>

@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,12 +49,21 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	private PlayerService player;
 	private boolean bound = false;
 	private static final int CELL = 1111;
+	private static final int BOOKMARK = 2222;
+	private Menu menu;
+	private Timer timer;
+	private boolean timerOn = false;
+	private final int TIMER_DELAY = 15;
+	private final TimeUnit TIMER_UNIT = TimeUnit.SECONDS;
+	private Monitor bookmark_monitor = null;
+	private LinearLayout bookmark_list;
 
+	//Activity + Bind to PlayerService
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.controller);
-		
+
 		//No cover
 		if(noCover == null || drw_play == null || drw_pause == null
 				|| drw_play_on_cover == null || drw_pause_on_cover == null){
@@ -97,23 +107,25 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		//Start playerservice
 		Intent serviceIntent = new Intent(this, PlayerService.class);
 		startService(serviceIntent);
-		
+
 		//Buttons
 		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
 		cover_btn.setImageDrawable(null);
 		cover_btn.setOnClickListener(this);
-		
+
 		ImageButton next_btn = (ImageButton) findViewById(R.id.track_next);
 		next_btn.setOnClickListener(this);
 
 		ImageButton prev_btn = (ImageButton) findViewById(R.id.track_previous);
 		prev_btn.setOnClickListener(this);
-		
+
 		ImageButton forward_btn = (ImageButton) findViewById(R.id.seeker_fast_forward);
 		forward_btn.setOnClickListener(this);
 
 		ImageButton rewind_btn = (ImageButton) findViewById(R.id.seeker_rewind);
 		rewind_btn.setOnClickListener(this);
+		
+		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
 		//Current bookmark
 		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
@@ -132,7 +144,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		 * Therefore the bookmark will also be displayed after bookmarks and 
 		 * audiobooks are loaded. 
 		 */
-		
+
 		//Load Audiobooks and Bookmarks
 		new AsyncTask<Activity, Void, Bookmark>(){
 			Activity activity;
@@ -165,6 +177,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 								}
 							}
 						}
+						displayBookmarks();
 					}
 
 				});
@@ -172,16 +185,199 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		}.execute(this);
 
 		//Start monitor
-		if(monitor == null){
-			monitor = new displayMonitor(this);
-			monitor.start();
-		}
+		if(monitor != null) monitor.kill();
+		monitor = new displayMonitor(this);
+		monitor.start();
 
 	}
-	
+	@Override
+	public void onStart(){
+		Log.d(TAG, "onStart");
+		super.onStart();
+		//Bind to PlayerService
+		Intent intent = new Intent(this, PlayerService.class);
+		bindService(intent, this, Context.BIND_AUTO_CREATE);	
+	}
+	@Override
+	public void onStop(){
+		Log.d(TAG, "onStop");
+		super.onStop();
+		//Unbind from PlayerService
+		if(bound){
+			unbindService(this);
+			bound = false;
+		}
+	}
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder service) {
+		Log.d(TAG, "onServiceConnected");
+		DAPBinder binder = (DAPBinder) service;
+		player = binder.getPlayerService();
+		bound = true;
+
+		player.addObserver(this);
+
+		Audiobook audiobook = player.getAudiobook();
+		int trackno = player.getTrackno();
+		if(audiobook != null){
+			Track track  = audiobook.getPlaylist().get(trackno);
+			displayInfo(audiobook, track);
+			displayTracks(audiobook, track, trackno);
+			displayTime(track);
+		}
+		displayPlayButton();
+		
+		if(bookmark_monitor != null) bookmark_monitor.kill();
+		bookmark_monitor = new BookmarkMonitor();
+		bookmark_monitor.start();
+	}
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		bound = false;
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		if(cover_btn != null) cover_btn.setImageDrawable(null);
+	}
+	@Override
+	public void onClick(View v) {
+		//reused variables
+		int currentProgress, progress;
+		Audiobook audiobook;
+		
+		switch(v.getId()){
+		case R.id.audiobook_basics_cover_btn: 
+			if(player == null) break;
+			player.toggle();
+			break;
+		case R.id.track_next:
+			if(player == null) break;
+			player.next();
+			break;
+		case R.id.track_previous: 
+			if(player == null) break;
+			player.prev();
+			break;
+		case R.id.seeker_fast_forward: 
+			if(player == null) break;
+			currentProgress = player.getCurrentProgress();
+			progress = currentProgress + Time.toMillis(1, TimeUnit.MINUTES);
+			int duration = player.getDuration();
+			player.seekTo(Math.min(progress, duration));
+			break;
+		case R.id.seeker_rewind: 
+			if(player == null) break;
+			currentProgress = player.getCurrentProgress();
+			progress = currentProgress - Time.toMillis(1, TimeUnit.MINUTES);
+			player.seekTo(Math.max(progress, 0));
+			break;
+		case CELL:
+			if(player == null) break;
+			audiobook = player.getAudiobook();
+			int trackno = (int) v.getTag();
+			player.set(audiobook, trackno, 0);
+			break;
+		case BOOKMARK:
+			Bookmark bookmark = (Bookmark) v.getTag();
+			if(bookmark == null) break;
+			audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+			if(audiobook == null) break;
+			if(player == null) break;
+			if(!audiobook.equals(player.getAudiobook())) {
+				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+			}
+			break;
+		}
+	}
+
+	//Callbacks from PlayerService
+	@Override
+	public void set(final Audiobook audiobook, final int trackno, final int progress){
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				Track track = audiobook.getPlaylist().get(trackno);
+				displayInfo(audiobook, track);
+				displayPlayButton();
+				displayTracks(audiobook, track, trackno);
+				displayTime(track);
+			}
+		});	
+	}
+	@Override
+	public void play() { 
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+				cover_btn.setImageDrawable(drw_pause_on_cover);
+			}
+		});
+	}
+	@Override
+	public void pause() { 
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+				cover_btn.setImageDrawable(drw_play_on_cover);
+			}
+		});
+	}
+	@Override
+	public void next(final Audiobook audiobook, final Track track, final int trackno) { 
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				displayTracks(audiobook, track, trackno);
+				displayTime(track);
+			}
+		});
+	}
+	@Override
+	public void prev(final Audiobook audiobook, final Track track, final int trackno) { 
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				displayTracks(audiobook, track, trackno);
+				displayTime(track);
+			}
+		});
+	}
+	@Override
+	public void seek(final Track track){
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				displayTime(track);
+			}
+		});
+	}
+	@Override
+	public void complete(final Audiobook audiobook, final int new_trackno) {
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				if(new_trackno == -1) return;
+				Track track = audiobook.getPlaylist().get(new_trackno);
+				displayTracks(audiobook, track, new_trackno);
+				displayTime(track);
+			}
+		});
+	}
+	@Override
+	public void updateBookmark(String author, String album, int trackno, int progress){
+		
+	}
+
 	//Update views
 	private void displayInfo(Audiobook audiobook, Track track){
-		
+
 		//Author
 		TextView author_tv = (TextView) findViewById(R.id.audiobook_basics_author_tv);
 		if(author_tv != null) author_tv.setText(audiobook.getAuthor());
@@ -209,7 +405,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			if(tracks_gv != null) tracks_gv.removeAllViews();
 			return;
 		}
-		
+
 		//Title
 		String _trackno = String.format(Locale.US, "%02d", trackno+1);
 		if(title_tv != null) title_tv.setText(_trackno + " " + track.getTitle());
@@ -274,101 +470,70 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			cover_btn.setImageDrawable(player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
 		}
 	}
+	private void displayBookmarks(){
+		if(bookmark_list == null) { System.out.println("no bookmark list!"); return; }
+		bookmark_list.removeAllViews();
+		LayoutInflater inflater = LayoutInflater.from(this);
+		for(Bookmark bookmark : BookmarkManager.getBookmarks()){
+			View v = inflater.inflate(R.layout.bookmark_item, bookmark_list, true);
+			v.setId(BOOKMARK);
+			v.setTag(bookmark);
+			v.setOnClickListener(this);
+			
+			//Cover
+			Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+			if(audiobook != null){
+				ImageView cover_iv = (ImageView) v.findViewById(R.id.bookmark_cover_iv);
+				String cover = audiobook.getCover();
+				if(cover != null) {
+					Bitmap bitmap = BitmapFactory.decodeFile(cover);
+					if(cover_iv != null) cover_iv.setImageBitmap(bitmap);
+				} else {
+					if(cover_iv != null) cover_iv.setImageDrawable(noCover);
+				}
+			}
+			
+			//Track no
+			TextView track_tv = (TextView) v.findViewById(R.id.bookmark_track_tv);
+			track_tv.setText(String.format("%02d", bookmark.getTrackno()));
+			
+			//Progress
+			TextView progress_tv = (TextView) v.findViewById(R.id.bookmark_progress_tv);
+			progress_tv.setText(Time.toString(bookmark.getProgress()));
+		}
+	}
 	
 	//Menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		this.menu = menu;
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		MenuItem item = menu.getItem(1);
+		int delay = Time.toMillis(TIMER_DELAY, TIMER_UNIT);
+		item.setTitle(Time.toString(delay));
 		return true;
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
+		switch(item.getItemId()){
+		case R.id.menu_item_timer: 
+			if(!timerOn){
+				MenuItem menuitem = menu.getItem(1);
+				timer = new Timer(TIMER_DELAY, TIMER_UNIT, menuitem);
+				timer.start();
+				timerOn = true;
+			} else {
+				timer.kill();
+			}
+			break;
 		}
-		return super.onOptionsItemSelected(item);
-	}
-	
-	@Override
-	public void onClick(View v) {
-		int currentProgress, progress;
-		switch(v.getId()){
-		case R.id.audiobook_basics_cover_btn: 
-			if(player == null) break;
-			player.toggle();
-			break;
-		case R.id.track_next:
-			if(player == null) break;
-			player.next();
-			break;
-		case R.id.track_previous: 
-			if(player == null) break;
-			player.prev();
-			break;
-		case R.id.seeker_fast_forward: 
-			if(player == null) break;
-			currentProgress = player.getCurrentProgress();
-			progress = currentProgress + Time.toMillis(1, TimeUnit.MINUTES);
-			int duration = player.getDuration();
-			player.seekTo(Math.min(progress, duration));
-			break;
-		case R.id.seeker_rewind: 
-			if(player == null) break;
-			currentProgress = player.getCurrentProgress();
-			progress = currentProgress - Time.toMillis(1, TimeUnit.MINUTES);
-			player.seekTo(Math.max(progress, 0));
-			break;
-		case CELL:
-			if(player == null) break;
-			Audiobook audiobook = player.getAudiobook();
-			int trackno = (int) v.getTag();
-			player.set(audiobook, trackno, 0);
-		}
-	}
-	
-	@Override
-	public void onStart(){
-		Log.d(TAG, "onStart");
-		super.onStart();
-		//Bind to PlayerService
-		Intent intent = new Intent(this, PlayerService.class);
-		bindService(intent, this, Context.BIND_AUTO_CREATE);	
-	}
-	@Override
-	public void onStop(){
-		Log.d(TAG, "onStop");
-		super.onStop();
-		//Unbind from PlayerService
-		if(bound){
-			unbindService(this);
-			bound = false;
-		}
-	}
-	@Override
-	public void onServiceConnected(ComponentName name, IBinder service) {
-		DAPBinder binder = (DAPBinder) service;
-		player = binder.getPlayerService();
-		bound = true;
-		
-		player.addObserver(this);
-		
-		displayPlayButton();
-	}
-	@Override
-	public void onServiceDisconnected(ComponentName name) {
-		bound = false;
-		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
-		if(cover_btn != null) cover_btn.setImageDrawable(null);
+		return true;
 	}
 
-	class displayMonitor extends Monitor{
+	class displayMonitor extends Monitor {
 		private Activity activity;
-		
+
 		public displayMonitor(Activity activity) {
 			super(1, TimeUnit.SECONDS);
 			this.activity = activity;
@@ -378,7 +543,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		public void execute() {
 			if(activity == null) return;
 			activity.runOnUiThread(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					if(player == null) return;
@@ -390,49 +555,100 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 				}
 			});
 		}
+
+	}
+	class Timer extends Monitor {
+		private long endTime;
+		private MenuItem item;
+		private String _delay;
 		
-	}
+		public Timer(int delay, TimeUnit unit, final MenuItem item) {
+			super(1, TimeUnit.SECONDS);
+			
+			delay = Time.toMillis(delay, unit);
+			endTime = System.currentTimeMillis() + delay;
+			
+			this.item = item;
+			_delay = Time.toString(delay);
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					item.setTitle(_delay);
+				}
+			});
+		}
 
-	
-	@Override
-	public void updateBookmark(Bookmark bookmark) { }
-
-	@Override
-	public void complete(int new_trackno) { }
-
-	@Override
-	public void set(Audiobook audiobook, int trackno, int progress){
-		Track track = audiobook.getPlaylist().get(trackno);
-		displayInfo(audiobook, track);
-		displayPlayButton();
-		displayTracks(audiobook, track, trackno);
-		displayTime(track);
+		@Override
+		public void execute() {
+			final long timeleft = endTime - System.currentTimeMillis();
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					item.setTitle(Time.toString(timeleft));
+				}
+			});
+			if(timeleft <= 0){
+				player.pause();
+				kill();
+			}
+		}
+		
+		@Override
+		public void kill(){
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					item.setTitle(_delay);
+				}
+			});
+			timerOn = false;
+			super.kill();
+		}
 	}
-	@Override
-	public void play() { 
-		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
-		cover_btn.setImageDrawable(drw_pause_on_cover);
-	}
+	class BookmarkMonitor extends Monitor {
+		private static final String TAG = "Monitor_bookmarks";
+		private boolean go_again = true;
 
-	@Override
-	public void pause() { 
-		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
-		cover_btn.setImageDrawable(drw_play_on_cover);
-	}
+		public BookmarkMonitor() {
+			super(5, TimeUnit.SECONDS);
+		}
 
+		@Override
+		public void execute() {
+			if(player == null) return;
 
-	@Override
-	public void next(Audiobook audiobook, Track track, int trackno) { 
-		displayTracks(audiobook, track, trackno);
-		displayTime(track);
-	}
-	@Override
-	public void prev(Audiobook audiobook, Track track, int trackno) { 
-		displayTracks(audiobook, track, trackno);
-		displayTime(track);
-	}
-	@Override
-	public void seek(Track track){
-		displayTime(track);
+			if(!go_again && !player.isPlaying()){
+				return;
+			}
+			
+			Audiobook audiobook = player.getAudiobook();
+			if(audiobook == null) return;
+			
+			String author = audiobook.getAuthor();
+			String album = audiobook.getAlbum();
+			int trackno = player.getTrackno();
+			int progress = player.getCurrentProgress();
+			boolean force = false; //only update bookmark if progress is greater than previously recorded
+			BookmarkManager bm = BookmarkManager.getInstance();
+			if(trackno > 0 || progress > 0){
+				Bookmark bookmark = bm.createOrUpdateBookmark(getFilesDir(), author, album, trackno, progress, force);
+				BookmarkManager.getInstance().saveBookmarks(getFilesDir());
+				Log.d(TAG, "Bookmark created or updated\n"+bookmark);
+				
+				//Update view
+				runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						displayBookmarks();
+					}
+				});
+			}
+			go_again = player.isPlaying();
+		}
+		
 	}
 }
