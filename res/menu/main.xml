@@ -1,6 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="rd.dap.MainActivity" >
+    
+    <item 
+        android:id="@+id/menu_item_audiobooks_reload"
+        android:showAsAction="always"
+        android:title="New"
+        android:icon="@drawable/ic_action_new" />
 
     <item
         android:id="@+id/menu_item_timer"

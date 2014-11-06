@@ -3,9 +3,15 @@
     tools:context="rd.dap.MainActivity" >
 
     <item
-        android:id="@+id/menu_item_new_audiobook"
+        android:id="@+id/menu_item_audiobooks_reload"
         android:showAsAction="ifRoom"
-        android:title="New Audiobook"
-        android:icon="@drawable/ic_action_new"/>
+        android:title="Reload Audiobook"
+        android:icon="@drawable/ic_action_refresh"/>
+    
+    <item 
+        android:id="@+id/menu_item_audiobooks_set_home"
+        android:showAsAction="never"
+        android:title="Select homefolder"
+        android:icon="@drawable/ic_action_collection" />
 
 </menu>

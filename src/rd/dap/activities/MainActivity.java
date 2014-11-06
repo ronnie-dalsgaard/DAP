@@ -15,6 +15,7 @@ import rd.dap.services.PlayerService.DAPBinder;
 import rd.dap.support.Monitor;
 import rd.dap.support.Time;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -57,6 +59,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	private final TimeUnit TIMER_UNIT = TimeUnit.SECONDS;
 	private Monitor bookmark_monitor = null;
 	private LinearLayout bookmark_list;
+	
 
 	//Activity + Bind to PlayerService
 	@Override
@@ -127,6 +130,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
+		
 		//Current bookmark
 		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 		final String author = pref.getString("author", null);
@@ -146,6 +150,13 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		 */
 
 		//Load Audiobooks and Bookmarks
+		final Dialog dialog = new Dialog(this);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View dv = inflater.inflate(R.layout.loading, null, false);
+		dialog.setContentView(dv);
+		dialog.show();
+		
 		new AsyncTask<Activity, Void, Bookmark>(){
 			Activity activity;
 			@Override
@@ -169,21 +180,36 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 
 					@Override 
 					public void run() {
-						if(bookmark != null){
-							if(player != null && player.getAudiobook() == null) {
-								Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-								if(audiobook != null) {
-									player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-								}
+						if(BookmarkManager.getBookmarks().isEmpty()){
+							System.out.println("MainActivity AsyncTask - NO BOOKMARKS");
+							return;
+						}
+						//At this point at least one bookmark exists
+						Bookmark b = bookmark;
+						if(b == null){
+							b = BookmarkManager.getBookmarks().get(0);
+						}
+						
+						if(player != null && player.getAudiobook() == null) {
+							Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(b);
+							if(audiobook != null) {
+								player.set(audiobook, b.getTrackno(), b.getProgress());
 							}
 						}
+						
 						displayBookmarks();
 					}
 
 				});
+				dialog.dismiss();
 			}
 		}.execute(this);
 
+		
+		
+		
+		
+		
 		//Start monitor
 		if(monitor != null) monitor.kill();
 		monitor = new displayMonitor(this);
@@ -475,7 +501,9 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		bookmark_list.removeAllViews();
 		LayoutInflater inflater = LayoutInflater.from(this);
 		for(Bookmark bookmark : BookmarkManager.getBookmarks()){
-			View v = inflater.inflate(R.layout.bookmark_item, bookmark_list, true);
+			System.out.println("### "+bookmark);
+			
+			View v = inflater.inflate(R.layout.bookmark_item, bookmark_list, false);
 			v.setId(BOOKMARK);
 			v.setTag(bookmark);
 			v.setOnClickListener(this);
@@ -500,6 +528,8 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			//Progress
 			TextView progress_tv = (TextView) v.findViewById(R.id.bookmark_progress_tv);
 			progress_tv.setText(Time.toString(bookmark.getProgress()));
+			
+			bookmark_list.addView(v);
 		}
 	}
 	
@@ -527,10 +557,31 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 				timer.kill();
 			}
 			break;
+		
+		case R.id.menu_item_audiobooks_reload:
+			Intent intent = new Intent(this, AudiobooksActivity.class);
+			startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
+			break;
 		}
 		return true;
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		Log.d(TAG, "onActivityResult");
+		if(data == null) return;
+		Audiobook audiobook = (Audiobook) data.getSerializableExtra("result");
+		if(audiobook == null) return;
+		Bookmark bookmark = new Bookmark(audiobook.getAuthor(), audiobook.getAlbum(), 0, 0);
+		BookmarkManager.getInstance().createOrUpdateBookmark(getFilesDir(), bookmark, true);
+		displayBookmarks();
+		if(BookmarkManager.getBookmarks().size() == 1){
+			if(player != null && player.getAudiobook() == null) {
+				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+			}
+		}
+	}
+	
 	class displayMonitor extends Monitor {
 		private Activity activity;
 

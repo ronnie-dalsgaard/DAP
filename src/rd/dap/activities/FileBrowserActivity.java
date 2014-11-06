@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rd.dap.R;
-import rd.dap.R.drawable;
-import rd.dap.R.id;
-import rd.dap.R.layout;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -48,7 +44,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 
 		type = getIntent().getStringExtra("type");
 		if(type == null || type.isEmpty()) throw new RuntimeException("No type set");
-		
+				
 		message = getIntent().getStringExtra("message");
 		if(message == null || message.isEmpty()) throw new RuntimeException("No message set");
 
@@ -89,6 +85,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		position -= 1; //compensate for header
 		File file = list.get(position);
+		
 
 		//Validate file
 		boolean accept = false;
@@ -135,6 +132,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 		if(TYPE_FOLDER.equalsIgnoreCase(type)){
 			File file = list.get(position);
 			int requestcode = getIntent().getIntExtra("requestcode", -1);
+			if(requestcode == -1) throw new RuntimeException("No requestcode provided");
 			if(requestcode > 0){
 //				Toast.makeText(FileBrowserActivity.this, file.getName(), Toast.LENGTH_SHORT).show();
 				Intent intent = new Intent();

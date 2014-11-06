@@ -110,6 +110,7 @@ public class BookmarkManager extends Data{ //Singleton
 			BufferedReader in = new BufferedReader(reader);
 			Gson gson = new Gson();
 			ArrayList<Bookmark> list = gson.fromJson(in, new TypeToken<ArrayList<Bookmark>>(){}.getType());
+			if(list == null) list = new ArrayList<Bookmark>();
 			bookmarks.clear();
 			bookmarks.addAll(list);
 			in.close();

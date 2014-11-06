@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 
 import rd.dap.support.AlbumFolderFilter;
@@ -26,8 +27,6 @@ import com.google.gson.reflect.TypeToken;
 public final class AudiobookManager extends Data{
 	private static final String TAG = "AudiobookManager";
 	private static AudiobookManager instance = new AudiobookManager();
-	private static final File root = Environment.getExternalStorageDirectory();
-	private static final File home = new File(root.getPath() + File.separator +"Audiobooks");
 
 	public static AudiobookManager getInstance(){
 		return instance; //Eager singleton
@@ -40,6 +39,14 @@ public final class AudiobookManager extends Data{
 		if(Data.getAudiobooks().contains(audiobook)) return;
 		audiobooks.add(audiobook);
 		authors.add(audiobook.getAuthor());
+		saveAudiobooks(context);
+	}
+	public void addAllAudiobooks(Context context, Collection<Audiobook> collection){
+		for(Audiobook audiobook : collection){
+			if(audiobooks.contains(audiobook)) continue;
+			audiobooks.add(audiobook);
+			authors.add(audiobook.getAuthor());
+		}
 		saveAudiobooks(context);
 	}
 	public Audiobook getAudiobook(String author, String album){
@@ -76,7 +83,15 @@ public final class AudiobookManager extends Data{
 		authors.remove(audiobook.getAuthor());
 		saveAudiobooks(context);
 	}
-	
+	public void removeAllAudiobooks(Context context){
+		ArrayList<Audiobook> trash = new ArrayList<Audiobook>();
+		trash.addAll(audiobooks);
+		for(Audiobook audiobook : trash){
+			audiobooks.remove(audiobook);
+			authors.remove(audiobook.getAuthor());
+		}
+		saveAudiobooks(context);
+	}
 	//Load and save
 	public void saveAudiobooks(Context context){
 		Log.d(TAG, "saveAudiobooks");
@@ -179,7 +194,7 @@ public final class AudiobookManager extends Data{
 		audiobook.setPlaylist(playlist);
 		return audiobook;
 	}
-	public ArrayList<Audiobook> autodetect(){
+	public ArrayList<Audiobook> autodetect(File folder){
 		ArrayList<Audiobook> list = new ArrayList<Audiobook>();
 
 		String state = Environment.getExternalStorageState();
@@ -188,7 +203,7 @@ public final class AudiobookManager extends Data{
 			throw new RuntimeException("No external storrage!");
 		}
 
-		ArrayList<File> albums = collectFiles(new ArrayList<File>(), home, new AlbumFolderFilter());
+		ArrayList<File> albums = collectFiles(new ArrayList<File>(), folder, new AlbumFolderFilter());
 		for(File album_folder : albums){
 			Audiobook audiobook = autoCreateAudiobook(album_folder, true);
 			list.add(audiobook);

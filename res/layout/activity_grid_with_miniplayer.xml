@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="rd.dap.fragments.AudiobookGridFragment" >
+    tools:context="rd.dap.activities.AudiobooksActivity" >
 
     <GridView
         android:id="@+id/grid_layout_gv"
