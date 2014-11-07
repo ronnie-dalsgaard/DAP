@@ -8,6 +8,7 @@ import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
+import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.services.HeadSetReceiver;
 import rd.dap.services.PlayerService;
@@ -35,18 +36,23 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnClickListener, ServiceConnection, PlayerService.PlayerObserver {
+public class MainActivity extends Activity implements OnClickListener, OnLongClickListener, ServiceConnection, PlayerService.PlayerObserver {
 	private static final String TAG = "MainActivity";
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
+	private RelativeLayout base;
 	private static Monitor monitor;
 	private PlayerService player;
 	private boolean bound = false;
@@ -55,17 +61,17 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	private Menu menu;
 	private Timer timer;
 	private boolean timerOn = false;
-	private final int TIMER_DELAY = 15;
-	private final TimeUnit TIMER_UNIT = TimeUnit.SECONDS;
+	private int timer_delay = Time.toMillis(15, TimeUnit.MINUTES);
 	private Monitor bookmark_monitor = null;
 	private LinearLayout bookmark_list;
-	
+
 
 	//Activity + Bind to PlayerService
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.controller);
+		base = (RelativeLayout) findViewById(R.id.controller_base);
 
 		//No cover
 		if(noCover == null || drw_play == null || drw_pause == null
@@ -127,10 +133,15 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 
 		ImageButton rewind_btn = (ImageButton) findViewById(R.id.seeker_rewind);
 		rewind_btn.setOnClickListener(this);
-		
+
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
-		
+		//Start monitor
+		if(monitor != null) monitor.kill();
+		monitor = new displayMonitor(this);
+		monitor.start();
+
+
 		//Current bookmark
 		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 		final String author = pref.getString("author", null);
@@ -149,71 +160,75 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		 * audiobooks are loaded. 
 		 */
 
-		//Load Audiobooks and Bookmarks
-		final Dialog dialog = new Dialog(this);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		LayoutInflater inflater = LayoutInflater.from(this);
-		View dv = inflater.inflate(R.layout.loading, null, false);
-		dialog.setContentView(dv);
-		dialog.show();
-		
-		new AsyncTask<Activity, Void, Bookmark>(){
-			Activity activity;
-			@Override
-			protected Bookmark doInBackground(Activity... params) {
-				activity = params[0];
-				AudiobookManager.getInstance().loadAudiobooks(activity);
-				BookmarkManager.getInstance().loadBookmarks(activity.getFilesDir()); 
 
-				if(author != null && album != null){
-					BookmarkManager bm = BookmarkManager.getInstance();
-					Bookmark bookmark = bm.getBookmark(author, album);
-					return bookmark;
-				}
-				return null;
-			}
-			@Override 
-			protected void onPostExecute(final Bookmark bookmark){
-				Log.d(TAG, "onPostExecute - audiobooks loaded");
 
-				runOnUiThread(new Runnable() {
+		if(bookmark == null){
+			//Load Audiobooks and Bookmarks
+			final Dialog dialog = new Dialog(this);
+			dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+			LayoutInflater inflater = LayoutInflater.from(this);
+			View dv = inflater.inflate(R.layout.loading, base, false);
+			dialog.setContentView(dv);
+			dialog.show();
 
-					@Override 
-					public void run() {
-						if(BookmarkManager.getBookmarks().isEmpty()){
-							System.out.println("MainActivity AsyncTask - NO BOOKMARKS");
-							return;
-						}
-						//At this point at least one bookmark exists
-						Bookmark b = bookmark;
-						if(b == null){
-							b = BookmarkManager.getBookmarks().get(0);
-						}
-						
-						if(player != null && player.getAudiobook() == null) {
-							Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(b);
-							if(audiobook != null) {
-								player.set(audiobook, b.getTrackno(), b.getProgress());
-							}
-						}
-						
-						displayBookmarks();
+			new AsyncTask<Activity, Void, Bookmark>(){
+				Activity activity;
+				@Override
+				protected Bookmark doInBackground(Activity... params) {
+					activity = params[0];
+					AudiobookManager.getInstance().loadAudiobooks(activity);
+					BookmarkManager.getInstance().loadBookmarks(activity.getFilesDir()); 
+
+					if(author != null && album != null){
+						BookmarkManager bm = BookmarkManager.getInstance();
+						Bookmark bookmark = bm.getBookmark(author, album);
+						return bookmark;
 					}
+					return null;
+				}
+				@Override 
+				protected void onPostExecute(final Bookmark bookmark){
+					Log.d(TAG, "onPostExecute - audiobooks loaded");
 
-				});
-				dialog.dismiss();
-			}
-		}.execute(this);
+					runOnUiThread(new Runnable() {
 
-		
-		
-		
-		
-		
-		//Start monitor
-		if(monitor != null) monitor.kill();
-		monitor = new displayMonitor(this);
-		monitor.start();
+						@Override 
+						public void run() {
+							if(BookmarkManager.getBookmarks().isEmpty()){
+								System.out.println("MainActivity AsyncTask - NO BOOKMARKS");
+								return;
+							}
+							//At this point at least one bookmark exists
+							Bookmark b = bookmark;
+							if(b == null){
+								b = BookmarkManager.getBookmarks().get(0);
+								SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+								pref.edit().putString("author", b.getAuthor()).putString("album", b.getAlbum()).commit();
+							}
+
+							if(player != null && player.getAudiobook() == null) {
+								Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(b);
+								if(audiobook != null) {
+									player.set(audiobook, b.getTrackno(), b.getProgress());
+								}
+							}
+
+							displayBookmarks();
+						}
+
+					});
+					dialog.dismiss();
+				}
+			}.execute(this);
+
+
+		} else {
+
+		}
+
+
+
+
 
 	}
 	@Override
@@ -252,7 +267,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			displayTime(track);
 		}
 		displayPlayButton();
-		
+
 		if(bookmark_monitor != null) bookmark_monitor.kill();
 		bookmark_monitor = new BookmarkMonitor();
 		bookmark_monitor.start();
@@ -268,7 +283,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		//reused variables
 		int currentProgress, progress;
 		Audiobook audiobook;
-		
+
 		switch(v.getId()){
 		case R.id.audiobook_basics_cover_btn: 
 			if(player == null) break;
@@ -313,12 +328,24 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			break;
 		}
 	}
+	@Override
+	public boolean onLongClick(View v) {
+		switch(v.getId()){
+		case BOOKMARK:
+			Bookmark bookmark = (Bookmark) v.getTag();
+			if(bookmark == null) break;
+			System.out.println(")))))-> "+bookmark);
+			Toast.makeText(this, bookmark.toString(), Toast.LENGTH_LONG).show();
+			deleteBookmarkDialog(bookmark);
+		}
+		return true;
+	}
 
 	//Callbacks from PlayerService
 	@Override
 	public void set(final Audiobook audiobook, final int trackno, final int progress){
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				Track track = audiobook.getPlaylist().get(trackno);
@@ -332,7 +359,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	@Override
 	public void play() { 
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
@@ -343,7 +370,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	@Override
 	public void pause() { 
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
@@ -354,7 +381,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	@Override
 	public void next(final Audiobook audiobook, final Track track, final int trackno) { 
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				displayTracks(audiobook, track, trackno);
@@ -365,7 +392,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	@Override
 	public void prev(final Audiobook audiobook, final Track track, final int trackno) { 
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				displayTracks(audiobook, track, trackno);
@@ -376,7 +403,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	@Override
 	public void seek(final Track track){
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				displayTime(track);
@@ -386,7 +413,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	@Override
 	public void complete(final Audiobook audiobook, final int new_trackno) {
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				if(new_trackno == -1) return;
@@ -398,7 +425,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 	}
 	@Override
 	public void updateBookmark(String author, String album, int trackno, int progress){
-		
+
 	}
 
 	//Update views
@@ -500,14 +527,13 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		if(bookmark_list == null) { System.out.println("no bookmark list!"); return; }
 		bookmark_list.removeAllViews();
 		LayoutInflater inflater = LayoutInflater.from(this);
-		for(Bookmark bookmark : BookmarkManager.getBookmarks()){
-			System.out.println("### "+bookmark);
-			
+		for(Bookmark bookmark : Data.getBookmarks()){
 			View v = inflater.inflate(R.layout.bookmark_item, bookmark_list, false);
 			v.setId(BOOKMARK);
 			v.setTag(bookmark);
 			v.setOnClickListener(this);
-			
+			v.setOnLongClickListener(this);
+
 			//Cover
 			Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
 			if(audiobook != null){
@@ -520,28 +546,30 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 					if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 				}
 			}
-			
+
 			//Track no
 			TextView track_tv = (TextView) v.findViewById(R.id.bookmark_track_tv);
 			track_tv.setText(String.format("%02d", bookmark.getTrackno()));
-			
+
 			//Progress
 			TextView progress_tv = (TextView) v.findViewById(R.id.bookmark_progress_tv);
 			progress_tv.setText(Time.toString(bookmark.getProgress()));
-			
+
 			bookmark_list.addView(v);
+
+			View div = inflater.inflate(R.layout.divider_vertical, bookmark_list, false);
+			bookmark_list.addView(div);
 		}
 	}
-	
+
 	//Menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		this.menu = menu;
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		MenuItem item = menu.getItem(1);
-		int delay = Time.toMillis(TIMER_DELAY, TIMER_UNIT);
-		item.setTitle(Time.toString(delay));
+		MenuItem item = menu.findItem(R.id.menu_item_countdown);
+		item.setTitle(Time.toString(timer_delay));
 		return true;
 	}
 	@Override
@@ -549,16 +577,20 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		switch(item.getItemId()){
 		case R.id.menu_item_timer: 
 			if(!timerOn){
-				MenuItem menuitem = menu.getItem(1);
-				timer = new Timer(TIMER_DELAY, TIMER_UNIT, menuitem);
+				MenuItem menuitem = menu.findItem(R.id.menu_item_countdown);
+				timer = new Timer(timer_delay, TimeUnit.MILLISECONDS, menuitem);
 				timer.start();
 				timerOn = true;
 			} else {
 				timer.kill();
 			}
 			break;
-		
-		case R.id.menu_item_audiobooks_reload:
+			
+		case R.id.menu_item_countdown:
+			timerDialog();
+			break;
+
+		case R.id.menu_item_audiobooks:
 			Intent intent = new Intent(this, AudiobooksActivity.class);
 			startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
 			break;
@@ -580,6 +612,184 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 			}
 		}
+	}
+
+	private void deleteBookmarkDialog(final Bookmark bookmark){
+		final Dialog dialog = new Dialog(this);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View dv = inflater.inflate(R.layout.dialog_text_2btn, base, false);
+
+		//Title
+		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
+		title_tv.setText("Delete bookmark");
+
+		//Message
+		TextView msg_tv = (TextView) dv.findViewById(R.id.dialog_msg_tv);
+		msg_tv.setText(bookmark.getAuthor() + "\n" + bookmark.getAlbum());
+
+		//Exit button
+		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
+		exit_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Left button
+		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
+		left_btn.setText("Cancel");
+		left_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Right button
+		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
+		right_btn.setText("Confirm");
+		right_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				dialog.dismiss();
+
+				//Remove the bookmark
+				BookmarkManager.getInstance().removeBookmark(MainActivity.this, bookmark);
+				Log.d(TAG, "Deleting Bookmark:\n"+bookmark);
+
+				displayBookmarks();
+			}
+		});
+
+		dialog.setContentView(dv);
+		dialog.show();
+
+	}
+	private void timerDialog(){
+		final Dialog dialog = new Dialog(this);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View dv = inflater.inflate(R.layout.dialog_timer, base, false);
+
+		//Title
+		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
+		title_tv.setText("Adjust sleep timer");
+
+		//Custom numberpicker hour
+		final TextView hour_tv = (TextView) dv.findViewById(R.id.dialog_timer_hour);
+		hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+		
+		ImageButton hour_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_hour_inc);
+		hour_inc.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				timer_delay += Time.toMillis(1, TimeUnit.HOURS);
+				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+			}
+		});
+		
+		ImageButton hour_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_hour_dec);
+		hour_dec.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				timer_delay -= Time.toMillis(1, TimeUnit.HOURS);
+				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+			}
+		});
+		
+		//Custom numberpicker min
+				final TextView min_tv = (TextView) dv.findViewById(R.id.dialog_timer_min);
+				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+				
+				ImageButton min_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_min_inc);
+				min_inc.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						timer_delay += Time.toMillis(1, TimeUnit.MINUTES);
+						min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+					}
+				});
+				
+				ImageButton min_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_min_dec);
+				min_dec.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						timer_delay -= Time.toMillis(1, TimeUnit.MINUTES);
+						min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+					}
+				});
+				
+				//Custom numberpicker sec
+				final TextView sec_tv = (TextView) dv.findViewById(R.id.dialog_timer_sec);
+				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
+				
+				ImageButton sec_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_inc);
+				sec_inc.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						timer_delay += Time.toMillis(1, TimeUnit.SECONDS);
+						sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
+					}
+				});
+				
+				ImageButton sec_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_dec);
+				sec_dec.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						timer_delay -= Time.toMillis(1, TimeUnit.SECONDS);
+						sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
+					}
+				});
+		
+		
+		
+		//Exit button
+		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
+		exit_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Left button
+		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
+		left_btn.setText("Cancel");
+		left_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		//Right button
+		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
+		right_btn.setText("Confirm");
+		right_btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				dialog.dismiss();
+				MenuItem item = menu.findItem(R.id.menu_item_countdown);
+				item.setTitle(Time.toString(timer_delay));
+			}
+		});
+
+		dialog.setContentView(dv);
+		dialog.show();
 	}
 	
 	class displayMonitor extends Monitor {
@@ -612,17 +822,17 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		private long endTime;
 		private MenuItem item;
 		private String _delay;
-		
+
 		public Timer(int delay, TimeUnit unit, final MenuItem item) {
 			super(1, TimeUnit.SECONDS);
-			
+
 			delay = Time.toMillis(delay, unit);
 			endTime = System.currentTimeMillis() + delay;
-			
+
 			this.item = item;
 			_delay = Time.toString(delay);
 			runOnUiThread(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					item.setTitle(_delay);
@@ -634,7 +844,7 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 		public void execute() {
 			final long timeleft = endTime - System.currentTimeMillis();
 			runOnUiThread(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					item.setTitle(Time.toString(timeleft));
@@ -645,11 +855,11 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 				kill();
 			}
 		}
-		
+
 		@Override
 		public void kill(){
 			runOnUiThread(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					item.setTitle(_delay);
@@ -674,10 +884,10 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			if(!go_again && !player.isPlaying()){
 				return;
 			}
-			
+
 			Audiobook audiobook = player.getAudiobook();
 			if(audiobook == null) return;
-			
+
 			String author = audiobook.getAuthor();
 			String album = audiobook.getAlbum();
 			int trackno = player.getTrackno();
@@ -688,10 +898,10 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 				Bookmark bookmark = bm.createOrUpdateBookmark(getFilesDir(), author, album, trackno, progress, force);
 				BookmarkManager.getInstance().saveBookmarks(getFilesDir());
 				Log.d(TAG, "Bookmark created or updated\n"+bookmark);
-				
+
 				//Update view
 				runOnUiThread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						displayBookmarks();
@@ -700,6 +910,6 @@ public class MainActivity extends Activity implements OnClickListener, ServiceCo
 			}
 			go_again = player.isPlaying();
 		}
-		
+
 	}
 }

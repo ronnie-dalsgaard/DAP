@@ -3,10 +3,10 @@
     tools:context="rd.dap.MainActivity" >
     
     <item 
-        android:id="@+id/menu_item_audiobooks_reload"
+        android:id="@+id/menu_item_audiobooks"
         android:showAsAction="always"
-        android:title="New"
-        android:icon="@drawable/ic_action_new" />
+        android:title="Audiobooks"
+        android:icon="@drawable/gray_tape" />
 
     <item
         android:id="@+id/menu_item_timer"

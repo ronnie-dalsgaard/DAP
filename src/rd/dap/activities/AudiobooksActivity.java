@@ -181,7 +181,7 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
-		case R.id.menu_item_audiobooks_reload:
+		case R.id.menu_item_audiobooks:
 			Log.d(TAG, "menu_item_reload_audiobooks");
 			loadAudibooks();
 			break;
@@ -257,7 +257,7 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 		dialog = new Dialog(this);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(this);
-		View dv = inflater.inflate(R.layout.dialog, layout, false);
+		View dv = inflater.inflate(R.layout.dialog_text_2btn, layout, false);
 
 		//Title
 		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
@@ -313,11 +313,11 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 		dialog = new Dialog(this);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(this);
-		View dv = inflater.inflate(R.layout.dialog, layout, false);
+		View dv = inflater.inflate(R.layout.dialog_text_2btn, layout, false);
 
 		//Title
 		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
-		title_tv.setText("Delete audiobooke");
+		title_tv.setText("Delete audiobook");
 
 		//Message
 		TextView msg_tv = (TextView) dv.findViewById(R.id.dialog_msg_tv);
@@ -371,7 +371,7 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 		dialog = new Dialog(this);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(this);
-		View dv = inflater.inflate(R.layout.dialog, layout, false);
+		View dv = inflater.inflate(R.layout.dialog_text_2btn, layout, false);
 
 		//Title
 		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);

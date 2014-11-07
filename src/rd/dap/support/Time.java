@@ -6,6 +6,11 @@ import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 public class Time {
+	public static final int SEC = 1000;
+	public static final int MIN = 60*SEC;
+	public static final int HOUR = 60*MIN;
+	public static final int DAY = 24*HOUR;
+	
 	private static NumberFormat f2d = new DecimalFormat("00");
 	private static NumberFormat f2or3d = new DecimalFormat("#00");
 
@@ -122,5 +127,20 @@ public class Time {
 		case SECONDS: return value * 1000;
 		default: return -1;
 		}
+	}
+	public static int hoursPart(int millis){
+		if(millis < HOUR) return 0;
+		millis = millis % DAY;
+		return (int)(millis / HOUR);
+	}
+	public static int minutesPart(int millis){
+		if(millis < MIN) return 0;
+		millis = millis % HOUR;
+		return (int)(millis / MIN);
+	}
+	public static int secondsPart(int millis){
+		if(millis < SEC) return 0;
+		millis = millis %  MIN;
+		return (int)(millis / SEC);
 	}
 }

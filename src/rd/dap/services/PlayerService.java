@@ -102,7 +102,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	}
 	public void pause(){
 		if(mp != null){
-			mp.pause();
+			if(mp.isPlaying()) mp.pause();
 			for(PlayerObserver obs : observers) { obs.pause(); }
 		}
 	}
