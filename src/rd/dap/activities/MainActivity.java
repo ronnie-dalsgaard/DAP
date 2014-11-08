@@ -578,14 +578,14 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 		case R.id.menu_item_timer: 
 			if(!timerOn){
 				MenuItem menuitem = menu.findItem(R.id.menu_item_countdown);
-				timer = new Timer(timer_delay, TimeUnit.MILLISECONDS, menuitem);
+				timer = new Timer(timer_delay, menuitem);
 				timer.start();
 				timerOn = true;
 			} else {
 				timer.kill();
 			}
 			break;
-			
+
 		case R.id.menu_item_countdown:
 			timerDialog();
 			break;
@@ -682,78 +682,100 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 
 		//Custom numberpicker hour
 		final TextView hour_tv = (TextView) dv.findViewById(R.id.dialog_timer_hour);
+		final TextView min_tv = (TextView) dv.findViewById(R.id.dialog_timer_min);
+		final TextView sec_tv = (TextView) dv.findViewById(R.id.dialog_timer_sec);
 		hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+		min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+		sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
 		
 		ImageButton hour_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_hour_inc);
 		hour_inc.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				timer_delay += Time.toMillis(1, TimeUnit.HOURS);
+				int new_delay = timer_delay + Time.toMillis(1, TimeUnit.HOURS);
+				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
+				timer_delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
 			}
 		});
-		
+
 		ImageButton hour_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_hour_dec);
 		hour_dec.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				timer_delay -= Time.toMillis(1, TimeUnit.HOURS);
+				int new_delay = timer_delay - Time.toMillis(1, TimeUnit.HOURS);
+				if(new_delay < 0) return;
+				timer_delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
 			}
 		});
-		
+
 		//Custom numberpicker min
-				final TextView min_tv = (TextView) dv.findViewById(R.id.dialog_timer_min);
+		ImageButton min_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_min_inc);
+		min_inc.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int new_delay = timer_delay + Time.toMillis(1, TimeUnit.MINUTES);
+				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
+				timer_delay = new_delay;
+				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
 				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-				
-				ImageButton min_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_min_inc);
-				min_inc.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						timer_delay += Time.toMillis(1, TimeUnit.MINUTES);
-						min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-					}
-				});
-				
-				ImageButton min_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_min_dec);
-				min_dec.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						timer_delay -= Time.toMillis(1, TimeUnit.MINUTES);
-						min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-					}
-				});
-				
-				//Custom numberpicker sec
-				final TextView sec_tv = (TextView) dv.findViewById(R.id.dialog_timer_sec);
 				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-				
-				ImageButton sec_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_inc);
-				sec_inc.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						timer_delay += Time.toMillis(1, TimeUnit.SECONDS);
-						sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-					}
-				});
-				
-				ImageButton sec_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_dec);
-				sec_dec.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						timer_delay -= Time.toMillis(1, TimeUnit.SECONDS);
-						sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-					}
-				});
-		
-		
-		
+			}
+		});
+
+		ImageButton min_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_min_dec);
+		min_dec.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int new_delay = timer_delay - Time.toMillis(1, TimeUnit.MINUTES);
+				if(new_delay < 0) return;
+				timer_delay = new_delay;
+				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
+			}
+		});
+
+		//Custom numberpicker sec
+		ImageButton sec_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_inc);
+		sec_inc.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int new_delay = timer_delay + Time.toMillis(1, TimeUnit.SECONDS);
+				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
+				timer_delay = new_delay;
+				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
+			}
+		});
+
+		ImageButton sec_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_dec);
+		sec_dec.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int new_delay = timer_delay - Time.toMillis(1, TimeUnit.SECONDS);
+				if(new_delay < 0) return;
+				timer_delay = new_delay;
+				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
+				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
+				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
+			}
+		});
+
+
+
 		//Exit button
 		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
 		exit_btn.setOnClickListener(new OnClickListener() {
@@ -791,7 +813,7 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 		dialog.setContentView(dv);
 		dialog.show();
 	}
-	
+
 	class displayMonitor extends Monitor {
 		private Activity activity;
 
@@ -823,10 +845,9 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 		private MenuItem item;
 		private String _delay;
 
-		public Timer(int delay, TimeUnit unit, final MenuItem item) {
+		public Timer(int delay, final MenuItem item) {
 			super(1, TimeUnit.SECONDS);
 
-			delay = Time.toMillis(delay, unit);
 			endTime = System.currentTimeMillis() + delay;
 
 			this.item = item;
