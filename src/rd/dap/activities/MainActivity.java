@@ -50,7 +50,6 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.Space;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, ServiceConnection, PlayerService.PlayerObserver {
 	private static final String TAG = "MainActivity";
@@ -158,12 +157,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 			}
 		}
-		/*
-		 * Initially the bookmarks will not have been loaded at this point in time.
-		 * Therefore the bookmark will also be displayed after bookmarks and 
-		 * audiobooks are loaded. 
-		 */
-
 
 
 		if(bookmark == null){
@@ -551,7 +544,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 			//Track no
 			TextView track_tv = (TextView) v.findViewById(R.id.bookmark_track_tv);
-			track_tv.setText(String.format("%02d", bookmark.getTrackno()));
+			track_tv.setText(String.format("%02d", bookmark.getTrackno()+1));
 
 			//Progress
 			TextView progress_tv = (TextView) v.findViewById(R.id.bookmark_progress_tv);
