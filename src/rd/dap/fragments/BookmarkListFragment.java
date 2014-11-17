@@ -1,7 +1,5 @@
 //package rd.dap.fragments;
 //
-//import static rd.dap.activities.old_MainActivity.miniplayer;
-//
 //import java.util.List;
 //
 //import rd.dap.R;
@@ -16,7 +14,6 @@
 //import rd.dap.services.PlayerService;
 //import rd.dap.services.PlayerService.DAPBinder;
 //import rd.dap.services.PlayerService.PlayerObserver;
-//import rd.dap.support.Changer;
 //import rd.dap.support.Time;
 //import android.app.Activity;
 //import android.app.Dialog;

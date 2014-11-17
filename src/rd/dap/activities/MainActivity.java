@@ -4,6 +4,9 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
+import rd.dap.dialogs.Dialog_delete_bookmark;
+import rd.dap.dialogs.Dialog_import_export;
+import rd.dap.dialogs.Dialog_timer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
@@ -13,6 +16,7 @@ import rd.dap.model.Track;
 import rd.dap.services.HeadSetReceiver;
 import rd.dap.services.PlayerService;
 import rd.dap.services.PlayerService.DAPBinder;
+import rd.dap.support.MainDriveHandler;
 import rd.dap.support.Monitor;
 import rd.dap.support.Time;
 import android.app.Activity;
@@ -39,7 +43,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,7 +52,7 @@ import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnClickListener, OnLongClickListener, ServiceConnection, PlayerService.PlayerObserver {
+public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, ServiceConnection, PlayerService.PlayerObserver {
 	private static final String TAG = "MainActivity";
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private RelativeLayout base;
@@ -58,6 +61,7 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 	private boolean bound = false;
 	private static final int CELL = 1111;
 	private static final int BOOKMARK = 2222;
+	public static final String END = "/END";
 	private Menu menu;
 	private Timer timer;
 	private boolean timerOn = false;
@@ -334,9 +338,7 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 		case BOOKMARK:
 			Bookmark bookmark = (Bookmark) v.getTag();
 			if(bookmark == null) break;
-			System.out.println(")))))-> "+bookmark);
-			Toast.makeText(this, bookmark.toString(), Toast.LENGTH_LONG).show();
-			deleteBookmarkDialog(bookmark);
+			new Dialog_delete_bookmark(this, bookmark).show();
 		}
 		return true;
 	}
@@ -523,7 +525,7 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 			cover_btn.setImageDrawable(player.isPlaying() ? drw_pause_on_cover : drw_play_on_cover);
 		}
 	}
-	private void displayBookmarks(){
+	public void displayBookmarks(){
 		if(bookmark_list == null) { System.out.println("no bookmark list!"); return; }
 		bookmark_list.removeAllViews();
 		LayoutInflater inflater = LayoutInflater.from(this);
@@ -587,17 +589,23 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 			break;
 
 		case R.id.menu_item_countdown:
-			timerDialog();
+			new Dialog_timer(this).show();
 			break;
 
 		case R.id.menu_item_audiobooks:
 			Intent intent = new Intent(this, AudiobooksActivity.class);
 			startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
 			break;
+			
+		case R.id.menu_item_import_export:
+			new Dialog_import_export(this).show();
+			break;
+						
 		}
+		
 		return true;
 	}
-
+ 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data){
 		Log.d(TAG, "onActivityResult");
@@ -613,207 +621,12 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 			}
 		}
 	}
-
-	private void deleteBookmarkDialog(final Bookmark bookmark){
-		final Dialog dialog = new Dialog(this);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		LayoutInflater inflater = LayoutInflater.from(this);
-		View dv = inflater.inflate(R.layout.dialog_text_2btn, base, false);
-
-		//Title
-		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
-		title_tv.setText("Delete bookmark");
-
-		//Message
-		TextView msg_tv = (TextView) dv.findViewById(R.id.dialog_msg_tv);
-		msg_tv.setText(bookmark.getAuthor() + "\n" + bookmark.getAlbum());
-
-		//Exit button
-		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
-		exit_btn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
-
-		//Left button
-		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
-		left_btn.setText("Cancel");
-		left_btn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
-
-		//Right button
-		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
-		right_btn.setText("Confirm");
-		right_btn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				dialog.dismiss();
-
-				//Remove the bookmark
-				BookmarkManager.getInstance().removeBookmark(MainActivity.this, bookmark);
-				Log.d(TAG, "Deleting Bookmark:\n"+bookmark);
-
-				displayBookmarks();
-			}
-		});
-
-		dialog.setContentView(dv);
-		dialog.show();
-
-	}
-	private void timerDialog(){
-		final Dialog dialog = new Dialog(this);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		LayoutInflater inflater = LayoutInflater.from(this);
-		View dv = inflater.inflate(R.layout.dialog_timer, base, false);
-
-		//Title
-		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
-		title_tv.setText("Adjust sleep timer");
-
-		//Custom numberpicker hour
-		final TextView hour_tv = (TextView) dv.findViewById(R.id.dialog_timer_hour);
-		final TextView min_tv = (TextView) dv.findViewById(R.id.dialog_timer_min);
-		final TextView sec_tv = (TextView) dv.findViewById(R.id.dialog_timer_sec);
-		hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
-		min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-		sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-		
-		ImageButton hour_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_hour_inc);
-		hour_inc.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				int new_delay = timer_delay + Time.toMillis(1, TimeUnit.HOURS);
-				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
-				timer_delay = new_delay;
-				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
-				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-			}
-		});
-
-		ImageButton hour_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_hour_dec);
-		hour_dec.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				int new_delay = timer_delay - Time.toMillis(1, TimeUnit.HOURS);
-				if(new_delay < 0) return;
-				timer_delay = new_delay;
-				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
-				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-			}
-		});
-
-		//Custom numberpicker min
-		ImageButton min_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_min_inc);
-		min_inc.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				int new_delay = timer_delay + Time.toMillis(1, TimeUnit.MINUTES);
-				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
-				timer_delay = new_delay;
-				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
-				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-			}
-		});
-
-		ImageButton min_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_min_dec);
-		min_dec.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				int new_delay = timer_delay - Time.toMillis(1, TimeUnit.MINUTES);
-				if(new_delay < 0) return;
-				timer_delay = new_delay;
-				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
-				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-			}
-		});
-
-		//Custom numberpicker sec
-		ImageButton sec_inc = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_inc);
-		sec_inc.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				int new_delay = timer_delay + Time.toMillis(1, TimeUnit.SECONDS);
-				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
-				timer_delay = new_delay;
-				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
-				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-			}
-		});
-
-		ImageButton sec_dec = (ImageButton) dv.findViewById(R.id.dialog_timer_sec_dec);
-		sec_dec.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				int new_delay = timer_delay - Time.toMillis(1, TimeUnit.SECONDS);
-				if(new_delay < 0) return;
-				timer_delay = new_delay;
-				hour_tv.setText(String.format("%02d", Time.hoursPart(timer_delay)));
-				min_tv.setText(String.format("%02d", Time.minutesPart(timer_delay)));
-				sec_tv.setText(String.format("%02d", Time.secondsPart(timer_delay)));
-			}
-		});
-
-
-
-		//Exit button
-		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
-		exit_btn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
-
-		//Left button
-		Button left_btn = (Button) dv.findViewById(R.id.dialog_left_btn);
-		left_btn.setText("Cancel");
-		left_btn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
-
-		//Right button
-		Button right_btn = (Button) dv.findViewById(R.id.dialog_right_btn);
-		right_btn.setText("Confirm");
-		right_btn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				dialog.dismiss();
-				MenuItem item = menu.findItem(R.id.menu_item_countdown);
-				item.setTitle(Time.toString(timer_delay));
-			}
-		});
-
-		dialog.setContentView(dv);
-		dialog.show();
-	}
-
+	
+	public RelativeLayout getBase() { return this.base; }
+	public Menu getMenu() { return this.menu; }
+	public int getDelay() { return this.timer_delay; }
+	public void setTimerDelay(int delay) { this.timer_delay = delay; }
+	
 	class displayMonitor extends Monitor {
 		private Activity activity;
 

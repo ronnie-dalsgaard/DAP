@@ -11,7 +11,6 @@
 //import rd.dap.model.Track;
 //import rd.dap.services.PlayerService;
 //import rd.dap.services.PlayerService.DAPBinder;
-//import rd.dap.support.Changer;
 //import rd.dap.support.Monitor;
 //import rd.dap.support.Time;
 //import android.app.Activity;
@@ -47,7 +46,6 @@
 //	private boolean bound = false;
 //	private PlayerService player;
 //	private Monitor controllerMonitor;
-//	private Changer changer;
 //	private boolean timerOn = false;
 //	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 //	private LinearLayout info_layout, tracks_gv;

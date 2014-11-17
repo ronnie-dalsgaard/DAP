@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_base"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/miniplayer_bg" >
+
+    <TextView
+        android:id="@+id/dialog_title_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_big"
+        android:text="Title"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ImageButton
+        android:id="@+id/dialog_exit_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/margin_big"
+        android:background="@color/transparent"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_cancel" />
+
+    <include
+        android:id="@+id/dialog_divider1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/dialog_title_tv"
+        layout="@layout/divider_horizontal" />
+
+    <LinearLayout
+        android:id="@+id/dialog_timer_picker_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_divider1"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="25dp" >
+
+        <ImageButton
+            android:id="@+id/dialog_impexp_upload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginRight="10dp"
+            android:background="@color/black"
+            android:contentDescription="@string/content_description"
+            android:padding="15dp"
+            android:src="@drawable/ic_action_upload"
+            android:textColor="@color/white" />
+
+        <include layout="@layout/divider_vertical" />
+
+        <ImageButton
+            android:id="@+id/dialog_impexp_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="10dp"
+            android:background="@color/black"
+            android:contentDescription="@string/content_description"
+            android:padding="15dp"
+            android:src="@drawable/ic_action_download"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/dialog_divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/dialog_timer_picker_layout"
+        layout="@layout/divider_horizontal" />
+
+    <LinearLayout
+        android:id="@+id/dialog_button_bar"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_divider2"
+        android:divider="@drawable/vertical_divider" >
+
+        <Button
+            android:id="@+id/dialog_right_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Button 2"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</RelativeLayout>
