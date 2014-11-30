@@ -307,7 +307,8 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 				
 				try {
 					//Resove conflicts
-					String resolved = upload_resolve_conflicts(oldData, newData);
+					ConflictResolver resolver = new ConflictResolver();
+					String resolved = resolver.resolveConflicts(oldData, newData);
 					
 					//Write
 					out.write(resolved.getBytes());
@@ -332,11 +333,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 		
 		
 	}
-	private String upload_resolve_conflicts(String oldData, String newData){
-		//FIXME conflicts are not really resolved - new is written, old is discarded
-		return newData;
-		
-	}
+	
 	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode){
