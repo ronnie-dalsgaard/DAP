@@ -81,10 +81,6 @@ public class Dialog_import_export {
 							Audiobook fetchedAudiobook = am.getAudiobook(fetched);
 							if(bm.hasBookmark(fetched)){
 								Bookmark exisisting = bm.getBookmark(fetched.getAuthor(), fetched.getAlbum());
-								System.out.println("Bookmark:\n"+exisisting);
-								System.out.println("Fetched:\n"+fetched);
-								System.out.println("fetched.compareTo(existing) = "+fetched.compareTo(exisisting));
-
 								if(fetched.compareTo(exisisting) > 0){
 									exisisting.setTrackno(fetched.getTrackno());
 									exisisting.setProgress(fetched.getProgress());

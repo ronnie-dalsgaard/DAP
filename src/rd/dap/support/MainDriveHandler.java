@@ -145,6 +145,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 					if(!list.isEmpty()) {
 						DriveId id = list.get(0).getDriveId();
 						DriveFile file = Drive.DriveApi.getFile(client, id);
+						System.out.println("# "+file.toString());
 						
 						//Read file no matter what
 						common_read(file, data, mode, resultCallback);
