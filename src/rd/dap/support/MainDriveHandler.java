@@ -41,7 +41,6 @@ import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.DriveFile.DownloadProgressListener;
 import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.DriveFolder.DriveFileResult;
-import com.google.android.gms.drive.DriveFolder.DriveFolderResult;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.Metadata;
 import com.google.android.gms.drive.MetadataBuffer;
@@ -61,7 +60,6 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 	private static final int DH_REQUEST_CODE_RESOLVE_ERROR = 11001;
 	private static final String DH_ERROR_DIALOG_TAG = "DriveHandler.ErrorDialogFragment";
 	private static final String DH_DRIVE_FILENAME = "bookmarks.dap";
-	private static final String DH_DRIVE_FOLDERNAME = "DAP";
 	public static final int SUCCESS = 0;
 	public static final int FAILURE = -1;
 	private enum Mode {DOWNLOAD, UPLOAD};
@@ -70,60 +68,16 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 	public void download(Callback<String> resultCallback){
 		Log.d(TAG, "download");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
-		common_query_folder(null, Mode.DOWNLOAD, resultCallback);
+		common_query_file(null, Mode.DOWNLOAD, resultCallback);
 	}
 	@Override
-	public void upload(final String data){
+	public void upload(final String data, Callback<String> resultCallback){
 		Log.d(TAG, "upload");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
-		common_query_folder(data, Mode.UPLOAD, null);
+		common_query_file(data, Mode.UPLOAD, resultCallback);
 	}
 
-	private void common_query_folder(final String data, final Mode mode, final Callback<String> resultCallback){
-		Query query = new Query.Builder()
-		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FOLDERNAME))
-		.addFilter(Filters.eq(SearchableField.MIME_TYPE, DriveFolder.MIME_TYPE))
-		.build();
-		Drive.DriveApi.query(client, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
-			
-			@Override
-			public void onResult(MetadataBufferResult result) {
-				MetadataBuffer buffer = result.getMetadataBuffer();
-				if(buffer.getCount() > 0){
-					ArrayList<Metadata> list = new ArrayList<Metadata>();
-					Iterator<Metadata> iterator = buffer.iterator();
-					while(iterator.hasNext()){
-						Metadata metadata = iterator.next();
-						if(!metadata.isTrashed()){
-							list.add(metadata);
-						}
-					}
-					if(!list.isEmpty()) {
-						DriveId id = list.get(0).getDriveId();
-						DriveFolder folder = Drive.DriveApi.getFolder(client, id);
-						
-						//Query file no matter what
-						common_query_file(folder, data, mode, resultCallback);
-						
-					} else {
-						switch(mode){
-						case DOWNLOAD: resultCallback.onResult(Callback.NO_FOLDER); break;
-						case UPLOAD: upload_create_folder(data); break; 
-						}
-						
-					}
-					
-				} else {
-					switch(mode){
-					case DOWNLOAD: resultCallback.onResult(Callback.NO_FOLDER); break;
-					case UPLOAD: upload_create_folder(data); break; 
-					}
-				}
-				buffer.close();
-			}
-		});
-	}
-	private void common_query_file(final DriveFolder folder, final String data, final Mode mode, final Callback<String> resultCallback){
+	private void common_query_file(final String data, final Mode mode, final Callback<String> resultCallback){
 		Query query = new Query.Builder()
 		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FILENAME))
 		.addFilter(Filters.eq(SearchableField.MIME_TYPE, "text/plain"))
@@ -153,14 +107,14 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 					} else {
 						switch(mode){
 						case DOWNLOAD: resultCallback.onResult(Callback.NO_FILE); break;
-						case UPLOAD: upload_create_contents(folder, data); break; 
+						case UPLOAD: upload_create_contents(/*folder,*/ data, resultCallback); break; 
 						}
 					}
 					
 				} else {
 					switch(mode){
 					case DOWNLOAD: resultCallback.onResult(Callback.NO_FILE); break;
-					case UPLOAD: upload_create_contents(folder, data); break; 
+					case UPLOAD: upload_create_contents(/*folder,*/ data, resultCallback); break; 
 					}
 				}
 				buffer.close();
@@ -199,7 +153,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 					
 					switch(mode){
 					case DOWNLOAD: resultCallback.onResult(oldData); break;
-					case UPLOAD: upload_write(file, oldData, newData); 
+					case UPLOAD: upload_write(file, oldData, newData, resultCallback); 
 					}
 					
 				} catch (IOException e) {
@@ -210,32 +164,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 		});
 	}
 	
-	private void upload_create_folder(final String data){
-		Log.d(TAG, "upload_create_folder");
-		//Create metadata
-		MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-			.setMimeType(DriveFolder.MIME_TYPE)
-			.setTitle(DH_DRIVE_FOLDERNAME)
-			.build();
-		
-		Drive.DriveApi.getRootFolder(client)
-			.createFolder(client, changeSet)
-			.setResultCallback(new ResultCallback<DriveFolder.DriveFolderResult>() {
-				
-				@Override
-				public void onResult(DriveFolderResult result) {
-					// If the operation was not successful, we cannot do anything and must fail.
-					if (!result.getStatus().isSuccess()) {
-						Log.i(TAG, "Failed to create new folder.");
-						return;
-					}
-					Log.i(TAG, "New folder created.");
-					DriveFolder folder = result.getDriveFolder();
-					upload_create_contents(folder, data);
-				}
-			});
-	}
-	private void upload_create_contents(final DriveFolder folder, final String data){
+	private void upload_create_contents(final String data, final Callback<String> resultCallback){
 		Log.d(TAG, "upload_create_contents");
 		Drive.DriveApi.newContents(client)
 			.setResultCallback(new ResultCallback<DriveApi.ContentsResult>() {
@@ -264,20 +193,21 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 						Log.d(TAG, "Unable to write data");
 					}
 					
-					upload_create_file(folder, contents);
+					upload_create_file(contents, resultCallback);
 				}
 			});
 	}
-	private void upload_create_file(DriveFolder folder, Contents contents){
+	private void upload_create_file(Contents contents, final Callback<String> resultCallback){
 		Log.d(TAG, "upload_create_file");
 		//Create metadata
 		MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
 			.setMimeType("text/plain")
 			.setTitle(DH_DRIVE_FILENAME)
 			.build();
-
-		folder.createFile(client, changeSet, contents)
-			.setResultCallback(new ResultCallback<DriveFolder.DriveFileResult>() {
+		
+		DriveFolder root_folder = Drive.DriveApi.getRootFolder(client);
+		root_folder.createFile(client, changeSet, contents)
+		.setResultCallback(new ResultCallback<DriveFolder.DriveFileResult>() {
 				
 				@Override
 				public void onResult(DriveFileResult result) {
@@ -287,10 +217,11 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 						return;
 					}
 					Log.i(TAG, "New file created.");
+					resultCallback.onResult("New file created");
 				}
 			});
 	}
-	private void upload_write(DriveFile file, final String oldData, final String newData){	
+	private void upload_write(DriveFile file, final String oldData, final String newData, final Callback<String> resultCallback){	
 		file.open(client, DriveFile.MODE_WRITE_ONLY, new DownloadProgressListener() {
 			
 			@Override
@@ -322,7 +253,9 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 						
 						@Override
 						public void onResult(Status status) {
-							Log.d(TAG, "Status: " + (status.isSuccess() ? "Success" : "Failure"));
+							String str = status.isSuccess() ? "Bookmarks.dap updated" : "Failure";
+							Log.d(TAG, "Status: " + str);
+							resultCallback.onResult(str);
 						}
 					});
 				} catch (IOException e) {
@@ -331,8 +264,6 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 				}
 			}
 		});
-		
-		
 	}
 	
 	
@@ -371,7 +302,6 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 	}
 	@Override
 	public void onConnected(Bundle connectionHint) {
-//		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
 		Log.d(TAG, "onConnected");
 	}
 	@Override
@@ -382,7 +312,6 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 
 	private void showErrorDialog(int errorCode) {
 		/* Creates a dialog for an error message */
-
 		// Create a fragment for the error dialog
 		ErrorDialogFragment dialogFragment = new ErrorDialogFragment();
 		// Pass the error that should be displayed

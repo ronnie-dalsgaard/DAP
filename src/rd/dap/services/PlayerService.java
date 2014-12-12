@@ -57,6 +57,8 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 		this.trackno = trackno;
 		Track track = audiobook.getPlaylist().get(trackno);
 		
+		System.out.println("--- Track paht: "+track.getPath());
+		
 		if(mp != null){
 			mp.release();
 			mp = null;

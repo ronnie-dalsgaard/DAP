@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -56,7 +57,12 @@ public class Dialog_import_export {
 					json += gson.toJson(bookmark) + END + "\n";
 				}
 				Log.d(TAG, "onClick - upload: "+json);
-				activity.upload(json); 
+				activity.upload(json, new Callback<String>() {
+					@Override
+					public void onResult(final String result) {
+						Toast.makeText(activity, result, Toast.LENGTH_SHORT).show();
+					}
+				}); 
 				dialog.dismiss();
 			}
 		});
@@ -69,6 +75,7 @@ public class Dialog_import_export {
 			public void onClick(View v) {
 				activity.download(new Callback<String>() { 
 					@Override public void onResult(String result) {
+						System.out.println("----- DOWNLOAD COMPLETE -----");
 						Log.d(TAG, "onClick - download: "+result);
 						if(result == null || result.isEmpty()) return;
 						BookmarkManager bm = BookmarkManager.getInstance();
@@ -79,7 +86,9 @@ public class Dialog_import_export {
 							System.out.println("Line = "+line);
 							Bookmark fetched = gson.fromJson(line, Bookmark.class);
 							Audiobook fetchedAudiobook = am.getAudiobook(fetched);
+							System.out.println("Fetched audiobook: "+fetchedAudiobook);
 							if(bm.hasBookmark(fetched)){
+								System.out.println("Has bookmark");
 								Bookmark exisisting = bm.getBookmark(fetched.getAuthor(), fetched.getAlbum());
 								if(fetched.compareTo(exisisting) > 0){
 									exisisting.setTrackno(fetched.getTrackno());
@@ -87,13 +96,16 @@ public class Dialog_import_export {
 									changesHappened = true;
 								}
 							} else if(fetchedAudiobook != null){
-								bm.createOrUpdateBookmark(activity.getFilesDir(), fetched, false);
+								System.out.println("No bookmark, but matching audiobook exists...");
+								Bookmark b = bm.createOrUpdateBookmark(activity.getFilesDir(), fetched, false);
+								System.out.println("### "+b);
 								changesHappened = true;
 							}
 						}
 						if(changesHappened){
 							activity.displayBookmarks();
 						}
+						Toast.makeText(activity, "Download complete", Toast.LENGTH_SHORT).show();
 					}
 				});
 				dialog.dismiss();
