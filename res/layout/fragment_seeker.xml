@@ -8,7 +8,7 @@
     android:orientation="horizontal" >
 
     <ImageButton
-        android:id="@+id/seeker_rewind"
+        android:id="@+id/seeker_btn_rewind"
         style="?android:attr/buttonBarButtonStyle"
         android:layout_width="0dp"
         android:layout_height="@dimen/btn_height"
@@ -28,7 +28,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ImageButton
-        android:id="@+id/seeker_fast_forward"
+        android:id="@+id/seeker_btn_forward"
         style="?android:attr/buttonBarButtonStyle"
         android:layout_width="0dp"
         android:layout_height="@dimen/btn_height"

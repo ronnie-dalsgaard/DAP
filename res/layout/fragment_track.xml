@@ -15,7 +15,7 @@
         android:showDividers="middle" >
 
         <ImageButton
-            android:id="@+id/track_previous"
+            android:id="@+id/track_btn_previous"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="@dimen/btn_height"
@@ -35,7 +35,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageButton
-            android:id="@+id/track_next"
+            android:id="@+id/track_btn_next"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="@dimen/btn_height"

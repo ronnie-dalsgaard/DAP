@@ -732,7 +732,7 @@ containing a value of this type.
     public static final class id {
         public static final int audiobook_basics_album_tv=0x7f07004e;
         public static final int audiobook_basics_author_tv=0x7f07004d;
-        public static final int audiobook_basics_cover_btn=0x7f07004a;
+        public static final int audiobook_basics_btn_cover=0x7f07004a;
         public static final int audiobook_basics_cover_iv=0x7f070049;
         public static final int audiobook_basics_divider=0x7f07004b;
         public static final int audiobook_basics_info_layout=0x7f07004c;
@@ -827,17 +827,17 @@ containing a value of this type.
         public static final int satellite=0x7f070002;
         public static final int scrollView1=0x7f070066;
         public static final int section_label=0x7f070053;
-        public static final int seeker_fast_forward=0x7f070057;
+        public static final int seeker_btn_forward=0x7f070057;
+        public static final int seeker_btn_rewind=0x7f070055;
         public static final int seeker_progress_tv=0x7f070056;
-        public static final int seeker_rewind=0x7f070055;
         public static final int selectionDetails=0x7f07000b;
         public static final int strict_sandbox=0x7f070009;
         public static final int terrain=0x7f070003;
+        public static final int track_btn_next=0x7f07005b;
+        public static final int track_btn_previous=0x7f070059;
         public static final int track_divider=0x7f070045;
         public static final int track_duration=0x7f070068;
         public static final int track_mini_player=0x7f070067;
-        public static final int track_next=0x7f07005b;
-        public static final int track_previous=0x7f070059;
         public static final int track_row=0x7f070058;
         public static final int track_title=0x7f07005a;
         public static final int tracks_grid=0x7f07005c;

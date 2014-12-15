@@ -121,21 +121,21 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		startService(serviceIntent);
 
 		//Buttons
-		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
-		cover_btn.setImageDrawable(null);
-		cover_btn.setOnClickListener(this);
+		ImageButton btn_cover = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
+		btn_cover.setImageDrawable(null);
+		btn_cover.setOnClickListener(this);
 
-		ImageButton next_btn = (ImageButton) findViewById(R.id.track_next);
-		next_btn.setOnClickListener(this);
+		ImageButton btn_next = (ImageButton) findViewById(R.id.track_btn_next);
+		btn_next.setOnClickListener(this);
 
-		ImageButton prev_btn = (ImageButton) findViewById(R.id.track_previous);
-		prev_btn.setOnClickListener(this);
+		ImageButton btn_prev = (ImageButton) findViewById(R.id.track_btn_previous);
+		btn_prev.setOnClickListener(this);
 
-		ImageButton forward_btn = (ImageButton) findViewById(R.id.seeker_fast_forward);
-		forward_btn.setOnClickListener(this);
-
-		ImageButton rewind_btn = (ImageButton) findViewById(R.id.seeker_rewind);
-		rewind_btn.setOnClickListener(this);
+		ImageButton btn_forward = (ImageButton) findViewById(R.id.seeker_btn_forward);
+		btn_forward.setOnClickListener(this);
+		
+		ImageButton btn_rewind = (ImageButton) findViewById(R.id.seeker_btn_rewind);
+		btn_rewind.setOnClickListener(this);
 
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
@@ -144,6 +144,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		monitor = new displayMonitor(this);
 		monitor.start();
 
+		
 
 		//Current bookmark
 		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
@@ -272,7 +273,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		bound = false;
-		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
 		if(cover_btn != null) cover_btn.setImageDrawable(null);
 	}
 	@Override
@@ -282,26 +283,26 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		Audiobook audiobook;
 
 		switch(v.getId()){
-		case R.id.audiobook_basics_cover_btn: 
+		case R.id.audiobook_basics_btn_cover: 
 			if(player == null) break;
 			player.toggle();
 			break;
-		case R.id.track_next:
+		case R.id.track_btn_next:
 			if(player == null) break;
 			player.next();
 			break;
-		case R.id.track_previous: 
+		case R.id.track_btn_previous: 
 			if(player == null) break;
 			player.prev();
 			break;
-		case R.id.seeker_fast_forward: 
+		case R.id.seeker_btn_forward: 
 			if(player == null) break;
 			currentProgress = player.getCurrentProgress();
 			progress = currentProgress + Time.toMillis(1, TimeUnit.MINUTES);
 			int duration = player.getDuration();
 			player.seekTo(Math.min(progress, duration));
 			break;
-		case R.id.seeker_rewind: 
+		case R.id.seeker_btn_rewind: 
 			if(player == null) break;
 			currentProgress = player.getCurrentProgress();
 			progress = currentProgress - Time.toMillis(1, TimeUnit.MINUTES);
@@ -357,7 +358,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 			@Override
 			public void run() {
-				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
 				cover_btn.setImageDrawable(drw_pause_on_cover);
 			}
 		});
@@ -368,7 +369,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 			@Override
 			public void run() {
-				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+				ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
 				cover_btn.setImageDrawable(drw_play_on_cover);
 			}
 		});
@@ -511,7 +512,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	}
 	private void displayPlayButton(){
 		//Cover button
-		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_cover_btn);
+		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
 		if(player == null || player.getAudiobook() == null) {
 			cover_btn.setImageDrawable(null);
 		} else {
@@ -608,11 +609,13 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		Bookmark bookmark = new Bookmark(audiobook.getAuthor(), audiobook.getAlbum(), 0, 0);
 		BookmarkManager.getInstance().createOrUpdateBookmark(getFilesDir(), bookmark, true);
 		displayBookmarks();
-		if(BookmarkManager.getBookmarks().size() == 1){
-			if(player != null && player.getAudiobook() == null) {
-				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-			}
-		}
+		
+		player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+//		if(BookmarkManager.getBookmarks().size() == 1){
+//			if(player != null && player.getAudiobook() == null) {
+//				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+//			}
+//		}
 	}
 	
 	public RelativeLayout getBase() { return this.base; }
