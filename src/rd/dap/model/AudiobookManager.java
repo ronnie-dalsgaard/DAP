@@ -24,9 +24,12 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public final class AudiobookManager extends Data{
+public final class AudiobookManager{
 	private static final String TAG = "AudiobookManager";
 	private static AudiobookManager instance = new AudiobookManager();
+	private static ArrayList<Audiobook> audiobooks = new ArrayList<Audiobook>();
+	private static HashSet<String> authors = new HashSet<String>();
+	private static HashSet<String> albums = new HashSet<String>();
 
 	public static AudiobookManager getInstance(){
 		return instance; //Eager singleton
@@ -36,9 +39,10 @@ public final class AudiobookManager extends Data{
 	
 	//CRUD Audiobook
 	public void addAudiobook(Context context, Audiobook audiobook){
-		if(Data.getAudiobooks().contains(audiobook)) return;
+		if(audiobooks.contains(audiobook)) return;
 		audiobooks.add(audiobook);
 		authors.add(audiobook.getAuthor());
+		albums.add(audiobook.getAlbum());
 		saveAudiobooks(context);
 	}
 	public void addAllAudiobooks(Context context, Collection<Audiobook> collection){
@@ -46,6 +50,7 @@ public final class AudiobookManager extends Data{
 			if(audiobooks.contains(audiobook)) continue;
 			audiobooks.add(audiobook);
 			authors.add(audiobook.getAuthor());
+			albums.add(audiobook.getAlbum());
 		}
 		saveAudiobooks(context);
 	}
@@ -66,9 +71,9 @@ public final class AudiobookManager extends Data{
 		String album = bookmark.getAlbum();
 		return getAudiobook(author, album);
 	}
-	public ArrayList<Audiobook> getAudiobooks(Context context){ return audiobooks; }
+	public ArrayList<Audiobook> getAudiobooks(){ return audiobooks; }
 	public void updateAudiobook(Context context, Audiobook audiobook, Audiobook original_audiobook) {
-		for(Audiobook element : getAudiobooks(context)){
+		for(Audiobook element : getAudiobooks()){
 			if(element.equals(original_audiobook)){
 				element.setAudiobook(audiobook);
 				
@@ -92,6 +97,7 @@ public final class AudiobookManager extends Data{
 		}
 		saveAudiobooks(context);
 	}
+	
 	//Load and save
 	public void saveAudiobooks(Context context){
 		Log.d(TAG, "saveAudiobooks");
@@ -111,8 +117,8 @@ public final class AudiobookManager extends Data{
 		}
 		
 		
+		//Save authors
 		String authors_json = gson.toJson(authors);
-		//Create a file for authors
 		File authors_file = new File(context.getFilesDir(), "authors.dap"); //FIXME filename as constant
 		try {
 			FileWriter writer = new FileWriter(authors_file, false);
@@ -120,7 +126,20 @@ public final class AudiobookManager extends Data{
 			out.write(authors_json);
 			out.close();
 		} catch (IOException e) {
-			Toast.makeText(context, "Unable to save audiobooks", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, "Unable to save authors", Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
+		
+		//Save albums
+		String albums_json = gson.toJson(albums);
+		File albums_file = new File(context.getFilesDir(), "albums.dap"); //FIXME filename as constant
+		try {
+			FileWriter writer = new FileWriter(albums_file, false);
+			BufferedWriter out = new BufferedWriter(writer);
+			out.write(albums_json);
+			out.close();
+		} catch (IOException e) {
+			Toast.makeText(context, "Unable to save albums", Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
 	}
@@ -157,9 +176,25 @@ public final class AudiobookManager extends Data{
 			e.printStackTrace();
 		}
 		
+		//Albums
+		File albums_file = new File(context.getFilesDir(), "albums.dap");
+		try {
+			FileInputStream stream = new FileInputStream(albums_file);
+			InputStreamReader reader = new InputStreamReader(stream);
+			BufferedReader in = new BufferedReader(reader);
+			Gson gson = new Gson();
+			HashSet<String> set = gson.fromJson(in, new TypeToken<HashSet<String>>(){}.getType());
+			albums.clear();
+			albums.addAll(set);
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		return audiobooks;
 	}
 	
+	//Auto-detect
 	public Audiobook autoCreateAudiobook(File album_folder, boolean incl_subfolders){
 		Audiobook audiobook = new Audiobook();
 		audiobook.setAuthor(album_folder.getParentFile().getName());
@@ -203,8 +238,8 @@ public final class AudiobookManager extends Data{
 			throw new RuntimeException("No external storrage!");
 		}
 
-		ArrayList<File> albums = collectFiles(new ArrayList<File>(), folder, new AlbumFolderFilter());
-		for(File album_folder : albums){
+		ArrayList<File> album_folders = collectFiles(new ArrayList<File>(), folder, new AlbumFolderFilter());
+		for(File album_folder : album_folders){
 			Audiobook audiobook = autoCreateAudiobook(album_folder, true);
 			list.add(audiobook);
 		}		
@@ -221,4 +256,7 @@ public final class AudiobookManager extends Data{
 		return list;
 	}
 
+	//Authors & Albums
+	public HashSet<String> getAuthors() { return authors; }
+	public HashSet<String> getAlbums() { return albums; }
 }

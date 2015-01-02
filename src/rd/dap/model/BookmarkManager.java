@@ -15,15 +15,16 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public class BookmarkManager extends Data{ //Singleton
+public class BookmarkManager{ //Singleton
 	private static final String TAG = "BookmarkManager";
-	
 	private static BookmarkManager instance = new BookmarkManager();
+	private ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
 	
 	private BookmarkManager() { }
 	public static BookmarkManager getInstance() { return instance; }
 	
 	//CRUD bookmarks
+	public ArrayList<Bookmark> getBookmarks() { return bookmarks; }
 	public Bookmark createOrUpdateBookmark(File filesDir, Bookmark bookmark, boolean force){
 		String author = bookmark.getAuthor();
 		String album = bookmark.getAlbum();
@@ -91,7 +92,6 @@ public class BookmarkManager extends Data{ //Singleton
 		if(delete == null) return false;
 		return removeBookmark(context, delete.getAuthor(), delete.getAlbum());
 	}
-	
 	public boolean hasBookmark(Bookmark bookmark){
 		if(bookmark == null) return false;
 		for(Bookmark b : bookmarks){

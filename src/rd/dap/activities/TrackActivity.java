@@ -6,8 +6,6 @@ import static rd.dap.activities.InputActivity.REQUEST_EDIT_TRACK_TITLE;
 import java.util.ArrayList;
 
 import rd.dap.R;
-import rd.dap.R.id;
-import rd.dap.R.layout;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Track;
 import rd.dap.support.Time;
@@ -87,16 +85,6 @@ public class TrackActivity extends Activity {
 				startActivityForResult(intent, REQUEST_EDIT_TRACK_FILE);
 			}
 		});
-
-		//Cover
-		cover_iv = (ImageView) findViewById(R.id.details_item_cover_iv);
-		if(track.getCover() != null){
-			Bitmap bm = BitmapFactory.decodeFile(track.getCover());
-			cover_iv.setImageBitmap(bm);
-			cover_iv.setVisibility(View.VISIBLE);
-		} else {
-			cover_iv.setVisibility(View.GONE);
-		}
 	}
 	
 	@Override

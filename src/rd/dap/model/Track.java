@@ -32,7 +32,7 @@ public class Track implements Serializable{
 	public void setPath(String path) { this.path = new String(path); }
 	public int getDuration() { return duration; }
 	public void setDuration(int duration) { this.duration = duration; }
-	public String getCover() { return new String(cover); }
+	public String getCover() { return cover == null ? null : new String(cover); }
 	public void setCover(String cover) { this.cover = new String(cover); }
 	
 	public String toString(){

@@ -1,17 +1,18 @@
 package rd.dap.activities;
 
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
 import rd.dap.dialogs.Dialog_delete_bookmark;
+import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
 import rd.dap.dialogs.Dialog_timer;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
-import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.services.HeadSetReceiver;
 import rd.dap.services.PlayerService;
@@ -58,7 +59,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	private static Monitor monitor;
 	private PlayerService player;
 	private boolean bound = false;
-	private static final int CELL = 1111;
+	private static final int TRACKNO = 1111;
 	private static final int BOOKMARK = 2222;
 	public static final String END = "/END";
 	private Menu menu;
@@ -74,6 +75,24 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.controller);
+		
+//*******************************// BETA //*****************************************//
+		final boolean BETA = false;
+		TextView beta = (TextView) findViewById(R.id.controller_beta);
+		beta.setVisibility(BETA ? View.VISIBLE : View.GONE);
+		if(BETA){
+			Calendar expiration = Calendar.getInstance(Locale.getDefault());
+			expiration.set(Calendar.YEAR, 2015);
+			expiration.set(Calendar.MONTH, Calendar.APRIL);
+			expiration.set(Calendar.DAY_OF_MONTH, 1);
+			beta.setText("BETA (expires on April 1st 2015)");
+
+			if(System.currentTimeMillis() >= expiration.getTimeInMillis()) {
+				new Dialog_expired(this).show();
+			}
+		}
+//*********************************************************************************//
+		
 		base = (RelativeLayout) findViewById(R.id.controller_base);
 
 		//No cover
@@ -110,7 +129,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			}
 		};
 		int result = am.requestAudioFocus(l, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-		System.out.println("Audiofocus: "+result);
 		if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 			throw new RuntimeException("Unable to obtaing audio focus");
 		}
@@ -144,24 +162,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		monitor = new displayMonitor(this);
 		monitor.start();
 
-		
-
-		//Current bookmark
-		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-		final String author = pref.getString("author", null);
-		final String album = pref.getString("album", null);
-		BookmarkManager bm = BookmarkManager.getInstance();
-		Bookmark bookmark = bm.getBookmark(author, album);
-		if(player != null && player.getAudiobook() == null) {
-			Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-			if(audiobook != null) {
-				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-			}
-		}
-
-
-		if(bookmark == null){
-			//Load Audiobooks and Bookmarks
+		//Load Audiobooks and Bookmarks
 			final Dialog dialog = new Dialog(this);
 			dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 			LayoutInflater inflater = LayoutInflater.from(this);
@@ -169,45 +170,40 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			dialog.setContentView(dv);
 			dialog.show();
 
-			new AsyncTask<Activity, Void, Bookmark>(){
-				Activity activity;
+			new AsyncTask<Void, Void, Void>(){
 				@Override
-				protected Bookmark doInBackground(Activity... params) {
-					activity = params[0];
-					AudiobookManager.getInstance().loadAudiobooks(activity);
-					BookmarkManager.getInstance().loadBookmarks(activity.getFilesDir()); 
-
-					if(author != null && album != null){
-						BookmarkManager bm = BookmarkManager.getInstance();
-						Bookmark bookmark = bm.getBookmark(author, album);
-						return bookmark;
-					}
+				protected Void doInBackground(Void... params) {
+					AudiobookManager.getInstance().loadAudiobooks(MainActivity.this);
+					BookmarkManager.getInstance().loadBookmarks(MainActivity.this.getFilesDir()); 
 					return null;
 				}
 				@Override 
-				protected void onPostExecute(final Bookmark bookmark){
+				protected void onPostExecute(Void obj){
 					Log.d(TAG, "onPostExecute - audiobooks loaded");
 
 					runOnUiThread(new Runnable() {
-
+						
 						@Override 
 						public void run() {
-							if(BookmarkManager.getBookmarks().isEmpty()){
+							if(BookmarkManager.getInstance().getBookmarks().isEmpty()){
 								System.out.println("MainActivity AsyncTask - NO BOOKMARKS");
 								return;
 							}
 							//At this point at least one bookmark exists
-							Bookmark b = bookmark;
-							if(b == null){
-								b = BookmarkManager.getBookmarks().get(0);
-								SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-								pref.edit().putString("author", b.getAuthor()).putString("album", b.getAlbum()).commit();
+							SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+							String author = pref.getString("author", null);
+							String album = pref.getString("album", null);
+							Bookmark bookmark = BookmarkManager.getInstance().getBookmark(author, album);
+							
+							if(bookmark == null){
+								bookmark = BookmarkManager.getInstance().getBookmarks().get(0);
+								pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
 							}
 
 							if(player != null && player.getAudiobook() == null) {
-								Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(b);
+								Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
 								if(audiobook != null) {
-									player.set(audiobook, b.getTrackno(), b.getProgress());
+									player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 								}
 							}
 
@@ -217,16 +213,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 					});
 					dialog.dismiss();
 				}
-			}.execute(this);
-
-
-		} else {
-
-		}
-
-
-
-
+			}.execute();
 
 	}
 	@Override
@@ -308,7 +295,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			progress = currentProgress - Time.toMillis(1, TimeUnit.MINUTES);
 			player.seekTo(Math.max(progress, 0));
 			break;
-		case CELL:
+		case TRACKNO:
 			if(player == null) break;
 			audiobook = player.getAudiobook();
 			int trackno = (int) v.getTag();
@@ -322,6 +309,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			if(player == null) break;
 			if(!audiobook.equals(player.getAudiobook())) {
 				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+				pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
 			}
 			break;
 		}
@@ -482,7 +471,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				if(i == trackno){
 					cell.setBackground(getResources().getDrawable(R.drawable.circle));
 				}
-				cell.setId(CELL);
+				cell.setId(TRACKNO);
 				cell.setTag(i); //Autoboxing
 				cell.setOnClickListener(this);
 				row.addView(cell, p);
@@ -523,7 +512,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		if(bookmark_list == null) { System.out.println("no bookmark list!"); return; }
 		bookmark_list.removeAllViews();
 		LayoutInflater inflater = LayoutInflater.from(this);
-		for(Bookmark bookmark : Data.getBookmarks()){
+		for(Bookmark bookmark : BookmarkManager.getInstance().getBookmarks()){
 			View v = inflater.inflate(R.layout.bookmark_item, bookmark_list, false);
 			v.setId(BOOKMARK);
 			v.setTag(bookmark);
@@ -565,6 +554,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		MenuItem item = menu.findItem(R.id.menu_item_countdown);
+		
+		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+		timer_delay = pref.getInt("timer_delay", Time.toMillis(15, TimeUnit.MINUTES));
+		
 		item.setTitle(Time.toString(timer_delay));
 		return true;
 	}
@@ -611,17 +604,16 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		displayBookmarks();
 		
 		player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-//		if(BookmarkManager.getBookmarks().size() == 1){
-//			if(player != null && player.getAudiobook() == null) {
-//				player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-//			}
-//		}
 	}
 	
 	public RelativeLayout getBase() { return this.base; }
 	public Menu getMenu() { return this.menu; }
 	public int getDelay() { return this.timer_delay; }
-	public void setTimerDelay(int delay) { this.timer_delay = delay; }
+	public void setTimerDelay(int delay) { 
+		this.timer_delay = delay;
+		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+		pref.edit().putInt("timer_delay", delay).commit();
+	}
 	
 	class displayMonitor extends Monitor {
 		private Activity activity;

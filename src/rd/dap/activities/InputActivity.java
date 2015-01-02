@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rd.dap.R;
-import rd.dap.R.id;
-import rd.dap.R.layout;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -27,8 +24,9 @@ public class InputActivity extends Activity {
 	public static final int REQUEST_EDIT_AUTHOR = 1200;
 	public static final int REQUEST_EDIT_ALBUM = 1201;
 	public static final int REQUEST_EDIT_COVER = 1202;
-	public static final int REQUEST_EDIT_TRACK_TITLE = 1203;
-	public static final int REQUEST_EDIT_TRACK_FILE = 1204;
+	public static final int REQUEST_EDIT_TRACK = 1203;
+	public static final int REQUEST_EDIT_TRACK_TITLE = 1204;
+	public static final int REQUEST_EDIT_TRACK_FILE = 1205;
 	
 	private int requestCode;
 	private ArrayList<String> list; 

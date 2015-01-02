@@ -5,34 +5,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <TextView
+        android:id="@+id/controller_beta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="BETA"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/green" />
+
     <ScrollView
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="match_parent"
+        android:layout_below="@+id/controller_beta"
         android:layout_centerHorizontal="true" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
-            
-            <TextView 
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bookmarks:"/>
-            
-            <HorizontalScrollView 
+                android:text="Bookmarks:" />
+
+            <HorizontalScrollView
                 android:layout_width="@dimen/mini_player_width"
                 android:layout_height="@dimen/cover_height_medium" >
-                
+
                 <LinearLayout
-                    android:id="@+id/controller_bookmark_list" 
+                    android:id="@+id/controller_bookmark_list"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/cover_height_medium"
-                    android:orientation="horizontal">
-                    
+                    android:orientation="horizontal" >
                 </LinearLayout>
             </HorizontalScrollView>
-            
+
             <include layout="@layout/divider_horizontal" />
 
             <include layout="@layout/fragment_audiobook_basics" />
@@ -46,18 +55,18 @@
             <include layout="@layout/fragment_seeker" />
 
             <include layout="@layout/divider_horizontal" />
-            
-            <TextView 
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tracks:"/>
-            
+                android:text="Tracks:" />
+
             <LinearLayout
                 android:id="@+id/controller_tracks_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
-            
+
             <include layout="@layout/divider_horizontal" />
         </LinearLayout>
     </ScrollView>

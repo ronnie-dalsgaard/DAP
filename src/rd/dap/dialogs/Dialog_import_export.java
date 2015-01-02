@@ -1,21 +1,6 @@
 package rd.dap.dialogs;
 
-import android.app.Dialog;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.Window;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.gson.Gson;
-
-import static rd.dap.activities.MainActivity.*;
-
+import static rd.dap.activities.MainActivity.END;
 import rd.dap.R;
 import rd.dap.activities.MainActivity;
 import rd.dap.model.Audiobook;
@@ -23,7 +8,19 @@ import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Callback;
-import rd.dap.model.Data;
+import android.app.Dialog;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 public class Dialog_import_export {
 	private static final String TAG = "Dialog_import_export";
@@ -53,7 +50,7 @@ public class Dialog_import_export {
 			public void onClick(View v) {
 				Gson gson = new Gson();
 				String json = "";
-				for(Bookmark bookmark : Data.getBookmarks()){
+				for(Bookmark bookmark : BookmarkManager.getInstance().getBookmarks()){
 					json += gson.toJson(bookmark) + END + "\n";
 				}
 				Log.d(TAG, "onClick - upload: "+json);

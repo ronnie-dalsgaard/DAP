@@ -3,17 +3,14 @@ package rd.dap.activities;
 import static rd.dap.activities.InputActivity.REQUEST_EDIT_ALBUM;
 import static rd.dap.activities.InputActivity.REQUEST_EDIT_AUTHOR;
 import static rd.dap.activities.InputActivity.REQUEST_EDIT_COVER;
+import static rd.dap.activities.InputActivity.REQUEST_EDIT_TRACK;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import rd.dap.R;
-import rd.dap.R.drawable;
-import rd.dap.R.id;
-import rd.dap.R.layout;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
-import rd.dap.model.Data;
 import rd.dap.model.Track;
 import rd.dap.support.Time;
 import android.app.Activity;
@@ -57,7 +54,8 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_list_with_miniplayer);
+		ListView list = new ListView(this);
+		setContentView(list);
 
 		original_audiobook = (Audiobook) getIntent().getExtras().getSerializable("audiobook");
 		if(original_audiobook == null) throw new RuntimeException("No audiobook supplied");
@@ -67,7 +65,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		if(state == 0) throw new RuntimeException("State not provided");
 		
 		//List
-		ListView list = (ListView) findViewById(R.id.list_layout_lv);
+		list.setDivider(getResources().getDrawable(R.drawable.horizontal_divider));
 		adapter = new AudiobookDetailsAdapter(this, R.layout.item_track, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);
@@ -113,7 +111,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		position--;
 		if(position == TYPE_AUTHOR){
 			ArrayList<String> list = new ArrayList<String>();
-			list.addAll(Data.getAuthors());
+			list.addAll(AudiobookManager.getInstance().getAuthors());
 			Intent intent = new Intent(AudiobookActivity.this, InputActivity.class);
 			intent.putExtra("list", list);
 			intent.putExtra("value", audiobook.getAuthor());
@@ -121,6 +119,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 			startActivityForResult(intent, REQUEST_EDIT_AUTHOR);
 		} else if(position == TYPE_ALBUM) {
 			ArrayList<String> list = new ArrayList<String>();
+			list.addAll(AudiobookManager.getInstance().getAlbums());
 			Intent intent = new Intent(AudiobookActivity.this, InputActivity.class);
 			intent.putExtra("list", list);
 			intent.putExtra("value", audiobook.getAlbum());
@@ -136,7 +135,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 			Intent intent = new Intent(AudiobookActivity.this, TrackActivity.class);
 			intent.putExtra("audiobook", audiobook);
 			intent.putExtra("position", position-NUMBER_OF_ELEMENTS_NOT_OF_TYPE_TRACK);
-			startActivity(intent);
+			startActivityForResult(intent, REQUEST_EDIT_TRACK);
 		}
 	}
 	@Override
@@ -245,25 +244,20 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 
 					trackHolder.track_item_title_tv = (TextView) convertView.findViewById(R.id.details_item_audiobook_track_title);
 					trackHolder.track_item_duration_tv = (TextView) convertView.findViewById(R.id.details_item_audiobook_track_duration);
-					trackHolder.track_item_cover_iv = (ImageView) convertView.findViewById(R.id.details_item_audiobook_track_cover);
+					trackHolder.track_item_position_tv = (TextView) convertView.findViewById(R.id.details_item_audiobook_track_position);  
 					convertView.setTag(trackHolder);
 				} else {
 					trackHolder = (TrackViewHolder) convertView.getTag();
 				}
-				Track track = tracks.get(position-3);
-
+				int trackno = position-3;
+				
+				Track track = tracks.get(trackno);
+				
+				//trackno
+				trackHolder.track_item_position_tv.setText(String.format("%02d", trackno+1));
+				
 				//Title
 				trackHolder.track_item_title_tv.setText(track.getTitle());
-
-				//Cover
-				String track_cover = track.getCover();
-				if(track_cover != null){
-					Bitmap bm = BitmapFactory.decodeFile(track_cover);
-					trackHolder.track_item_cover_iv.setImageBitmap(bm);
-					trackHolder.track_item_cover_iv.setVisibility(View.VISIBLE);
-				} else {
-					trackHolder.track_item_cover_iv.setVisibility(View.GONE);
-				}
 
 				//Duration
 				if(track.getDuration() >= 0){
@@ -300,8 +294,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		public ImageView cover_item_iv;
 	}
 	static class TrackViewHolder {
-		public TextView track_item_title_tv, track_item_duration_tv;
-		public ImageView track_item_cover_iv;
+		public TextView track_item_position_tv, track_item_title_tv, track_item_duration_tv;
 	}
 
 }

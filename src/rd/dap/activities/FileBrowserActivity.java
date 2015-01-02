@@ -39,7 +39,9 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_list_with_miniplayer);
+		ListView listview = new ListView(this);
+		setContentView(listview);
+//		setContentView(R.layout.activity_list_with_miniplayer);
 		Log.d(TAG, "onCreate");
 
 		type = getIntent().getStringExtra("type");
@@ -61,7 +63,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 			list.add(f);
 		}
 
-		ListView listview = (ListView) findViewById(R.id.list_layout_lv);
+//		ListView listview = (ListView) findViewById(R.id.list_layout_lv);
 		LayoutInflater inflater = LayoutInflater.from(this);
 		TextView v = (TextView) inflater.inflate(R.layout.file_browser_message, listview, false);
 		v.setText(message);
@@ -72,11 +74,6 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 		listview.setAdapter(adapter);
 		listview.setOnItemClickListener(this);
 		listview.setOnItemLongClickListener(this);
-		
-		//FIXME
-//		FragmentManager fm = getFragmentManager();
-//		FragmentMiniPlayer miniplayer = (FragmentMiniPlayer) fm.findFragmentById(R.id.list_layout_mini_player);
-//		miniplayer.setVisibility(Data.getAudiobook() == null ? View.GONE : View.VISIBLE);
 
 		Log.d(TAG, "created");
 	}

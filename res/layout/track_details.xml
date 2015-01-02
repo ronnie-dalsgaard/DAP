@@ -8,7 +8,6 @@
         android:id="@+id/scrollView1"
         android:layout_width="@dimen/mini_player_width"
         android:layout_height="match_parent"
-        android:layout_above="@+id/track_mini_player"
         android:layout_centerHorizontal="true" >
 
         <LinearLayout
@@ -29,22 +28,9 @@
 
             <include layout="@layout/divider_horizontal"/>
 
-            <include layout="@layout/details_item_cover_medium" />
-
-            <include layout="@layout/divider_horizontal"/>
-
             <include layout="@layout/details_item_file" />
             
         </LinearLayout>
     </ScrollView>
-
-    <fragment
-        android:id="@+id/track_mini_player"
-        android:name="rd.dap.fragments.FragmentMiniPlayer"
-        android:layout_width="@dimen/mini_player_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        tools:layout="@layout/mini_player" />
 
 </RelativeLayout>

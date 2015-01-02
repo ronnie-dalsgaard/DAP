@@ -22,6 +22,9 @@ public class Dialog_timer {
 	private RelativeLayout base;
 	private Menu menu;
 	private int delay;
+	private final int HOUR_STEP = 1;
+	private final int MIN_STEP = 5;
+	private final int SEC_STEP = 1;
 	
 	public Dialog_timer(MainActivity activity) {
 		this.activity = activity;
@@ -53,7 +56,7 @@ public class Dialog_timer {
 
 			@Override
 			public void onClick(View v) {
-				int new_delay = delay + Time.toMillis(1, TimeUnit.HOURS);
+				int new_delay = delay + Time.toMillis(HOUR_STEP, TimeUnit.HOURS);
 				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
 				delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(delay)));
@@ -67,7 +70,7 @@ public class Dialog_timer {
 
 			@Override
 			public void onClick(View v) {
-				int new_delay = delay - Time.toMillis(1, TimeUnit.HOURS);
+				int new_delay = delay - Time.toMillis(HOUR_STEP, TimeUnit.HOURS);
 				if(new_delay < 0) return;
 				delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(delay)));
@@ -82,7 +85,7 @@ public class Dialog_timer {
 
 			@Override
 			public void onClick(View v) {
-				int new_delay = delay + Time.toMillis(1, TimeUnit.MINUTES);
+				int new_delay = delay + Time.toMillis(MIN_STEP, TimeUnit.MINUTES);
 				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
 				delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(delay)));
@@ -96,7 +99,7 @@ public class Dialog_timer {
 
 			@Override
 			public void onClick(View v) {
-				int new_delay = delay - Time.toMillis(1, TimeUnit.MINUTES);
+				int new_delay = delay - Time.toMillis(MIN_STEP, TimeUnit.MINUTES);
 				if(new_delay < 0) return;
 				delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(delay)));
@@ -111,7 +114,7 @@ public class Dialog_timer {
 
 			@Override
 			public void onClick(View v) {
-				int new_delay = delay + Time.toMillis(1, TimeUnit.SECONDS);
+				int new_delay = delay + Time.toMillis(SEC_STEP, TimeUnit.SECONDS);
 				if(new_delay > Time.toMillis(1, TimeUnit.DAYS)) return;
 				delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(delay)));
@@ -125,7 +128,7 @@ public class Dialog_timer {
 
 			@Override
 			public void onClick(View v) {
-				int new_delay = delay - Time.toMillis(1, TimeUnit.SECONDS);
+				int new_delay = delay - Time.toMillis(SEC_STEP, TimeUnit.SECONDS);
 				if(new_delay < 0) return;
 				delay = new_delay;
 				hour_tv.setText(String.format("%02d", Time.hoursPart(delay)));

@@ -12,7 +12,6 @@ import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
-import rd.dap.model.Data;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -49,7 +48,6 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 	public static final int REQUEST_AUDIOBOOK = 8801;
 	private static final int COLUMNS = 3;
 
-	//Fragment must-haves
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
@@ -73,7 +71,7 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 //		AudiobookManager.getInstance().removeAllAudiobooks(this);
 		////////////////////////////////////////////////////
 
-		if(AudiobookManager.getAudiobooks().isEmpty()){
+		if(AudiobookManager.getInstance().getAudiobooks().isEmpty()){
 			askToLoadDialog();
 		} else {
 			displayAudiobooks();
@@ -87,7 +85,7 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 		if(layout != null){
 			layout.removeAllViews();
 			HashSet<String> authors_set = new HashSet<String>();
-			for(Audiobook audiobook : Data.getAudiobooks()){
+			for(Audiobook audiobook : AudiobookManager.getInstance().getAudiobooks()){
 				authors_set.add(audiobook.getAuthor());
 			}
 			ArrayList<String> authors = new ArrayList<String>();
@@ -121,7 +119,7 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 
 				ArrayList<Audiobook> books_by_author = new ArrayList<Audiobook>();
 
-				for(Audiobook audiobook : Data.getAudiobooks()){
+				for(Audiobook audiobook : AudiobookManager.getInstance().getAudiobooks()){
 					if(author.equals(audiobook.getAuthor())){
 						books_by_author.add(audiobook);
 					}
@@ -439,7 +437,7 @@ public class AudiobooksActivity extends Activity implements OnClickListener, OnL
 			@Override
 			protected void onPostExecute(Void result){
 				dialog.dismiss();
-				if(AudiobookManager.getAudiobooks().isEmpty()){
+				if(AudiobookManager.getInstance().getAudiobooks().isEmpty()){
 					setHomeFolder();
 				} else {
 					displayAudiobooks();					
