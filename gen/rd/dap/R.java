@@ -8,6 +8,9 @@
 package rd.dap;
 
 public final class R {
+    public static final class anim {
+        public static final int rotate=0x7f040000;
+    }
     public static final class attr {
         /** 
     The size of the ad. It must be one of BANNER, FULL_BANNER, LEADERBOARD,
@@ -327,194 +330,194 @@ containing a value of this type.
         public static final int zOrderOnTop=0x7f010010;
     }
     public static final class color {
-        public static final int alice_blue=0x7f06004e;
-        public static final int antique_white=0x7f06002b;
-        public static final int antique_white_2=0x7f06002c;
-        public static final int antique_white_3=0x7f06002d;
-        public static final int antique_white_4=0x7f06002e;
-        public static final int aquamarine=0x7f060070;
-        public static final int azure=0x7f06004d;
-        public static final int beige=0x7f060090;
-        public static final int bisque=0x7f060031;
-        public static final int bisque_2=0x7f060032;
-        public static final int bisque_3=0x7f060033;
-        public static final int bisque_4=0x7f060034;
-        public static final int black=0x7f060017;
-        public static final int blanched_almond=0x7f060030;
-        public static final int blue=0x7f06001e;
-        public static final int blue_violet=0x7f0600ac;
-        public static final int brown=0x7f060096;
-        public static final int burlywood=0x7f06008f;
-        public static final int cadet_blue=0x7f06006e;
-        public static final int chartreuse=0x7f06007a;
-        public static final int chocolate=0x7f060094;
-        public static final int common_action_bar_splitter=0x7f060009;
+        public static final int alice_blue=0x7f07004e;
+        public static final int antique_white=0x7f07002b;
+        public static final int antique_white_2=0x7f07002c;
+        public static final int antique_white_3=0x7f07002d;
+        public static final int antique_white_4=0x7f07002e;
+        public static final int aquamarine=0x7f070070;
+        public static final int azure=0x7f07004d;
+        public static final int beige=0x7f070090;
+        public static final int bisque=0x7f070031;
+        public static final int bisque_2=0x7f070032;
+        public static final int bisque_3=0x7f070033;
+        public static final int bisque_4=0x7f070034;
+        public static final int black=0x7f070017;
+        public static final int blanched_almond=0x7f070030;
+        public static final int blue=0x7f07001e;
+        public static final int blue_violet=0x7f0700ac;
+        public static final int brown=0x7f070096;
+        public static final int burlywood=0x7f07008f;
+        public static final int cadet_blue=0x7f07006e;
+        public static final int chartreuse=0x7f07007a;
+        public static final int chocolate=0x7f070094;
+        public static final int common_action_bar_splitter=0x7f070009;
         /**  Sign-in Button Colors 
          */
-        public static final int common_signin_btn_dark_text_default=0x7f060000;
-        public static final int common_signin_btn_dark_text_disabled=0x7f060002;
-        public static final int common_signin_btn_dark_text_focused=0x7f060003;
-        public static final int common_signin_btn_dark_text_pressed=0x7f060001;
-        public static final int common_signin_btn_default_background=0x7f060008;
-        public static final int common_signin_btn_light_text_default=0x7f060004;
-        public static final int common_signin_btn_light_text_disabled=0x7f060006;
-        public static final int common_signin_btn_light_text_focused=0x7f060007;
-        public static final int common_signin_btn_light_text_pressed=0x7f060005;
-        public static final int common_signin_btn_text_dark=0x7f0600b1;
-        public static final int common_signin_btn_text_light=0x7f0600b2;
-        public static final int coral=0x7f06009b;
-        public static final int cornflower_blue=0x7f060059;
-        public static final int cornsilk=0x7f06003b;
-        public static final int cornsilk_2=0x7f06003c;
-        public static final int cornsilk_3=0x7f06003d;
-        public static final int cornsilk_4=0x7f06003e;
-        public static final int cyan=0x7f06006c;
-        public static final int dark_goldenrod=0x7f060089;
-        public static final int dark_green=0x7f060071;
-        public static final int dark_khaki=0x7f060081;
-        public static final int dark_olive_green=0x7f060072;
-        public static final int dark_orange=0x7f06009a;
-        public static final int dark_orchid=0x7f0600aa;
-        public static final int dark_salmon=0x7f060097;
-        public static final int dark_sea_green=0x7f060073;
-        public static final int dark_slate_blue=0x7f06005a;
-        public static final int dark_slate_gray=0x7f060052;
-        public static final int dark_turquoise=0x7f060069;
-        public static final int dark_violet=0x7f0600ab;
-        public static final int deep_pink=0x7f0600a0;
-        public static final int deep_sky_blue=0x7f060061;
-        public static final int dim_gray=0x7f060053;
-        public static final int dodger_blue=0x7f060060;
-        public static final int firebrick=0x7f060095;
-        public static final int floral_white=0x7f060028;
-        public static final int forest_green=0x7f06007f;
-        public static final int gainsboro=0x7f060027;
-        public static final int ghost_white=0x7f060025;
-        public static final int gold=0x7f060086;
-        public static final int goldenrod=0x7f060088;
-        public static final int gray=0x7f060018;
-        public static final int green=0x7f06001d;
-        public static final int green_yellow=0x7f06007c;
-        public static final int honeydew=0x7f060048;
-        public static final int honeydew_2=0x7f060049;
-        public static final int honeydew_3=0x7f06004a;
-        public static final int honeydew_4=0x7f06004b;
-        public static final int hot_pink=0x7f06009f;
-        public static final int indian_red=0x7f06008b;
-        public static final int indigo=0x7f06001f;
-        public static final int ivory=0x7f06003f;
-        public static final int ivory_2=0x7f060040;
-        public static final int ivory_3=0x7f060041;
-        public static final int ivory_4=0x7f060042;
-        public static final int khaki=0x7f060082;
-        public static final int lavender=0x7f06004f;
-        public static final int lavender_blush=0x7f060050;
-        public static final int lawn_green=0x7f060079;
-        public static final int lemon_chiffon=0x7f060043;
-        public static final int light_blue=0x7f060066;
-        public static final int light_coral=0x7f06009c;
-        public static final int light_cyan=0x7f06006d;
-        public static final int light_goldenrod=0x7f060087;
-        public static final int light_goldenrod_yellow=0x7f060084;
-        public static final int light_gray=0x7f060056;
-        public static final int light_pink=0x7f0600a2;
-        public static final int light_salmon=0x7f060099;
-        public static final int light_sea_green=0x7f060076;
-        public static final int light_sky_blue=0x7f060063;
-        public static final int light_slate_blue=0x7f06005d;
-        public static final int light_slate_gray=0x7f060055;
-        public static final int light_steel_blue=0x7f060065;
-        public static final int light_yellow=0x7f060085;
-        public static final int lime_green=0x7f06007d;
-        public static final int linen=0x7f06002a;
-        public static final int maroon=0x7f0600a4;
-        public static final int medium_aquamarine=0x7f06006f;
-        public static final int medium_blue=0x7f06005e;
-        public static final int medium_orchid=0x7f0600a9;
-        public static final int medium_purple=0x7f0600ae;
-        public static final int medium_sea_green=0x7f060075;
-        public static final int medium_slate_blue=0x7f06005c;
-        public static final int medium_spring_green=0x7f06007b;
-        public static final int medium_turquoise=0x7f06006a;
-        public static final int medium_violet_red=0x7f0600a5;
-        public static final int midnight_blue=0x7f060057;
-        public static final int mint_cream=0x7f06004c;
-        public static final int misty_rose=0x7f060051;
-        public static final int moccasin=0x7f06003a;
-        public static final int navajo_white=0x7f060039;
-        public static final int navy=0x7f060058;
-        public static final int old_lace=0x7f060029;
-        public static final int olive_drab=0x7f060080;
-        public static final int orange=0x7f06001b;
-        public static final int orange_red=0x7f06009e;
-        public static final int orchid=0x7f0600a8;
-        public static final int pale_goldenrod=0x7f060083;
-        public static final int pale_green=0x7f060077;
-        public static final int pale_turquoise=0x7f060068;
-        public static final int pale_violet_red=0x7f0600a3;
-        public static final int papaya_whip=0x7f06002f;
-        public static final int peach_puff=0x7f060035;
-        public static final int peach_puff_2=0x7f060036;
-        public static final int peach_puff_3=0x7f060037;
-        public static final int peach_puff_4=0x7f060038;
-        public static final int peru=0x7f06008e;
-        public static final int pink=0x7f0600a1;
-        public static final int plum=0x7f0600a7;
-        public static final int powder_blue=0x7f060067;
-        public static final int purple=0x7f0600ad;
-        public static final int red=0x7f06001a;
-        public static final int rosy_brown=0x7f06008a;
-        public static final int royal_blue=0x7f06005f;
-        public static final int saddle_brown=0x7f06008c;
-        public static final int salmon=0x7f060098;
-        public static final int sandy_brown=0x7f060092;
-        public static final int sea_green=0x7f060074;
-        public static final int seashell=0x7f060044;
-        public static final int seashell_2=0x7f060045;
-        public static final int seashell_3=0x7f060046;
-        public static final int seashell_4=0x7f060047;
-        public static final int sienna=0x7f06008d;
-        public static final int sky_blue=0x7f060062;
-        public static final int slate_blue=0x7f06005b;
-        public static final int slate_gray=0x7f060054;
-        public static final int snow=0x7f060021;
-        public static final int snow2=0x7f060022;
-        public static final int snow3=0x7f060023;
-        public static final int snow4=0x7f060024;
-        public static final int spring_green=0x7f060078;
-        public static final int steel_blue=0x7f060064;
-        public static final int tan=0x7f060093;
-        public static final int thistle=0x7f0600af;
-        public static final int tomato=0x7f06009d;
-        public static final int transparent=0x7f0600b0;
-        public static final int turquoise=0x7f06006b;
-        public static final int violet=0x7f060020;
-        public static final int violet_red=0x7f0600a6;
-        public static final int wallet_bright_foreground_disabled_holo_light=0x7f06000f;
+        public static final int common_signin_btn_dark_text_default=0x7f070000;
+        public static final int common_signin_btn_dark_text_disabled=0x7f070002;
+        public static final int common_signin_btn_dark_text_focused=0x7f070003;
+        public static final int common_signin_btn_dark_text_pressed=0x7f070001;
+        public static final int common_signin_btn_default_background=0x7f070008;
+        public static final int common_signin_btn_light_text_default=0x7f070004;
+        public static final int common_signin_btn_light_text_disabled=0x7f070006;
+        public static final int common_signin_btn_light_text_focused=0x7f070007;
+        public static final int common_signin_btn_light_text_pressed=0x7f070005;
+        public static final int common_signin_btn_text_dark=0x7f0700b1;
+        public static final int common_signin_btn_text_light=0x7f0700b2;
+        public static final int coral=0x7f07009b;
+        public static final int cornflower_blue=0x7f070059;
+        public static final int cornsilk=0x7f07003b;
+        public static final int cornsilk_2=0x7f07003c;
+        public static final int cornsilk_3=0x7f07003d;
+        public static final int cornsilk_4=0x7f07003e;
+        public static final int cyan=0x7f07006c;
+        public static final int dark_goldenrod=0x7f070089;
+        public static final int dark_green=0x7f070071;
+        public static final int dark_khaki=0x7f070081;
+        public static final int dark_olive_green=0x7f070072;
+        public static final int dark_orange=0x7f07009a;
+        public static final int dark_orchid=0x7f0700aa;
+        public static final int dark_salmon=0x7f070097;
+        public static final int dark_sea_green=0x7f070073;
+        public static final int dark_slate_blue=0x7f07005a;
+        public static final int dark_slate_gray=0x7f070052;
+        public static final int dark_turquoise=0x7f070069;
+        public static final int dark_violet=0x7f0700ab;
+        public static final int deep_pink=0x7f0700a0;
+        public static final int deep_sky_blue=0x7f070061;
+        public static final int dim_gray=0x7f070053;
+        public static final int dodger_blue=0x7f070060;
+        public static final int firebrick=0x7f070095;
+        public static final int floral_white=0x7f070028;
+        public static final int forest_green=0x7f07007f;
+        public static final int gainsboro=0x7f070027;
+        public static final int ghost_white=0x7f070025;
+        public static final int gold=0x7f070086;
+        public static final int goldenrod=0x7f070088;
+        public static final int gray=0x7f070018;
+        public static final int green=0x7f07001d;
+        public static final int green_yellow=0x7f07007c;
+        public static final int honeydew=0x7f070048;
+        public static final int honeydew_2=0x7f070049;
+        public static final int honeydew_3=0x7f07004a;
+        public static final int honeydew_4=0x7f07004b;
+        public static final int hot_pink=0x7f07009f;
+        public static final int indian_red=0x7f07008b;
+        public static final int indigo=0x7f07001f;
+        public static final int ivory=0x7f07003f;
+        public static final int ivory_2=0x7f070040;
+        public static final int ivory_3=0x7f070041;
+        public static final int ivory_4=0x7f070042;
+        public static final int khaki=0x7f070082;
+        public static final int lavender=0x7f07004f;
+        public static final int lavender_blush=0x7f070050;
+        public static final int lawn_green=0x7f070079;
+        public static final int lemon_chiffon=0x7f070043;
+        public static final int light_blue=0x7f070066;
+        public static final int light_coral=0x7f07009c;
+        public static final int light_cyan=0x7f07006d;
+        public static final int light_goldenrod=0x7f070087;
+        public static final int light_goldenrod_yellow=0x7f070084;
+        public static final int light_gray=0x7f070056;
+        public static final int light_pink=0x7f0700a2;
+        public static final int light_salmon=0x7f070099;
+        public static final int light_sea_green=0x7f070076;
+        public static final int light_sky_blue=0x7f070063;
+        public static final int light_slate_blue=0x7f07005d;
+        public static final int light_slate_gray=0x7f070055;
+        public static final int light_steel_blue=0x7f070065;
+        public static final int light_yellow=0x7f070085;
+        public static final int lime_green=0x7f07007d;
+        public static final int linen=0x7f07002a;
+        public static final int maroon=0x7f0700a4;
+        public static final int medium_aquamarine=0x7f07006f;
+        public static final int medium_blue=0x7f07005e;
+        public static final int medium_orchid=0x7f0700a9;
+        public static final int medium_purple=0x7f0700ae;
+        public static final int medium_sea_green=0x7f070075;
+        public static final int medium_slate_blue=0x7f07005c;
+        public static final int medium_spring_green=0x7f07007b;
+        public static final int medium_turquoise=0x7f07006a;
+        public static final int medium_violet_red=0x7f0700a5;
+        public static final int midnight_blue=0x7f070057;
+        public static final int mint_cream=0x7f07004c;
+        public static final int misty_rose=0x7f070051;
+        public static final int moccasin=0x7f07003a;
+        public static final int navajo_white=0x7f070039;
+        public static final int navy=0x7f070058;
+        public static final int old_lace=0x7f070029;
+        public static final int olive_drab=0x7f070080;
+        public static final int orange=0x7f07001b;
+        public static final int orange_red=0x7f07009e;
+        public static final int orchid=0x7f0700a8;
+        public static final int pale_goldenrod=0x7f070083;
+        public static final int pale_green=0x7f070077;
+        public static final int pale_turquoise=0x7f070068;
+        public static final int pale_violet_red=0x7f0700a3;
+        public static final int papaya_whip=0x7f07002f;
+        public static final int peach_puff=0x7f070035;
+        public static final int peach_puff_2=0x7f070036;
+        public static final int peach_puff_3=0x7f070037;
+        public static final int peach_puff_4=0x7f070038;
+        public static final int peru=0x7f07008e;
+        public static final int pink=0x7f0700a1;
+        public static final int plum=0x7f0700a7;
+        public static final int powder_blue=0x7f070067;
+        public static final int purple=0x7f0700ad;
+        public static final int red=0x7f07001a;
+        public static final int rosy_brown=0x7f07008a;
+        public static final int royal_blue=0x7f07005f;
+        public static final int saddle_brown=0x7f07008c;
+        public static final int salmon=0x7f070098;
+        public static final int sandy_brown=0x7f070092;
+        public static final int sea_green=0x7f070074;
+        public static final int seashell=0x7f070044;
+        public static final int seashell_2=0x7f070045;
+        public static final int seashell_3=0x7f070046;
+        public static final int seashell_4=0x7f070047;
+        public static final int sienna=0x7f07008d;
+        public static final int sky_blue=0x7f070062;
+        public static final int slate_blue=0x7f07005b;
+        public static final int slate_gray=0x7f070054;
+        public static final int snow=0x7f070021;
+        public static final int snow2=0x7f070022;
+        public static final int snow3=0x7f070023;
+        public static final int snow4=0x7f070024;
+        public static final int spring_green=0x7f070078;
+        public static final int steel_blue=0x7f070064;
+        public static final int tan=0x7f070093;
+        public static final int thistle=0x7f0700af;
+        public static final int tomato=0x7f07009d;
+        public static final int transparent=0x7f0700b0;
+        public static final int turquoise=0x7f07006b;
+        public static final int violet=0x7f070020;
+        public static final int violet_red=0x7f0700a6;
+        public static final int wallet_bright_foreground_disabled_holo_light=0x7f07000f;
         /** 
          Wallet colors to support consistent Wallet fragment holo dark UI in client application
          regardless of the theme and device type
     
          */
-        public static final int wallet_bright_foreground_holo_dark=0x7f06000a;
-        public static final int wallet_bright_foreground_holo_light=0x7f060010;
-        public static final int wallet_dim_foreground_disabled_holo_dark=0x7f06000c;
-        public static final int wallet_dim_foreground_holo_dark=0x7f06000b;
-        public static final int wallet_dim_foreground_inverse_disabled_holo_dark=0x7f06000e;
-        public static final int wallet_dim_foreground_inverse_holo_dark=0x7f06000d;
-        public static final int wallet_highlighted_text_holo_dark=0x7f060014;
-        public static final int wallet_highlighted_text_holo_light=0x7f060013;
-        public static final int wallet_hint_foreground_holo_dark=0x7f060012;
-        public static final int wallet_hint_foreground_holo_light=0x7f060011;
-        public static final int wallet_holo_blue_light=0x7f060015;
-        public static final int wallet_link_text_light=0x7f060016;
-        public static final int wallet_primary_text_holo_light=0x7f0600b3;
-        public static final int wallet_secondary_text_holo_dark=0x7f0600b4;
-        public static final int wheat=0x7f060091;
-        public static final int white=0x7f060019;
-        public static final int white_smoke=0x7f060026;
-        public static final int yellow=0x7f06001c;
-        public static final int yellow_green=0x7f06007e;
+        public static final int wallet_bright_foreground_holo_dark=0x7f07000a;
+        public static final int wallet_bright_foreground_holo_light=0x7f070010;
+        public static final int wallet_dim_foreground_disabled_holo_dark=0x7f07000c;
+        public static final int wallet_dim_foreground_holo_dark=0x7f07000b;
+        public static final int wallet_dim_foreground_inverse_disabled_holo_dark=0x7f07000e;
+        public static final int wallet_dim_foreground_inverse_holo_dark=0x7f07000d;
+        public static final int wallet_highlighted_text_holo_dark=0x7f070014;
+        public static final int wallet_highlighted_text_holo_light=0x7f070013;
+        public static final int wallet_hint_foreground_holo_dark=0x7f070012;
+        public static final int wallet_hint_foreground_holo_light=0x7f070011;
+        public static final int wallet_holo_blue_light=0x7f070015;
+        public static final int wallet_link_text_light=0x7f070016;
+        public static final int wallet_primary_text_holo_light=0x7f0700b3;
+        public static final int wallet_secondary_text_holo_dark=0x7f0700b4;
+        public static final int wheat=0x7f070091;
+        public static final int white=0x7f070019;
+        public static final int white_smoke=0x7f070026;
+        public static final int yellow=0x7f07001c;
+        public static final int yellow_green=0x7f07007e;
     }
     public static final class dimen {
         /** 
@@ -523,24 +526,24 @@ containing a value of this type.
          would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively).
     
          */
-        public static final int activity_horizontal_margin=0x7f090010;
-        public static final int activity_vertical_margin=0x7f090011;
-        public static final int btn_height=0x7f090005;
-        public static final int cover_height=0x7f09000b;
-        public static final int cover_height_big=0x7f09000d;
-        public static final int cover_height_medium=0x7f090009;
-        public static final int cover_height_small=0x7f090007;
-        public static final int cover_width=0x7f09000a;
-        public static final int cover_width_big=0x7f09000c;
-        public static final int cover_width_medium=0x7f090008;
-        public static final int cover_width_small=0x7f090006;
-        public static final int file_type_height=0x7f09000f;
-        public static final int file_type_width=0x7f09000e;
-        public static final int margin_big=0x7f090004;
-        public static final int margin_small=0x7f090003;
-        public static final int match_parent=0x7f090000;
-        public static final int mini_player_width=0x7f090002;
-        public static final int wrap_content=0x7f090001;
+        public static final int activity_horizontal_margin=0x7f0a0010;
+        public static final int activity_vertical_margin=0x7f0a0011;
+        public static final int btn_height=0x7f0a0005;
+        public static final int cover_height=0x7f0a000b;
+        public static final int cover_height_big=0x7f0a000d;
+        public static final int cover_height_medium=0x7f0a0009;
+        public static final int cover_height_small=0x7f0a0007;
+        public static final int cover_width=0x7f0a000a;
+        public static final int cover_width_big=0x7f0a000c;
+        public static final int cover_width_medium=0x7f0a0008;
+        public static final int cover_width_small=0x7f0a0006;
+        public static final int file_type_height=0x7f0a000f;
+        public static final int file_type_width=0x7f0a000e;
+        public static final int margin_big=0x7f0a0004;
+        public static final int margin_small=0x7f0a0003;
+        public static final int match_parent=0x7f0a0000;
+        public static final int mini_player_width=0x7f0a0002;
+        public static final int wrap_content=0x7f0a0001;
     }
     public static final class drawable {
         public static final int circle=0x7f020000;
@@ -723,120 +726,125 @@ containing a value of this type.
         public static final int ic_plusone_small_off_client=0x7f0200b1;
         public static final int ic_plusone_standard_off_client=0x7f0200b2;
         public static final int ic_plusone_tall_off_client=0x7f0200b3;
-        public static final int miniplayer_bg=0x7f0200b4;
-        public static final int powered_by_google_dark=0x7f0200b5;
-        public static final int powered_by_google_light=0x7f0200b6;
-        public static final int red_tape=0x7f0200b7;
-        public static final int vertical_divider=0x7f0200b8;
+        public static final int min_hand=0x7f0200b4;
+        public static final int miniplayer_bg=0x7f0200b5;
+        public static final int powered_by_google_dark=0x7f0200b6;
+        public static final int powered_by_google_light=0x7f0200b7;
+        public static final int red_tape=0x7f0200b8;
+        public static final int sec_hand=0x7f0200b9;
+        public static final int vertical_divider=0x7f0200ba;
     }
     public static final class id {
-        public static final int audiobook_basics_album_tv=0x7f07004e;
-        public static final int audiobook_basics_author_tv=0x7f07004d;
-        public static final int audiobook_basics_btn_cover=0x7f07004a;
-        public static final int audiobook_basics_cover_iv=0x7f070049;
-        public static final int audiobook_basics_divider=0x7f07004b;
-        public static final int audiobook_basics_info_layout=0x7f07004c;
-        public static final int audiobook_header_cancel_btn=0x7f070014;
-        public static final int audiobook_header_save_btn=0x7f070015;
-        public static final int author_item_grid_gv=0x7f070017;
-        public static final int author_item_header_tv=0x7f070016;
-        public static final int book_now=0x7f070010;
-        public static final int bookmark_cover_iv=0x7f07001a;
-        public static final int bookmark_cover_layout=0x7f070019;
-        public static final int bookmark_info_layout=0x7f07001b;
-        public static final int bookmark_layout=0x7f070018;
-        public static final int bookmark_progress_iv=0x7f07001e;
-        public static final int bookmark_progress_tv=0x7f07001f;
-        public static final int bookmark_track_iv=0x7f07001c;
-        public static final int bookmark_track_tv=0x7f07001d;
-        public static final int buyButton=0x7f07000a;
-        public static final int buy_now=0x7f07000f;
-        public static final int buy_with_google=0x7f07000e;
-        public static final int classic=0x7f070011;
-        public static final int controller_base=0x7f070020;
-        public static final int controller_beta=0x7f070021;
-        public static final int controller_bookmark_list=0x7f070022;
-        public static final int controller_track_row=0x7f07004f;
-        public static final int controller_tracks_grid=0x7f070023;
-        public static final int cover_view_cover_iv=0x7f070024;
-        public static final int details_item_album_label=0x7f070025;
-        public static final int details_item_album_tv=0x7f070026;
-        public static final int details_item_audiobook_track_duration=0x7f07005e;
-        public static final int details_item_audiobook_track_position=0x7f07005c;
-        public static final int details_item_audiobook_track_title=0x7f07005d;
-        public static final int details_item_author_label=0x7f070027;
-        public static final int details_item_author_tv=0x7f070028;
-        public static final int details_item_cover_iv=0x7f070029;
-        public static final int details_item_file_label=0x7f07002a;
-        public static final int details_item_file_tv=0x7f07002b;
-        public static final int details_item_track_pos_title_divider=0x7f07002d;
-        public static final int details_item_track_position=0x7f07002c;
-        public static final int details_item_track_title=0x7f07002e;
-        public static final int dialog_base=0x7f07002f;
-        public static final int dialog_button_bar=0x7f070036;
-        public static final int dialog_divider1=0x7f070032;
-        public static final int dialog_divider2=0x7f070035;
-        public static final int dialog_exit_btn=0x7f070031;
-        public static final int dialog_impexp_download=0x7f070039;
-        public static final int dialog_impexp_upload=0x7f070038;
-        public static final int dialog_left_btn=0x7f07003b;
-        public static final int dialog_msg_tv=0x7f07003a;
-        public static final int dialog_right_btn=0x7f070037;
-        public static final int dialog_timer_hour=0x7f07003d;
-        public static final int dialog_timer_hour_dec=0x7f07003e;
-        public static final int dialog_timer_hour_inc=0x7f07003c;
-        public static final int dialog_timer_min=0x7f070040;
-        public static final int dialog_timer_min_dec=0x7f070041;
-        public static final int dialog_timer_min_inc=0x7f07003f;
-        public static final int dialog_timer_picker_layout=0x7f070033;
-        public static final int dialog_timer_sec=0x7f070043;
-        public static final int dialog_timer_sec_dec=0x7f070044;
-        public static final int dialog_timer_sec_inc=0x7f070042;
-        public static final int dialog_title_tv=0x7f070030;
-        public static final int file_item_cb=0x7f070048;
-        public static final int file_item_name_tv=0x7f070047;
-        public static final int file_item_type_iv=0x7f070046;
-        public static final int grayscale=0x7f070012;
-        public static final int holo_dark=0x7f070005;
-        public static final int holo_light=0x7f070006;
-        public static final int hybrid=0x7f070004;
-        public static final int input_btn=0x7f070059;
-        public static final int input_et=0x7f070058;
-        public static final int input_item_tv=0x7f07005b;
-        public static final int input_lv=0x7f07005a;
-        public static final int match_parent=0x7f07000c;
-        public static final int menu_item_audiobooks=0x7f070061;
-        public static final int menu_item_audiobooks_set_home=0x7f070062;
-        public static final int menu_item_countdown=0x7f070066;
-        public static final int menu_item_download=0x7f070064;
-        public static final int menu_item_import_export=0x7f070067;
-        public static final int menu_item_timer=0x7f070065;
-        public static final int menu_item_upload=0x7f070063;
-        public static final int monochrome=0x7f070013;
-        public static final int none=0x7f070000;
-        public static final int normal=0x7f070001;
-        public static final int production=0x7f070007;
-        public static final int sandbox=0x7f070008;
-        public static final int satellite=0x7f070002;
-        public static final int scrollView1=0x7f07005f;
-        public static final int seeker_btn_forward=0x7f070052;
-        public static final int seeker_btn_rewind=0x7f070050;
-        public static final int seeker_progress_tv=0x7f070051;
-        public static final int selectionDetails=0x7f07000b;
-        public static final int strict_sandbox=0x7f070009;
-        public static final int terrain=0x7f070003;
-        public static final int textView1=0x7f070034;
-        public static final int track_btn_next=0x7f070056;
-        public static final int track_btn_previous=0x7f070054;
-        public static final int track_divider=0x7f070045;
-        public static final int track_duration=0x7f070060;
-        public static final int track_row=0x7f070053;
-        public static final int track_title=0x7f070055;
-        public static final int tracks_grid=0x7f070057;
-        public static final int wrap_content=0x7f07000d;
+        public static final int analogClock=0x7f080049;
+        public static final int audiobook_basics_album_tv=0x7f080050;
+        public static final int audiobook_basics_author_tv=0x7f08004f;
+        public static final int audiobook_basics_btn_cover=0x7f080051;
+        public static final int audiobook_basics_cover_iv=0x7f08004c;
+        public static final int audiobook_basics_divider=0x7f08004d;
+        public static final int audiobook_basics_info_layout=0x7f08004e;
+        public static final int audiobook_header_cancel_btn=0x7f080014;
+        public static final int audiobook_header_save_btn=0x7f080015;
+        public static final int author_item_grid_gv=0x7f080017;
+        public static final int author_item_header_tv=0x7f080016;
+        public static final int book_now=0x7f080010;
+        public static final int bookmark_cover_iv=0x7f08001a;
+        public static final int bookmark_cover_layout=0x7f080019;
+        public static final int bookmark_info_layout=0x7f08001b;
+        public static final int bookmark_layout=0x7f080018;
+        public static final int bookmark_progress_iv=0x7f08001e;
+        public static final int bookmark_progress_tv=0x7f08001f;
+        public static final int bookmark_track_iv=0x7f08001c;
+        public static final int bookmark_track_tv=0x7f08001d;
+        public static final int buyButton=0x7f08000a;
+        public static final int buy_now=0x7f08000f;
+        public static final int buy_with_google=0x7f08000e;
+        public static final int classic=0x7f080011;
+        public static final int controller_base=0x7f080020;
+        public static final int controller_beta=0x7f080021;
+        public static final int controller_bookmark_list=0x7f080022;
+        public static final int controller_track_row=0x7f080052;
+        public static final int controller_tracks_grid=0x7f080023;
+        public static final int cover_view_cover_iv=0x7f080024;
+        public static final int details_item_album_label=0x7f080025;
+        public static final int details_item_album_tv=0x7f080026;
+        public static final int details_item_audiobook_track_duration=0x7f080061;
+        public static final int details_item_audiobook_track_position=0x7f08005f;
+        public static final int details_item_audiobook_track_title=0x7f080060;
+        public static final int details_item_author_label=0x7f080027;
+        public static final int details_item_author_tv=0x7f080028;
+        public static final int details_item_cover_iv=0x7f080029;
+        public static final int details_item_file_label=0x7f08002a;
+        public static final int details_item_file_tv=0x7f08002b;
+        public static final int details_item_track_pos_title_divider=0x7f08002d;
+        public static final int details_item_track_position=0x7f08002c;
+        public static final int details_item_track_title=0x7f08002e;
+        public static final int dialog_base=0x7f08002f;
+        public static final int dialog_button_bar=0x7f080036;
+        public static final int dialog_divider1=0x7f080032;
+        public static final int dialog_divider2=0x7f080035;
+        public static final int dialog_exit_btn=0x7f080031;
+        public static final int dialog_impexp_download=0x7f080039;
+        public static final int dialog_impexp_upload=0x7f080038;
+        public static final int dialog_left_btn=0x7f08003b;
+        public static final int dialog_msg_tv=0x7f08003a;
+        public static final int dialog_right_btn=0x7f080037;
+        public static final int dialog_timer_hour=0x7f08003d;
+        public static final int dialog_timer_hour_dec=0x7f08003e;
+        public static final int dialog_timer_hour_inc=0x7f08003c;
+        public static final int dialog_timer_min=0x7f080040;
+        public static final int dialog_timer_min_dec=0x7f080041;
+        public static final int dialog_timer_min_inc=0x7f08003f;
+        public static final int dialog_timer_picker_layout=0x7f080033;
+        public static final int dialog_timer_sec=0x7f080043;
+        public static final int dialog_timer_sec_dec=0x7f080044;
+        public static final int dialog_timer_sec_inc=0x7f080042;
+        public static final int dialog_title_tv=0x7f080030;
+        public static final int file_item_cb=0x7f080048;
+        public static final int file_item_name_tv=0x7f080047;
+        public static final int file_item_type_iv=0x7f080046;
+        public static final int grayscale=0x7f080012;
+        public static final int holo_dark=0x7f080005;
+        public static final int holo_light=0x7f080006;
+        public static final int hybrid=0x7f080004;
+        public static final int input_btn=0x7f08005c;
+        public static final int input_et=0x7f08005b;
+        public static final int input_item_tv=0x7f08005e;
+        public static final int input_lv=0x7f08005d;
+        public static final int match_parent=0x7f08000c;
+        public static final int menu_item_audiobooks=0x7f080064;
+        public static final int menu_item_audiobooks_set_home=0x7f080065;
+        public static final int menu_item_countdown=0x7f080069;
+        public static final int menu_item_download=0x7f080067;
+        public static final int menu_item_import_export=0x7f08006a;
+        public static final int menu_item_timer=0x7f080068;
+        public static final int menu_item_upload=0x7f080066;
+        public static final int min_hand=0x7f08004a;
+        public static final int monochrome=0x7f080013;
+        public static final int none=0x7f080000;
+        public static final int normal=0x7f080001;
+        public static final int production=0x7f080007;
+        public static final int sandbox=0x7f080008;
+        public static final int satellite=0x7f080002;
+        public static final int scrollView1=0x7f080062;
+        public static final int sec_hand=0x7f08004b;
+        public static final int seeker_btn_forward=0x7f080055;
+        public static final int seeker_btn_rewind=0x7f080053;
+        public static final int seeker_progress_tv=0x7f080054;
+        public static final int selectionDetails=0x7f08000b;
+        public static final int strict_sandbox=0x7f080009;
+        public static final int terrain=0x7f080003;
+        public static final int textView1=0x7f080034;
+        public static final int track_btn_next=0x7f080059;
+        public static final int track_btn_previous=0x7f080057;
+        public static final int track_divider=0x7f080045;
+        public static final int track_duration=0x7f080063;
+        public static final int track_row=0x7f080056;
+        public static final int track_title=0x7f080058;
+        public static final int tracks_grid=0x7f08005a;
+        public static final int wrap_content=0x7f08000d;
     }
     public static final class integer {
-        public static final int google_play_services_version=0x7f080000;
+        public static final int google_play_services_version=0x7f090000;
     }
     public static final class layout {
         public static final int audiobook_header_buttons=0x7f030000;
@@ -868,139 +876,139 @@ containing a value of this type.
         public static final int track_details=0x7f03001a;
     }
     public static final class menu {
-        public static final int audiobooks=0x7f0a0000;
-        public static final int bookmarks=0x7f0a0001;
-        public static final int details=0x7f0a0002;
-        public static final int main=0x7f0a0003;
+        public static final int audiobooks=0x7f0b0000;
+        public static final int bookmarks=0x7f0b0001;
+        public static final int details=0x7f0b0002;
+        public static final int main=0x7f0b0003;
     }
     public static final class string {
-        public static final int _progress=0x7f05002b;
-        public static final int accept=0x7f050002;
-        public static final int action_settings=0x7f05002d;
-        public static final int app_name=0x7f050023;
-        public static final int author=0x7f050027;
+        public static final int _progress=0x7f06002b;
+        public static final int accept=0x7f060002;
+        public static final int action_settings=0x7f06002d;
+        public static final int app_name=0x7f060023;
+        public static final int author=0x7f060027;
         /**   Text for notification shown when the Android Wear apps needs to be updated. Only shown on the wearable. [CHAR LIMIT=NONE] 
          */
-        public static final int common_android_wear_notification_needs_update_text=0x7f050009;
+        public static final int common_android_wear_notification_needs_update_text=0x7f060009;
         /**  Message in confirmation dialog informing user that they need to update
         the Android Wear app [CHAR LIMIT=NONE] 
          */
-        public static final int common_android_wear_update_text=0x7f050016;
+        public static final int common_android_wear_update_text=0x7f060016;
         /**  Title of confirmation dialog informing user that they need to update
         the Android Wear app (from Play Store) [CHAR LIMIT=40] 
          */
-        public static final int common_android_wear_update_title=0x7f050014;
+        public static final int common_android_wear_update_title=0x7f060014;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
         can enable it [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_enable_button=0x7f050012;
+        public static final int common_google_play_services_enable_button=0x7f060012;
         /**  Message in confirmation dialog informing user they need to enable
         Google Play services in application settings [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_enable_text=0x7f050011;
+        public static final int common_google_play_services_enable_text=0x7f060011;
         /**  Title of confirmation dialog informing user they need to enable
         Google Play services in application settings [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_enable_title=0x7f050010;
+        public static final int common_google_play_services_enable_title=0x7f060010;
         /**   Requested by string saying which app requested the notification. [CHAR LIMIT=42] 
          */
-        public static final int common_google_play_services_error_notification_requested_by_msg=0x7f05000b;
+        public static final int common_google_play_services_error_notification_requested_by_msg=0x7f06000b;
         /**  Button in confirmation dialog for installing Google Play services [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_install_button=0x7f05000f;
+        public static final int common_google_play_services_install_button=0x7f06000f;
         /**  (For phones) Message in confirmation dialog informing user that
         they need to install Google Play services (from Play Store) [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_install_text_phone=0x7f05000d;
+        public static final int common_google_play_services_install_text_phone=0x7f06000d;
         /**  (For tablets) Message in confirmation dialog informing user that
         they need to install Google Play services (from Play Store) [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_install_text_tablet=0x7f05000e;
+        public static final int common_google_play_services_install_text_tablet=0x7f06000e;
         /**  Title of confirmation dialog informing user that they need to install
         Google Play services (from Play Store) [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_install_title=0x7f05000c;
+        public static final int common_google_play_services_install_title=0x7f06000c;
         /**  Message in confirmation dialog informing the user that they provided an invalid account. [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_invalid_account_text=0x7f05001a;
+        public static final int common_google_play_services_invalid_account_text=0x7f06001a;
         /**  Title of confirmation dialog informing the user that they provided an invalid account. [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_invalid_account_title=0x7f050019;
+        public static final int common_google_play_services_invalid_account_title=0x7f060019;
         /**   Title for notification shown when GooglePlayServices needs to be enabled for an
         application to work. [CHAR LIMIT=70] 
          */
-        public static final int common_google_play_services_needs_enabling_title=0x7f05000a;
+        public static final int common_google_play_services_needs_enabling_title=0x7f06000a;
         /**  Message in confirmation dialog informing the user that a network error occurred. [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_network_error_text=0x7f050018;
+        public static final int common_google_play_services_network_error_text=0x7f060018;
         /**  Title of confirmation dialog informing the user that a network error occurred. [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_network_error_title=0x7f050017;
+        public static final int common_google_play_services_network_error_title=0x7f060017;
         /**   Title for notification shown when GooglePlayServices needs to be installed
         for an application to work. [CHAR LIMIT=70] 
          */
-        public static final int common_google_play_services_notification_needs_installation_title=0x7f050007;
+        public static final int common_google_play_services_notification_needs_installation_title=0x7f060007;
         /**   Title for notification shown when GooglePlayServices needs to be updated for an
         application to work. [CHAR LIMIT=70] 
          */
-        public static final int common_google_play_services_notification_needs_update_title=0x7f050008;
+        public static final int common_google_play_services_notification_needs_update_title=0x7f060008;
         /**   Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=42] 
          */
-        public static final int common_google_play_services_notification_ticker=0x7f050006;
+        public static final int common_google_play_services_notification_ticker=0x7f060006;
         /**  Message in confirmation dialog informing user there is an unknown issue in Google Play
         services [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_unknown_issue=0x7f05001b;
+        public static final int common_google_play_services_unknown_issue=0x7f06001b;
         /**  Message in confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_unsupported_text=0x7f05001d;
+        public static final int common_google_play_services_unsupported_text=0x7f06001d;
         /**  Title of confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_unsupported_title=0x7f05001c;
+        public static final int common_google_play_services_unsupported_title=0x7f06001c;
         /**  Button in confirmation dialog for updating Google Play services [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_update_button=0x7f05001e;
+        public static final int common_google_play_services_update_button=0x7f06001e;
         /**  Message in confirmation dialog informing user that they need to update
         Google Play services (from Play Store) [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_update_text=0x7f050015;
+        public static final int common_google_play_services_update_text=0x7f060015;
         /**  Title of confirmation dialog informing user that they need to update
         Google Play services (from Play Store) [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_update_title=0x7f050013;
+        public static final int common_google_play_services_update_title=0x7f060013;
         /**  Label for an action to open a notifications content on the phone [CHAR LIMIT=25] 
          */
-        public static final int common_open_on_phone=0x7f050021;
+        public static final int common_open_on_phone=0x7f060021;
         /**  Sign-in button text [CHAR LIMIT=15] 
          */
-        public static final int common_signin_button_text=0x7f05001f;
+        public static final int common_signin_button_text=0x7f06001f;
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
-        public static final int common_signin_button_text_long=0x7f050020;
-        public static final int content_description=0x7f050024;
-        public static final int create_calendar_message=0x7f050005;
-        public static final int create_calendar_title=0x7f050004;
-        public static final int decline=0x7f050003;
-        public static final int edit_mode_enter=0x7f05002e;
-        public static final int edit_mode_exit=0x7f05002f;
-        public static final int hello_world=0x7f05002c;
-        public static final int pause=0x7f050026;
-        public static final int play=0x7f050025;
-        public static final int progress=0x7f05002a;
-        public static final int store_picture_message=0x7f050001;
-        public static final int store_picture_title=0x7f050000;
-        public static final int tab1=0x7f050030;
-        public static final int tab2=0x7f050031;
-        public static final int tab3=0x7f050032;
-        public static final int title=0x7f050028;
-        public static final int title_activity_change_audiobook_dialog=0x7f050033;
-        public static final int title_activity_main=0x7f050034;
-        public static final int track=0x7f050029;
+        public static final int common_signin_button_text_long=0x7f060020;
+        public static final int content_description=0x7f060024;
+        public static final int create_calendar_message=0x7f060005;
+        public static final int create_calendar_title=0x7f060004;
+        public static final int decline=0x7f060003;
+        public static final int edit_mode_enter=0x7f06002e;
+        public static final int edit_mode_exit=0x7f06002f;
+        public static final int hello_world=0x7f06002c;
+        public static final int pause=0x7f060026;
+        public static final int play=0x7f060025;
+        public static final int progress=0x7f06002a;
+        public static final int store_picture_message=0x7f060001;
+        public static final int store_picture_title=0x7f060000;
+        public static final int tab1=0x7f060030;
+        public static final int tab2=0x7f060031;
+        public static final int tab3=0x7f060032;
+        public static final int title=0x7f060028;
+        public static final int title_activity_change_audiobook_dialog=0x7f060033;
+        public static final int title_activity_main=0x7f060034;
+        public static final int track=0x7f060029;
         /**  Text on a placeholder buy button when Google Play services is not
          available or up-to-date 
          */
-        public static final int wallet_buy_button_place_holder=0x7f050022;
+        public static final int wallet_buy_button_place_holder=0x7f060022;
     }
     public static final class style {
         /** 
@@ -1024,20 +1032,20 @@ containing a value of this type.
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f040005;
+        public static final int AppBaseTheme=0x7f050005;
         /**  Application theme. 
          */
-        public static final int AppTheme=0x7f040006;
-        public static final int Theme_IAPTheme=0x7f040000;
-        public static final int WalletFragmentDefaultButtonTextAppearance=0x7f040003;
-        public static final int WalletFragmentDefaultDetailsHeaderTextAppearance=0x7f040002;
-        public static final int WalletFragmentDefaultDetailsTextAppearance=0x7f040001;
+        public static final int AppTheme=0x7f050006;
+        public static final int Theme_IAPTheme=0x7f050000;
+        public static final int WalletFragmentDefaultButtonTextAppearance=0x7f050003;
+        public static final int WalletFragmentDefaultDetailsHeaderTextAppearance=0x7f050002;
+        public static final int WalletFragmentDefaultDetailsTextAppearance=0x7f050001;
         /** 
          Default style of the wallet fragment that will be used if not set explicitly
          when fragment is created
     
          */
-        public static final int WalletFragmentDefaultStyle=0x7f040004;
+        public static final int WalletFragmentDefaultStyle=0x7f050004;
     }
     public static final class styleable {
         /** Attributes that can be used with a AdsAttrs.

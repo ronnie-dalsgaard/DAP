@@ -44,12 +44,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.AnalogClock;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
-import android.widget.Space;
 import android.widget.TextView;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, ServiceConnection, PlayerService.PlayerObserver {
@@ -75,7 +77,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.controller);
-		
+
+
 //*******************************// BETA //*****************************************//
 		final boolean BETA = false;
 		TextView beta = (TextView) findViewById(R.id.controller_beta);
@@ -92,7 +95,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			}
 		}
 //*********************************************************************************//
-		
+
 		base = (RelativeLayout) findViewById(R.id.controller_base);
 
 		//No cover
@@ -151,7 +154,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 		ImageButton btn_forward = (ImageButton) findViewById(R.id.seeker_btn_forward);
 		btn_forward.setOnClickListener(this);
-		
+
 		ImageButton btn_rewind = (ImageButton) findViewById(R.id.seeker_btn_rewind);
 		btn_rewind.setOnClickListener(this);
 
@@ -161,59 +164,65 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		if(monitor != null) monitor.kill();
 		monitor = new displayMonitor(this);
 		monitor.start();
+		
+		//Sleep timer
+//		AnalogClock clock = (AnalogClock) findViewById(R.id.analogClock);
+//		ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
+				
+				
 
 		//Load Audiobooks and Bookmarks
-			final Dialog dialog = new Dialog(this);
-			dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-			LayoutInflater inflater = LayoutInflater.from(this);
-			View dv = inflater.inflate(R.layout.loading, base, false);
-			dialog.setContentView(dv);
-			dialog.show();
+		final Dialog dialog = new Dialog(this);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View dv = inflater.inflate(R.layout.loading, base, false);
+		dialog.setContentView(dv);
+		dialog.show();
 
-			new AsyncTask<Void, Void, Void>(){
-				@Override
-				protected Void doInBackground(Void... params) {
-					AudiobookManager.getInstance().loadAudiobooks(MainActivity.this);
-					BookmarkManager.getInstance().loadBookmarks(MainActivity.this.getFilesDir()); 
-					return null;
-				}
-				@Override 
-				protected void onPostExecute(Void obj){
-					Log.d(TAG, "onPostExecute - audiobooks loaded");
+		new AsyncTask<Void, Void, Void>(){
+			@Override
+			protected Void doInBackground(Void... params) {
+				AudiobookManager.getInstance().loadAudiobooks(MainActivity.this);
+				BookmarkManager.getInstance().loadBookmarks(MainActivity.this.getFilesDir()); 
+				return null;
+			}
+			@Override 
+			protected void onPostExecute(Void obj){
+				Log.d(TAG, "onPostExecute - audiobooks loaded");
 
-					runOnUiThread(new Runnable() {
-						
-						@Override 
-						public void run() {
-							if(BookmarkManager.getInstance().getBookmarks().isEmpty()){
-								System.out.println("MainActivity AsyncTask - NO BOOKMARKS");
-								return;
-							}
-							//At this point at least one bookmark exists
-							SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-							String author = pref.getString("author", null);
-							String album = pref.getString("album", null);
-							Bookmark bookmark = BookmarkManager.getInstance().getBookmark(author, album);
-							
-							if(bookmark == null){
-								bookmark = BookmarkManager.getInstance().getBookmarks().get(0);
-								pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
-							}
+				runOnUiThread(new Runnable() {
 
-							if(player != null && player.getAudiobook() == null) {
-								Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-								if(audiobook != null) {
-									player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-								}
-							}
+					@Override 
+					public void run() {
+						if(BookmarkManager.getInstance().getBookmarks().isEmpty()){
+							System.out.println("MainActivity AsyncTask - NO BOOKMARKS");
+							return;
+						}
+						//At this point at least one bookmark exists
+						SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+						String author = pref.getString("author", null);
+						String album = pref.getString("album", null);
+						Bookmark bookmark = BookmarkManager.getInstance().getBookmark(author, album);
 
-							displayBookmarks();
+						if(bookmark == null){
+							bookmark = BookmarkManager.getInstance().getBookmarks().get(0);
+							pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
 						}
 
-					});
-					dialog.dismiss();
-				}
-			}.execute();
+						if(player != null && player.getAudiobook() == null) {
+							Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+							if(audiobook != null) {
+								player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+							}
+						}
+
+						displayBookmarks();
+					}
+
+				});
+				dialog.dismiss();
+			}
+		}.execute();
 
 	}
 	@Override
@@ -469,7 +478,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				cell.setGravity(Gravity.CENTER);
 				cell.setText(String.format("%02d", i+1));
 				if(i == trackno){
-					cell.setBackground(getResources().getDrawable(R.drawable.circle));
+					cell.setBackgroundResource(R.drawable.circle);
+					//					cell.setBackground(getResources().getDrawable(R.drawable.circle));
 				}
 				cell.setId(TRACKNO);
 				cell.setTag(i); //Autoboxing
@@ -477,7 +487,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				row.addView(cell, p);
 			}
 			if(trackCount % COLUMNS > 0){
-				Space space = new Space(this);
+				//				Space space = new Space(this);
+				View space = new View(this);
 				int weight = COLUMNS - (trackCount % COLUMNS);
 				LinearLayout.LayoutParams space_p = new LinearLayout.LayoutParams(0, 75, weight);
 				row.addView(space, space_p);
@@ -554,10 +565,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		MenuItem item = menu.findItem(R.id.menu_item_countdown);
-		
+
 		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 		timer_delay = pref.getInt("timer_delay", Time.toMillis(15, TimeUnit.MINUTES));
-		
+
 		item.setTitle(Time.toString(timer_delay));
 		return true;
 	}
@@ -567,7 +578,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		case R.id.menu_item_timer: 
 			if(!timerOn){
 				MenuItem menuitem = menu.findItem(R.id.menu_item_countdown);
-				timer = new Timer(timer_delay, menuitem);
+				AnalogClock clock = (AnalogClock) findViewById(R.id.analogClock);
+				ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
+				ImageView sec_hand = (ImageView) findViewById(R.id.sec_hand);
+				timer = new Timer(timer_delay, menuitem, clock, min_hand, sec_hand);
 				timer.start();
 				timerOn = true;
 			} else {
@@ -583,16 +597,16 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			Intent intent = new Intent(this, AudiobooksActivity.class);
 			startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
 			break;
-			
+
 		case R.id.menu_item_import_export:
 			new Dialog_import_export(this).show();
 			break;
-						
+
 		}
-		
+
 		return true;
 	}
- 
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data){
 		Log.d(TAG, "onActivityResult");
@@ -602,10 +616,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		Bookmark bookmark = new Bookmark(audiobook.getAuthor(), audiobook.getAlbum(), 0, 0);
 		BookmarkManager.getInstance().createOrUpdateBookmark(getFilesDir(), bookmark, true);
 		displayBookmarks();
-		
+
 		player.set(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 	}
-	
+
 	public RelativeLayout getBase() { return this.base; }
 	public Menu getMenu() { return this.menu; }
 	public int getDelay() { return this.timer_delay; }
@@ -614,7 +628,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 		pref.edit().putInt("timer_delay", delay).commit();
 	}
-	
+
 	class displayMonitor extends Monitor {
 		private Activity activity;
 
@@ -645,33 +659,63 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		private long endTime;
 		private MenuItem item;
 		private String _delay;
+		private AnalogClock clock;
+		private ImageView min_hand;
+		private ImageView sec_hand;
 
-		public Timer(int delay, final MenuItem item) {
+
+		public Timer(final int delay, final MenuItem item, AnalogClock clock, ImageView min_hand, ImageView sec_hand) {
 			super(1, TimeUnit.SECONDS);
-
 			endTime = System.currentTimeMillis() + delay;
-
 			this.item = item;
+			this.clock = clock;
+			this.min_hand = min_hand;
+			this.sec_hand = sec_hand;
 			_delay = Time.toString(delay);
-			runOnUiThread(new Runnable() {
 
-				@Override
-				public void run() {
-					item.setTitle(_delay);
-				}
+			runOnUiThread(new Runnable() { 
+				@Override public void run() { 
+					item.setTitle(_delay); 
+				} 
 			});
+
+			double mins = Time.toUnits(delay, TimeUnit.MILLISECONDS, TimeUnit.MINUTES);
+			System.out.println("MINS..."+mins);
+			int min = (int)mins;
+			System.out.println("Min = "+ min);
+			int diffDegrees = (int)(min / 60.0 * 360.0);
+			System.out.println("Angle = "+ diffDegrees);
+			
+			int toDegrees = -90;
+			int fromDegrees = diffDegrees + toDegrees;
+			Animation min_hand_anim = new RotateAnimation(fromDegrees, toDegrees, 0, 1);
+			min_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
+			min_hand_anim.setDuration(delay+5);
+			
+			Animation sec_hand_anim = new RotateAnimation(269, -90, 0, 1);
+			sec_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
+			sec_hand_anim.setDuration(60000); //1 min.
+			sec_hand_anim.setRepeatCount(min);
+			sec_hand_anim.setRepeatMode(Animation.RESTART);
+						
+			sec_hand.startAnimation(sec_hand_anim);
+			min_hand.startAnimation(min_hand_anim);
+			
+			clock.setVisibility(View.VISIBLE);
+			min_hand.setVisibility(View.VISIBLE);
+			sec_hand.setVisibility(View.VISIBLE);
 		}
 
 		@Override
 		public void execute() {
 			final long timeleft = endTime - System.currentTimeMillis();
-			runOnUiThread(new Runnable() {
 
-				@Override
-				public void run() {
+			runOnUiThread(new Runnable() { 
+				@Override public void run() { 
 					item.setTitle(Time.toString(timeleft));
-				}
+				} 
 			});
+
 			if(timeleft <= 0){
 				player.pause();
 				kill();
@@ -685,6 +729,11 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				@Override
 				public void run() {
 					item.setTitle(_delay);
+					clock.setVisibility(View.GONE);
+					min_hand.setVisibility(View.GONE);
+					min_hand.clearAnimation();
+					sec_hand.setVisibility(View.GONE);
+					sec_hand.clearAnimation();
 				}
 			});
 			timerOn = false;

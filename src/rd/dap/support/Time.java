@@ -124,8 +124,20 @@ public class Time {
 		case DAYS: value *= 24;
 		case HOURS: value *= 60;
 		case MINUTES: value *= 60;
-		case SECONDS: return value * 1000;
+		case SECONDS: value *= 1000;
+		case MILLISECONDS: return value;
 		default: return -1;
+		}
+	}
+	public static double toUnits(int value, TimeUnit fromUnit, TimeUnit toUnit){
+		double millis = toMillis(value, fromUnit);
+		switch(toUnit){
+		case DAYS: return millis / DAY; 
+		case HOURS: return millis / HOUR;
+		case MINUTES: return millis / MIN;
+		case SECONDS: return millis / SEC; 
+		default: System.out.println("Bad toUnit"); 
+			throw new IllegalArgumentException("toUnit : "+toUnit);
 		}
 	}
 	public static int hoursPart(int millis){

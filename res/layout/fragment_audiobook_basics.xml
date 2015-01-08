@@ -3,6 +3,39 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
 
+    <AnalogClock
+        android:id="@+id/analogClock"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:hand_hour="@color/transparent"
+        android:hand_minute="@color/transparent"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/min_hand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="25dp"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/min_hand"
+        android:visibility="gone" />
+    
+    <ImageView
+        android:id="@+id/sec_hand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="25dp"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/sec_hand"
+        android:visibility="gone" />
+
     <ImageView
         android:id="@+id/audiobook_basics_cover_iv"
         android:layout_width="@dimen/cover_width_big"
@@ -11,19 +44,12 @@
         android:contentDescription="@string/content_description"
         android:src="@drawable/ic_action_help" />
 
-    <ImageButton
-        android:id="@+id/audiobook_basics_btn_cover"
-        android:layout_width="@dimen/cover_width_big"
-        android:layout_height="@dimen/cover_height_big"
-        android:background="@color/transparent"
-        android:contentDescription="@string/content_description" />
-
     <include
         android:id="@+id/audiobook_basics_divider"
         android:layout_width="1dp"
         android:layout_height="@dimen/cover_height_big"
-        layout="@layout/divider_vertical"
-        android:layout_toRightOf="@+id/audiobook_basics_cover_iv" />
+        android:layout_toRightOf="@+id/audiobook_basics_cover_iv"
+        layout="@layout/divider_vertical" />
 
     <LinearLayout
         android:id="@+id/audiobook_basics_info_layout"
@@ -52,5 +78,14 @@
             android:text="Album"
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/audiobook_basics_btn_cover"
+        android:layout_width="@dimen/cover_width_big"
+        android:layout_height="@dimen/cover_height_big"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/transparent"
+        android:contentDescription="@string/content_description" />
 
 </RelativeLayout>
