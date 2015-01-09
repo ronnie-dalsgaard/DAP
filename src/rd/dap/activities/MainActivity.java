@@ -1,5 +1,6 @@
 package rd.dap.activities;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -65,8 +66,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	private static final int BOOKMARK = 2222;
 	public static final String END = "/END";
 	private Menu menu;
-	private Timer timer;
-	private boolean timerOn = false;
+	private static Timer timer;
+	private static boolean timerOn = false;
 	private int timer_delay = Time.toMillis(15, TimeUnit.MINUTES);
 	private Monitor bookmark_monitor = null;
 	private LinearLayout bookmark_list;
@@ -76,6 +77,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.controller);
 
 
@@ -165,12 +167,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		monitor = new displayMonitor(this);
 		monitor.start();
 		
-		//Sleep timer
-//		AnalogClock clock = (AnalogClock) findViewById(R.id.analogClock);
-//		ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
-				
-				
-
 		//Load Audiobooks and Bookmarks
 		final Dialog dialog = new Dialog(this);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -224,6 +220,13 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			}
 		}.execute();
 
+		//Redraw sleep timer if active
+		if(timerOn){
+			AnalogClock clock = (AnalogClock) findViewById(R.id.analogClock);
+			ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
+			ImageView sec_hand = (ImageView) findViewById(R.id.sec_hand);
+			timer.setClock(clock, min_hand, sec_hand);
+		}
 	}
 	@Override
 	public void onStart(){
@@ -523,7 +526,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		if(bookmark_list == null) { System.out.println("no bookmark list!"); return; }
 		bookmark_list.removeAllViews();
 		LayoutInflater inflater = LayoutInflater.from(this);
-		for(Bookmark bookmark : BookmarkManager.getInstance().getBookmarks()){
+		ArrayList<Bookmark> bookmarks = BookmarkManager.getInstance().getBookmarks();
+		for(Bookmark bookmark : bookmarks){
 			View v = inflater.inflate(R.layout.bookmark_item, bookmark_list, false);
 			v.setId(BOOKMARK);
 			v.setTag(bookmark);
@@ -570,6 +574,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		timer_delay = pref.getInt("timer_delay", Time.toMillis(15, TimeUnit.MINUTES));
 
 		item.setTitle(Time.toString(timer_delay));
+		if(timerOn){
+			timer.setMenuItem(item);
+		}
+		
 		return true;
 	}
 	@Override
@@ -662,7 +670,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		private AnalogClock clock;
 		private ImageView min_hand;
 		private ImageView sec_hand;
-
+		private int timeleft;
 
 		public Timer(final int delay, final MenuItem item, AnalogClock clock, ImageView min_hand, ImageView sec_hand) {
 			super(1, TimeUnit.SECONDS);
@@ -672,6 +680,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			this.min_hand = min_hand;
 			this.sec_hand = sec_hand;
 			_delay = Time.toString(delay);
+			timeleft = delay;
 
 			runOnUiThread(new Runnable() { 
 				@Override public void run() { 
@@ -679,40 +688,25 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				} 
 			});
 
-			double mins = Time.toUnits(delay, TimeUnit.MILLISECONDS, TimeUnit.MINUTES);
-			System.out.println("MINS..."+mins);
-			int min = (int)mins;
-			System.out.println("Min = "+ min);
-			int diffDegrees = (int)(min / 60.0 * 360.0);
-			System.out.println("Angle = "+ diffDegrees);
-			
-			int toDegrees = -90;
-			int fromDegrees = diffDegrees + toDegrees;
-			Animation min_hand_anim = new RotateAnimation(fromDegrees, toDegrees, 0, 1);
-			min_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
-			min_hand_anim.setDuration(delay+5);
-			
-			Animation sec_hand_anim = new RotateAnimation(269, -90, 0, 1);
-			sec_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
-			sec_hand_anim.setDuration(60000); //1 min.
-			sec_hand_anim.setRepeatCount(min);
-			sec_hand_anim.setRepeatMode(Animation.RESTART);
-						
-			sec_hand.startAnimation(sec_hand_anim);
-			min_hand.startAnimation(min_hand_anim);
+			Animation min_hand_anim = createMin_hand_anim(delay);
+			Animation sec_hand_anim = createSec_hand_anim(delay);
 			
 			clock.setVisibility(View.VISIBLE);
 			min_hand.setVisibility(View.VISIBLE);
 			sec_hand.setVisibility(View.VISIBLE);
+			
+			sec_hand.startAnimation(sec_hand_anim);
+			min_hand.startAnimation(min_hand_anim);
 		}
 
 		@Override
 		public void execute() {
-			final long timeleft = endTime - System.currentTimeMillis();
+			timeleft = (int)(endTime - System.currentTimeMillis());
 
 			runOnUiThread(new Runnable() { 
 				@Override public void run() { 
 					item.setTitle(Time.toString(timeleft));
+					System.out.println("Timer says: Timeleft = "+Time.toString(timeleft));
 				} 
 			});
 
@@ -721,7 +715,23 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				kill();
 			}
 		}
-
+		public void setMenuItem(MenuItem item) { this.item = item; }
+		public void setClock(AnalogClock clock, ImageView min_hand, ImageView sec_hand){
+			this.clock = clock;
+			this.min_hand = min_hand;
+			this.sec_hand = sec_hand;
+			
+			Animation min_hand_anim = createMin_hand_anim(timeleft);
+			Animation sec_hand_anim = createSec_hand_anim(timeleft);
+			
+			clock.setVisibility(View.VISIBLE);
+			min_hand.setVisibility(View.VISIBLE);
+			sec_hand.setVisibility(View.VISIBLE);
+			
+			sec_hand.startAnimation(sec_hand_anim);
+			min_hand.startAnimation(min_hand_anim);
+		}
+		
 		@Override
 		public void kill(){
 			runOnUiThread(new Runnable() {
@@ -738,6 +748,32 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			});
 			timerOn = false;
 			super.kill();
+		}
+	
+		public int getTimeleft() { return timeleft; }
+		public Animation createMin_hand_anim(int delay){
+			double mins = Time.toUnits(delay, TimeUnit.MILLISECONDS, TimeUnit.MINUTES);
+			int min = (int)mins;
+			int diffDegrees = (int)(min / 60.0 * 360.0);
+			
+			int toDegrees = -90;
+			int fromDegrees = diffDegrees + toDegrees;
+			Animation min_hand_anim = new RotateAnimation(fromDegrees, toDegrees, 0, 1);
+			min_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
+			min_hand_anim.setDuration(delay+5);
+			return min_hand_anim;
+		}
+		public Animation createSec_hand_anim(int delay){
+			double d_sec = Time.toUnits(delay, TimeUnit.MILLISECONDS, TimeUnit.SECONDS);
+			int sec = (int)d_sec;
+			int diffDegrees = (int)(sec / 60.0 * 360.0);
+			
+			int toDegrees = -90;
+			int fromDegrees = diffDegrees + toDegrees;
+			Animation sec_hand_anim = new RotateAnimation(fromDegrees, toDegrees, 0, 1);
+			sec_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
+			sec_hand_anim.setDuration(delay+5);
+			return sec_hand_anim;
 		}
 	}
 	class BookmarkMonitor extends Monitor {

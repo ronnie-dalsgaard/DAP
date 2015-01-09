@@ -24,7 +24,11 @@ public class BookmarkManager{ //Singleton
 	public static BookmarkManager getInstance() { return instance; }
 	
 	//CRUD bookmarks
-	public ArrayList<Bookmark> getBookmarks() { return bookmarks; }
+	public ArrayList<Bookmark> getBookmarks() { 
+		ArrayList<Bookmark> defensiveCopy = new ArrayList<Bookmark>();
+		defensiveCopy.addAll(bookmarks);
+		return defensiveCopy;
+	}
 	public Bookmark createOrUpdateBookmark(File filesDir, Bookmark bookmark, boolean force){
 		String author = bookmark.getAuthor();
 		String album = bookmark.getAlbum();
