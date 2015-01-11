@@ -74,7 +74,10 @@ public class Dialog_import_export {
 					@Override public void onResult(String result) {
 						System.out.println("----- DOWNLOAD COMPLETE -----");
 						Log.d(TAG, "onClick - download: "+result);
-						if(result == null || result.isEmpty()) return;
+						if(result == null || result.isEmpty() || result.contains(NO_FILE)){
+							Toast.makeText(activity, "Bad result: \"" + result + "\"", Toast.LENGTH_LONG).show();
+							return;
+						}
 						BookmarkManager bm = BookmarkManager.getInstance();
 						AudiobookManager am = AudiobookManager.getInstance();
 						Gson gson = new Gson();
@@ -95,7 +98,6 @@ public class Dialog_import_export {
 							} else if(fetchedAudiobook != null){
 								System.out.println("No bookmark, but matching audiobook exists...");
 								Bookmark b = bm.createOrUpdateBookmark(activity.getFilesDir(), fetched, false);
-								System.out.println("### "+b);
 								changesHappened = true;
 							}
 						}

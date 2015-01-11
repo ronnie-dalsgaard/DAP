@@ -51,11 +51,13 @@ import android.widget.AnalogClock;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, ServiceConnection, PlayerService.PlayerObserver {
+public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, 
+ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookSelectedListener {
 	private static final String TAG = "MainActivity";
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private RelativeLayout base;
@@ -621,6 +623,9 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		if(data == null) return;
 		Audiobook audiobook = (Audiobook) data.getSerializableExtra("result");
 		if(audiobook == null) return;
+		selectAudiobook(audiobook);
+	}
+	private void selectAudiobook(Audiobook audiobook){
 		Bookmark bookmark = new Bookmark(audiobook.getAuthor(), audiobook.getAlbum(), 0, 0);
 		BookmarkManager.getInstance().createOrUpdateBookmark(getFilesDir(), bookmark, true);
 		displayBookmarks();
@@ -818,5 +823,9 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			go_again = player.isPlaying();
 		}
 
+	}
+	@Override
+	public void onAudiobookSelected(Audiobook audiobook) {
+		selectAudiobook(audiobook);
 	}
 }

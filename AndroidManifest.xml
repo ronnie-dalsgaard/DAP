@@ -29,7 +29,7 @@
             android:name=".fragments.BookmarkListFragment"
             android:label="@string/app_name" />
         <activity
-            android:name="rd.dap.activities.AudiobooksActivity"
+            android:name=".activities.AudiobooksActivity"
             android:label="@string/app_name" />
         <activity
             android:name=".fragments.ControllerFragment"
