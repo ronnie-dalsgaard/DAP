@@ -26,6 +26,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	private long laststart = 0;
 	private Audiobook audiobook;
 	private int trackno;
+	private PhoneStateListener phoneStateListener;
 
 	//Observer pattern - Miniplayer is observable
 	private ArrayList<PlayerObserver> observers = new ArrayList<PlayerObserver>();
@@ -44,7 +45,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	@Override
 	public void onCreate(){
 		Log.d(TAG, "onCreate");
-		PhoneStateListener phoneStateListener = new PhoneStateListener() {
+		phoneStateListener = new PhoneStateListener() {
 		    @Override
 		    public void onCallStateChanged(int state, String incomingNumber) {
 		    	boolean wasPlaying = false;
@@ -69,6 +70,10 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	public void onDestroy(){
 		Log.d(TAG, "onDestroy");
 		super.onDestroy();
+		TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		if(mgr != null) {
+		    mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+		}
 		kill();
 	}
 
