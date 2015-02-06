@@ -4,8 +4,6 @@ import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
 
-
-
 public abstract class Monitor extends Thread {
 	private static final String TAG = "Monitor";
 	public static final int DEFAULT_DELAY = 1000;
@@ -24,8 +22,9 @@ public abstract class Monitor extends Thread {
 		case MINUTES: this.delay = delay * MIN; break;
 		case HOURS: this.delay = delay * HOUR; break;
 		case DAYS: this.delay = delay * DAY; break;
-		case MICROSECONDS: //fall through
-		case NANOSECONDS: this.delay = DEFAULT_DELAY;
+//		case MICROSECONDS: //fall through
+//		case NANOSECONDS: 
+		default: this.delay = DEFAULT_DELAY;
 		}
 	}
 

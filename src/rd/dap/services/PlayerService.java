@@ -15,6 +15,8 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class PlayerService extends Service implements OnErrorListener, OnCompletionListener {
@@ -42,6 +44,26 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 	@Override
 	public void onCreate(){
 		Log.d(TAG, "onCreate");
+		PhoneStateListener phoneStateListener = new PhoneStateListener() {
+		    @Override
+		    public void onCallStateChanged(int state, String incomingNumber) {
+		    	boolean wasPlaying = false;
+		    	switch(state){
+		    	case TelephonyManager.CALL_STATE_RINGING: 
+		            PlayerService.this.pause();
+		            wasPlaying = true;
+		    		break;
+		    	case TelephonyManager.CALL_STATE_IDLE:
+		    		if(wasPlaying) PlayerService.this.play();
+		    		break;
+		        }
+		        super.onCallStateChanged(state, incomingNumber);
+		    }
+		};
+		TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		if(mgr != null) {
+		    mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+		}
 	}
 	@Override
 	public void onDestroy(){

@@ -132,7 +132,9 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 
 			@Override
 			public void onResult(DriveContentsResult result) {
+				System.out.println("Status: "+result.getStatus().toString());
 				DriveContents contents = result.getDriveContents();
+				if(contents == null)System.out.println("---------- Contents is null ---------");
 
 				//Input
 				InputStream stream = contents.getInputStream();
@@ -362,13 +364,8 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 	
 	public void connect() {
 		int playServiceAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-		System.out.println("------------- CONNECT ------------- " + playServiceAvailable);
-		System.out.println("Service missing = " +ConnectionResult.SERVICE_MISSING);
-		System.out.println("Update required = " + ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED);
-		System.out.println("Service disabled = " + ConnectionResult.SERVICE_DISABLED);
 		switch(playServiceAvailable){
 		case ConnectionResult.SUCCESS:
-			System.out.println("------------- SUCCESS -----------");
 			client = new GoogleApiClient.Builder(this)
 			.addApi(Drive.API)
 			.addScope(Drive.SCOPE_FILE)

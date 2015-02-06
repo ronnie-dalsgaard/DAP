@@ -51,7 +51,6 @@ import android.widget.AnalogClock;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -614,7 +613,7 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 
 		}
 
-		return true;
+		return false;
 	}
 
 	@Override
