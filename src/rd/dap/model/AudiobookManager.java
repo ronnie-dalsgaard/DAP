@@ -11,7 +11,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import rd.dap.support.AlbumFolderFilter;
 import rd.dap.support.Mp3FileFilter;
@@ -195,11 +198,26 @@ public final class AudiobookManager{
 	}
 	
 	//Auto-detect
-	public Audiobook autoCreateAudiobook(File album_folder, boolean incl_subfolders){
+	public Audiobook autoCreateAudiobook(File album_folder, File home_folder,  boolean incl_subfolders){
 		Audiobook audiobook = new Audiobook();
-		audiobook.setAuthor(album_folder.getParentFile().getName());
-		audiobook.setAlbum(album_folder.getName());
-
+		
+		File folder = album_folder;
+		LinkedList<String> tokens = new LinkedList<String>();
+		while(!folder.getAbsolutePath().equalsIgnoreCase(home_folder.getAbsolutePath())){
+			tokens.addFirst(folder.getName());
+			folder = folder.getParentFile();
+		}
+		String _author = tokens.removeFirst();
+		if(tokens.size() > 1){
+			String _series = tokens.getFirst();
+			audiobook.setSeries(_series);
+		}
+		String _album = tokens.removeFirst();
+		while(!tokens.isEmpty()) { _album += " " + tokens.removeFirst(); }
+		
+		audiobook.setAuthor(_author);
+		audiobook.setAlbum(_album);
+		
 		String cover = null;
 		for(File file : album_folder.listFiles()){
 			if("albumart.jpg".equalsIgnoreCase(file.getName())){
@@ -240,9 +258,10 @@ public final class AudiobookManager{
 
 		ArrayList<File> album_folders = collectFiles(new ArrayList<File>(), folder, new AlbumFolderFilter());
 		for(File album_folder : album_folders){
-			Audiobook audiobook = autoCreateAudiobook(album_folder, true);
+			Audiobook audiobook = autoCreateAudiobook(album_folder, folder, true);
 			list.add(audiobook);
-		}		
+		}
+		
 		return list;
 	}
 	private ArrayList<File> collectFiles(ArrayList<File> list, File folder, FileFilter filter){

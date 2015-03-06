@@ -6,7 +6,8 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
-import rd.dap.dialogs.Dialog_delete_bookmark;
+import rd.dap.activities.AudiobooksFragment.OnAudiobookSelectedListener;
+import rd.dap.dialogs.Dialog_bookmark_details;
 import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
 import rd.dap.dialogs.Dialog_timer;
@@ -28,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -41,22 +43,32 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AnalogClock;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, 
-ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookSelectedListener {
+		ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
+		OnAudiobookSelectedListener {
 	private static final String TAG = "MainActivity";
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private RelativeLayout base;
@@ -72,7 +84,8 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 	private int timer_delay = Time.toMillis(15, TimeUnit.MINUTES);
 	private Monitor bookmark_monitor = null;
 	private LinearLayout bookmark_list;
-
+	private boolean locked = true;
+	private SeekBar seeker;
 
 	//Activity + Bind to PlayerService
 	@Override
@@ -81,6 +94,14 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 		
 		setContentView(R.layout.controller);
 
+		TextView version_tv = (TextView) findViewById(R.id.version);
+		String versionName;
+		try {
+			versionName = this.getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+		} catch (NameNotFoundException e) { 
+			versionName = "Unknown";
+		}
+		if(version_tv != null) version_tv.setText(versionName);
 
 //*******************************// BETA //*****************************************//
 		final boolean BETA = false;
@@ -160,6 +181,10 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 
 		ImageButton btn_rewind = (ImageButton) findViewById(R.id.seeker_btn_rewind);
 		btn_rewind.setOnClickListener(this);
+		
+		seeker = (SeekBar) findViewById(R.id.seeker_progress_seeker);
+		seeker.setEnabled(!locked);
+		seeker.setOnSeekBarChangeListener(this);
 
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
@@ -280,7 +305,6 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 	public void onClick(View v) {
 		//reused variables
 		int currentProgress, progress;
-		Audiobook audiobook;
 
 		switch(v.getId()){
 		case R.id.audiobook_basics_btn_cover: 
@@ -288,14 +312,17 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 			player.toggle();
 			break;
 		case R.id.track_btn_next:
+			if(locked) break;
 			if(player == null) break;
 			player.next();
 			break;
 		case R.id.track_btn_previous: 
+			if(locked) break;
 			if(player == null) break;
 			player.prev();
 			break;
 		case R.id.seeker_btn_forward: 
+			if(locked) break;
 			if(player == null) break;
 			currentProgress = player.getCurrentProgress();
 			progress = currentProgress + Time.toMillis(1, TimeUnit.MINUTES);
@@ -303,21 +330,23 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 			player.seekTo(Math.min(progress, duration));
 			break;
 		case R.id.seeker_btn_rewind: 
+			if(locked) break;
 			if(player == null) break;
 			currentProgress = player.getCurrentProgress();
 			progress = currentProgress - Time.toMillis(1, TimeUnit.MINUTES);
 			player.seekTo(Math.max(progress, 0));
 			break;
 		case TRACKNO:
+			if(locked) break;
 			if(player == null) break;
-			audiobook = player.getAudiobook();
+			Audiobook currentAudiobook = player.getAudiobook();
 			int trackno = (int) v.getTag();
-			player.set(audiobook, trackno, 0);
+			player.set(currentAudiobook, trackno, 0);
 			break;
 		case BOOKMARK:
 			Bookmark bookmark = (Bookmark) v.getTag();
 			if(bookmark == null) break;
-			audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+			Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
 			if(audiobook == null) break;
 			if(player == null) break;
 			if(!audiobook.equals(player.getAudiobook())) {
@@ -334,11 +363,20 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 		case BOOKMARK:
 			Bookmark bookmark = (Bookmark) v.getTag();
 			if(bookmark == null) break;
-			new Dialog_delete_bookmark(this, bookmark).show();
+			new Dialog_bookmark_details(this, bookmark).show();
 		}
 		return true;
 	}
-
+	@Override 
+	public void onStopTrackingTouch(SeekBar seekBar) { } //Never used
+	@Override 
+	public void onStartTrackingTouch(SeekBar seekBar) { } //Never used
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		if(locked) return;
+		if(fromUser) player.seekTo(progress);
+	}
+	
 	//Callbacks from PlayerService
 	@Override
 	public void set(final Audiobook audiobook, final int trackno, final int progress){
@@ -456,7 +494,7 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 			if(tracks_gv != null) tracks_gv.removeAllViews();
 			return;
 		}
-
+		
 		//Title
 		String _trackno = String.format(Locale.US, "%02d", trackno+1);
 		if(title_tv != null) title_tv.setText(_trackno + " " + track.getTitle());
@@ -502,16 +540,19 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 	private void displayTime(Track track){
 		//Progress
 		TextView progress_tv = (TextView) findViewById(R.id.seeker_progress_tv);
-
+		SeekBar seeker = (SeekBar) findViewById(R.id.seeker_progress_seeker);
+		
 		if(player == null) {
-			progress_tv.setText(Time.toString(0));			
+			progress_tv.setText(Time.toString(0));
+			seeker.setProgress(0);
 		} else {
 			int progress = player.getCurrentProgress();
 			String _progress = Time.toString(progress);
-			long duration = track.getDuration();
+			int duration = track.getDuration();
 			String _duration = Time.toString(duration);
-			if(duration > 0) _progress += " / " + _duration;
-			progress_tv.setText(_progress);
+			progress_tv.setText(_progress + " / " + _duration);
+			seeker.setMax(duration);
+			seeker.setProgress(progress);
 		}
 	}
 	private void displayPlayButton(){
@@ -827,4 +868,137 @@ ServiceConnection, PlayerService.PlayerObserver, AudiobooksFragment.OnAudiobookS
 	public void onAudiobookSelected(Audiobook audiobook) {
 		selectAudiobook(audiobook);
 	}
+	
+	
+	private float x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent event){
+		final int MIN_DIST = 200;
+		final ImageView lock_iv = (ImageView) findViewById(R.id.controller_lock);
+		switch(event.getAction()){
+		case MotionEvent.ACTION_DOWN:
+			x1 = event.getX(); 
+			y1 = event.getY();
+			break;
+		case MotionEvent.ACTION_UP:
+			if(x1 == 0 || y1 == 0) break;
+			x2 = event.getX();
+			y2 = event.getY();
+			if(Math.abs(x2 - x1) < MIN_DIST) break;
+			if(Math.abs(y2 - y1) > MIN_DIST) break;
+			if(x2 > x1){
+				locked = true;
+				
+				Animation translate = new TranslateAnimation(-150, 0, 0, 0); 
+				translate.setInterpolator(MainActivity.this, android.R.anim.bounce_interpolator);
+				
+				Animation fade = new AlphaAnimation(0, 1);
+				fade.setInterpolator(MainActivity.this, android.R.anim.decelerate_interpolator);
+				
+				AnimationSet set = new AnimationSet(false);
+				set.addAnimation(translate);
+				set.addAnimation(fade);
+				set.setDuration(1000);
+				set.setAnimationListener(new AnimationListener() {
+					@Override public void onAnimationStart(Animation animation) {
+						lock_iv.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_secure));						
+					}
+					@Override public void onAnimationRepeat(Animation animation) { }
+					@Override public void onAnimationEnd(Animation animation) { }
+				});
+				lock_iv.startAnimation(set);
+			} else {
+				locked = false;
+				
+				Animation translate = new TranslateAnimation(0, -150, 0, 0); 
+				translate.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
+
+				Animation fade = new AlphaAnimation(1, 0);
+				fade.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
+				
+				AnimationSet set = new AnimationSet(false);
+				set.addAnimation(translate);
+				set.addAnimation(fade);
+				set.setDuration(600);
+				set.setAnimationListener(new AnimationListener() {
+					@Override public void onAnimationStart(Animation animation) { }
+					@Override public void onAnimationRepeat(Animation animation) { }
+					@Override public void onAnimationEnd(Animation animation) {
+						lock_iv.setImageDrawable(null);
+					}
+				});
+				lock_iv.startAnimation(set);
+			}
+		}
+		seeker.setEnabled(!locked);
+		super.dispatchTouchEvent(event);
+		super.onTouchEvent(event);
+		return false;
+	}
+//	@Override
+//	public boolean onTouch(View v, MotionEvent event) {
+//		Toast.makeText(this, "Touch", Toast.LENGTH_SHORT).show();
+//		final int MIN_DIST = 200;
+//		final ImageView lock_iv = (ImageView) findViewById(R.id.controller_lock);
+//		switch(event.getAction()){
+//		case MotionEvent.ACTION_DOWN:
+//			x1 = event.getX(); 
+//			y1 = event.getY();
+//			break;
+//		case MotionEvent.ACTION_UP:
+//			if(x1 == 0 || y1 == 0) break;
+//			x2 = event.getX();
+//			y2 = event.getY();
+//			if(Math.abs(x2 - x1) < MIN_DIST) break;
+//			if(Math.abs(y2 - y1) > MIN_DIST) break;
+//			if(x2 > x1){
+//				locked = true;
+//				
+//				Animation translate = new TranslateAnimation(-150, 0, 0, 0); 
+//				translate.setInterpolator(MainActivity.this, android.R.anim.bounce_interpolator);
+//				
+//				Animation fade = new AlphaAnimation(0, 1);
+//				fade.setInterpolator(MainActivity.this, android.R.anim.decelerate_interpolator);
+//				
+//				AnimationSet set = new AnimationSet(false);
+//				set.addAnimation(translate);
+//				set.addAnimation(fade);
+//				set.setDuration(1000);
+//				set.setAnimationListener(new AnimationListener() {
+//					@Override public void onAnimationStart(Animation animation) {
+//						lock_iv.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_secure));						
+//					}
+//					@Override public void onAnimationRepeat(Animation animation) { }
+//					@Override public void onAnimationEnd(Animation animation) { }
+//				});
+//				lock_iv.startAnimation(set);
+//			} else {
+//				locked = false;
+//				
+//				Animation translate = new TranslateAnimation(0, -150, 0, 0); 
+//				translate.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
+//
+//				Animation fade = new AlphaAnimation(1, 0);
+//				fade.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
+//				
+//				AnimationSet set = new AnimationSet(false);
+//				set.addAnimation(translate);
+//				set.addAnimation(fade);
+//				set.setDuration(600);
+//				set.setAnimationListener(new AnimationListener() {
+//					@Override public void onAnimationStart(Animation animation) { }
+//					@Override public void onAnimationRepeat(Animation animation) { }
+//					@Override public void onAnimationEnd(Animation animation) {
+//						lock_iv.setImageDrawable(null);
+//					}
+//				});
+//				lock_iv.startAnimation(set);
+//			}
+//			SeekBar seeker = (SeekBar) findViewById(R.id.seeker_progress_seeker);
+//			seeker.setEnabled(!locked);
+//		}
+//		v.performClick();
+//		super.onTouchEvent(event)
+//		return false;
+//	}
 }

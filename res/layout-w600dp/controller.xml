@@ -78,4 +78,13 @@
         android:layout_height="match_parent"
         android:layout_toRightOf="@+id/controller_scroller"/>
 
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:textColor="#80808080"
+        android:text="?android:attr/versionCode" />
+    
 </RelativeLayout>

@@ -16,17 +16,35 @@
         android:contentDescription="@string/content_description"
         android:src="@drawable/ic_action_rewind" />
 
-    <TextView
-        android:id="@+id/seeker_progress_tv"
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="4"
-        android:gravity="center"
-        android:maxLines="2"
-        android:paddingLeft="@dimen/margin_small"
-        android:text="00:00"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_weight="4" >
 
+        <TextView
+            android:id="@+id/seeker_progress_tv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:maxLines="2"
+            android:paddingLeft="@dimen/margin_small"
+            android:text="@string/_progress"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+        
+        <SeekBar
+            android:id="@+id/seeker_progress_seeker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="false"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="80"
+            android:progressDrawable="@color/transparent"
+            android:maxHeight="100dp"
+            android:thumb="@drawable/thumb" />
+
+    </FrameLayout>
+    
     <ImageButton
         android:id="@+id/seeker_btn_forward"
         style="?android:attr/buttonBarButtonStyle"

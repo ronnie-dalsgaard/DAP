@@ -5,7 +5,11 @@ import static rd.dap.activities.FileBrowserActivity.TYPE_FOLDER;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 import rd.dap.R;
 import rd.dap.model.Audiobook;
@@ -108,12 +112,15 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 		if(layout != null){
 			layout.removeAllViews();
 			HashSet<String> authors_set = new HashSet<String>();
-			for(Audiobook audiobook : AudiobookManager.getInstance().getAudiobooks()){
+			ArrayList<Audiobook> list = AudiobookManager.getInstance().getAudiobooks();
+			Collections.sort(list);
+			for(Audiobook audiobook : list){
 				authors_set.add(audiobook.getAuthor());
 			}
 			ArrayList<String> authors = new ArrayList<String>();
 			authors.addAll(authors_set);
 
+			Collections.sort(authors);
 
 			//LayoutParams
 			int width = LayoutParams.WRAP_CONTENT;
@@ -140,54 +147,114 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 				LinearLayout table = new LinearLayout(getActivity());
 				table.setOrientation(LinearLayout.VERTICAL);
 
-				ArrayList<Audiobook> books_by_author = new ArrayList<Audiobook>();
-
+				LinkedList<Audiobook> albums_by_author = new LinkedList<Audiobook>();
 				for(Audiobook audiobook : AudiobookManager.getInstance().getAudiobooks()){
 					if(author.equals(audiobook.getAuthor())){
-						books_by_author.add(audiobook);
+						albums_by_author.add(audiobook);
 					}
-				}		
-
-				LinearLayout row = null;
-
-				for(int i = 0; i < books_by_author.size(); i++){
-					Audiobook audiobook = books_by_author.get(i);
-
-					if(i % COLUMNS == 0){
-						row = new LinearLayout(getActivity());
-						row.setOrientation(LinearLayout.HORIZONTAL);
-						table.addView(row, row_params);
-					}
-
-					ImageView cover_iv = new ImageView(getActivity());
-					LinearLayout element = new LinearLayout(getActivity());
-					element.setGravity(Gravity.CENTER_HORIZONTAL);
-					element.setTag(audiobook);
-					element.setOnClickListener(this);
-					element.setOnLongClickListener(this);
-
-					if(audiobook.getCover() != null){
-						String cover = audiobook.getCover();
-						Bitmap bm = BitmapFactory.decodeFile(cover);
-						cover_iv.setImageBitmap(bm);
+				}
+				if(albums_by_author.isEmpty()) return; //Just a precaution
+				Collections.sort(albums_by_author);
+				
+				HashMap<String, LinkedList<Audiobook>> albummap = new HashMap<String, LinkedList<Audiobook>>();
+				for(Audiobook album : albums_by_author){
+					String series = album.getSeries();
+					if(series == null) series = "null";
+					LinkedList<Audiobook> serieslist;
+					if(!albummap.containsKey(series)){
+						serieslist = new LinkedList<Audiobook>();
+						albummap.put(series, serieslist);
 					} else {
-						Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);
-						cover_iv.setImageDrawable(drw);
+						serieslist = albummap.get(series);
 					}
-
-					element.addView(cover_iv, cover_params);
-					row.addView(element, element_params);
+					serieslist.addLast(album);
 				}
+				
+				Set<String> keyset = albummap.keySet();
+				ArrayList<String> keys = new ArrayList<String>();
+				for(String key : keyset) keys.add(key);
+				Collections.sort(keys);
+				for(String series : keys){
+					LinkedList<Audiobook> serieslist = albummap.get(series);
+					LinearLayout row = null;
+					int c = 0;
+					while(!serieslist.isEmpty()){
+						Audiobook audiobook = serieslist.removeFirst();
+						if(c == 0){
+							row = new LinearLayout(getActivity());
+							row.setOrientation(LinearLayout.HORIZONTAL);
+							table.addView(row, row_params);
+						}
+						//////////////////////////////
+						ImageView cover_iv = new ImageView(getActivity());
+						LinearLayout element = new LinearLayout(getActivity());
+						element.setGravity(Gravity.CENTER_HORIZONTAL);
+						element.setTag(audiobook);
+						element.setOnClickListener(this);
+						element.setOnLongClickListener(this);
 
-				int missing = COLUMNS - (books_by_author.size() % COLUMNS);
-				if(missing < COLUMNS){
-					for(int i = 0; i < missing; i++){
-						View dummy = new View(getActivity());
-						row.addView(dummy, element_params);
+						if(audiobook.getCover() != null){
+							String cover = audiobook.getCover();
+							Bitmap bm = BitmapFactory.decodeFile(cover);
+							cover_iv.setImageBitmap(bm);
+						} else {
+							Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);
+							cover_iv.setImageDrawable(drw);
+						}
+
+						element.addView(cover_iv, cover_params);
+						row.addView(element, element_params);
+						c++;
+						if(c == 3) c = 0;
+						//////////////////////////
 					}
+					
 				}
-
 				layout.addView(table, table_params);
+				
+///////////////////////////////////////////////////////////////////////////////////////////
+
+//				LinearLayout row = null;
+//
+//				for(int i = 0; i < albums_by_author.size(); i++){
+//					Audiobook audiobook = albums_by_author.get(i);
+//					
+//
+//					if(i % COLUMNS == 0){
+//						row = new LinearLayout(getActivity());
+//						row.setOrientation(LinearLayout.HORIZONTAL);
+//						table.addView(row, row_params);
+//					}
+//
+//					ImageView cover_iv = new ImageView(getActivity());
+//					LinearLayout element = new LinearLayout(getActivity());
+//					element.setGravity(Gravity.CENTER_HORIZONTAL);
+//					element.setTag(audiobook);
+//					element.setOnClickListener(this);
+//					element.setOnLongClickListener(this);
+//
+//					if(audiobook.getCover() != null){
+//						String cover = audiobook.getCover();
+//						Bitmap bm = BitmapFactory.decodeFile(cover);
+//						cover_iv.setImageBitmap(bm);
+//					} else {
+//						Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);
+//						cover_iv.setImageDrawable(drw);
+//					}
+//
+//					element.addView(cover_iv, cover_params);
+//					row.addView(element, element_params);
+//				}
+//
+//				int missing = COLUMNS - (albums_by_author.size() % COLUMNS);
+//				if(missing < COLUMNS){
+//					for(int i = 0; i < missing; i++){
+//						View dummy = new View(getActivity());
+//						row.addView(dummy, element_params);
+//					}
+//				}
+//
+//				layout.addView(table, table_params);
 			}
 		}
 	}
@@ -449,7 +516,8 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 			protected Void doInBackground(File... params) {
 				File folder = params[0];
 				AudiobookManager am = AudiobookManager.getInstance();
-				ArrayList<Audiobook> list = am.autodetect(folder);
+				ArrayList<Audiobook> list = new ArrayList<Audiobook>();
+				list.addAll(am.autodetect(folder));
 				am.addAllAudiobooks(getActivity(), list);
 				return null;
 			}

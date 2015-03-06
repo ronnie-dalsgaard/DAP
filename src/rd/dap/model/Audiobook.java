@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import rd.dap.support.TrackList;
 
-public class Audiobook implements Serializable{
+public class Audiobook implements Comparable<Audiobook>, Serializable{
 	private static final long serialVersionUID = 6956470301541977175L;
-	private String author, album;
+	private String author, album, series = "";
 	private String cover;
 	private TrackList playlist = new TrackList();
 	
@@ -28,13 +28,15 @@ public class Audiobook implements Serializable{
 	public void setAuthor(String author) { this.author = new String(author); }
 	public String getAlbum() { return new String(album); }
 	public void setAlbum(String album) { this.album = new String(album); }
+	public String getSeries() { return new String(series); }
+	public void setSeries(String series) { this.series = new String(series); }
 	public TrackList getPlaylist() { return new TrackList(playlist); }
 	public void setPlaylist(TrackList playlist) { this.playlist = new TrackList(playlist); }
 	public String getCover() { return cover == null ? null : new String(cover); }
 	public void setCover(String cover) { if(cover != null) this.cover = new String(cover); }
 	
 	public String toString(){
-		String out = author + " : " + album;
+		String out = author + " : " + album + (!series.isEmpty() ? "("+series+")" : "");
 		out += " Track count = " + playlist.size();
 		return out;
 	}
@@ -60,5 +62,13 @@ public class Audiobook implements Serializable{
 		} else if (!author.equals(other.author)) return false;
 		return true;
 	}
+	@Override
+	public int compareTo(Audiobook other) {
+		int p = this.getAuthor().compareTo(other.getAuthor());
+		if(p == 0) p = this.getSeries().compareTo(other.getSeries());
+		if(p == 0) p = this.getAlbum().compareTo(other.getAlbum());
+		return p;
+	}
+	
 	
 }
