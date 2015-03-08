@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    tools:ignore="HardcodedText" >
 
     <AnalogClock
         android:id="@+id/analogClock"
@@ -23,7 +25,7 @@
         android:contentDescription="@string/content_description"
         android:src="@drawable/min_hand"
         android:visibility="gone" />
-    
+
     <ImageView
         android:id="@+id/sec_hand"
         android:layout_width="wrap_content"
@@ -51,33 +53,77 @@
         android:layout_toRightOf="@+id/audiobook_basics_cover_iv"
         layout="@layout/divider_vertical" />
 
-    <LinearLayout
-        android:id="@+id/audiobook_basics_info_layout"
+    <FrameLayout
+        android:id="@+id/audiobook_basics_info"
         android:layout_width="match_parent"
         android:layout_height="@dimen/cover_height_big"
         android:layout_alignBottom="@+id/audiobook_basics_cover_iv"
-        android:layout_toRightOf="@+id/audiobook_basics_divider"
-        android:gravity="center_vertical"
-        android:orientation="vertical" >
+        android:layout_toRightOf="@+id/audiobook_basics_divider" >
 
-        <TextView
-            android:id="@+id/audiobook_basics_author_tv"
+        <LinearLayout
+            android:id="@+id/audiobook_basics_info_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/margin_small"
-            android:text="Author"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
 
-        <include layout="@layout/divider_horizontal" />
+            <TextView
+                android:id="@+id/audiobook_basics_author_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/margin_small"
+                android:text="Author"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <TextView
-            android:id="@+id/audiobook_basics_album_tv"
+            <include layout="@layout/divider_horizontal" />
+
+            <TextView
+                android:id="@+id/audiobook_basics_album_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/margin_small"
+                android:text="Album"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+
+        <FrameLayout
             android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:id="@+id/audiobook_timer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/dark_slate_blue"
+                android:orientation="vertical"
+                android:visibility="visible" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TIMER" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/timer_thumb_back_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|left"
+                android:layout_marginBottom="5dp"
+                android:contentDescription="@string/content_description"
+                android:src="@drawable/timer_thumb_back"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <ImageView
+            android:id="@+id/timer_thumb_iv"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/margin_small"
-            android:text="Album"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
+            android:layout_gravity="top|right"
+            android:layout_marginTop="5dp"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/timer_thumb" />
+    </FrameLayout>
 
     <ImageButton
         android:id="@+id/audiobook_basics_btn_cover"

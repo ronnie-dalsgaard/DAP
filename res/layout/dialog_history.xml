@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_base"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/miniplayer_bg" >
+
+    <TextView
+        android:id="@+id/dialog_title_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_big"
+        android:text="Title"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ImageButton
+        android:id="@+id/dialog_exit_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/margin_big"
+        android:background="@color/transparent"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_cancel" />
+
+    <include
+        android:id="@+id/dialog_divider1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/dialog_title_tv"
+        layout="@layout/divider_horizontal" />
+
+    <LinearLayout
+        android:id="@+id/dialog_history_layout"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_below="@+id/dialog_divider1"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@+id/dialog_history_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/dialog_divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/dialog_history_layout"
+        layout="@layout/divider_horizontal" />
+
+    <LinearLayout
+        android:id="@+id/dialog_button_bar"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_divider2"
+        android:divider="@drawable/vertical_divider" >
+
+        <Button
+            android:id="@+id/dialog_history_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Button"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</RelativeLayout>

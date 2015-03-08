@@ -3,6 +3,7 @@ package rd.dap.dialogs;
 import rd.dap.R;
 import rd.dap.activities.MainActivity;
 import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkEvent;
 import android.app.Dialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,17 +13,23 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class Dialog_bookmark_details {
 	private MainActivity activity;
 	private RelativeLayout base;
 	private Bookmark bookmark;
+	private Callback callback;
+	
+	public interface Callback {
+		public void onDeleteBookmark();
+		public void onItemSelected(BookmarkEvent event);
+	}
 
-	public Dialog_bookmark_details(MainActivity activity, Bookmark bookmark) {
+	public Dialog_bookmark_details(MainActivity activity, Bookmark bookmark, Callback callback) {
 		this.activity = activity;
 		this.base = activity.getBase();
 		this.bookmark = bookmark;
+		this.callback = callback;
 	}
 
 	public void show(){
@@ -57,7 +64,7 @@ public class Dialog_bookmark_details {
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
-				new Dialog_delete_bookmark(activity, bookmark).show();
+				callback.onDeleteBookmark();
 			}
 		});
 
@@ -69,8 +76,12 @@ public class Dialog_bookmark_details {
 			@Override
 			public void onClick(View arg0) {
 				dialog.dismiss();
-
-				Toast.makeText(activity, "View", Toast.LENGTH_SHORT).show();
+				new Dialog_bookmark_history(activity, bookmark, new Dialog_bookmark_history.Callback() {
+					@Override
+					public void onItemSelected(BookmarkEvent event) {
+						callback.onItemSelected(event); //Just pass it on up the chain.
+					}
+				}).show();
 			}
 		});
 

@@ -3,7 +3,6 @@ package rd.dap.dialogs;
 import rd.dap.R;
 import rd.dap.activities.MainActivity;
 import rd.dap.model.Bookmark;
-import rd.dap.model.BookmarkManager;
 import android.app.Dialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +17,17 @@ public class Dialog_delete_bookmark {
 	private MainActivity activity;
 	private RelativeLayout base;
 	private Bookmark bookmark;
+	private Callback callback;
 	
-	public Dialog_delete_bookmark(MainActivity activity, Bookmark bookmark) {
+	public interface Callback {
+		public void onDeleteBookmarkConfirmed();
+	}
+	
+	public Dialog_delete_bookmark(MainActivity activity, Bookmark bookmark, Callback callback) {
 		this.activity = activity;
 		this.base = activity.getBase();
 		this.bookmark = bookmark;
+		this.callback = callback;
 	}
 
 	public void show(){
@@ -68,11 +73,7 @@ public class Dialog_delete_bookmark {
 			@Override
 			public void onClick(View arg0) {
 				dialog.dismiss();
-
-				//Remove the bookmark
-				BookmarkManager.getInstance().removeBookmark(activity, bookmark);
-
-				activity.displayBookmarks();
+				callback.onDeleteBookmarkConfirmed();
 			}
 		});
 

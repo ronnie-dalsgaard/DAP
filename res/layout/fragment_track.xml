@@ -23,16 +23,33 @@
             android:contentDescription="@string/content_description"
             android:src="@drawable/ic_action_previous" />
 
-        <TextView
-            android:id="@+id/track_title"
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="4"
-            android:gravity="center"
-            android:maxLines="2"
-            android:paddingLeft="@dimen/margin_small"
-            android:text="Title"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_weight="4">
+
+            <TextView
+                android:id="@+id/track_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:maxLines="2"
+                android:paddingLeft="@dimen/margin_small"
+                android:text="Title"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <SeekBar
+                android:id="@+id/track_seeker"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="false"
+                android:indeterminate="false"
+                android:max="100"
+                android:maxHeight="100dp"
+                android:progress="30"
+                android:progressDrawable="@color/transparent"
+                android:thumb="@drawable/thumb" />
+        </FrameLayout>
 
         <ImageButton
             android:id="@+id/track_btn_next"

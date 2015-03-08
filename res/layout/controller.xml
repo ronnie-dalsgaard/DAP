@@ -43,11 +43,15 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
-            <include layout="@layout/divider_horizontal" />
+            <include
+                android:id="@+id/div_1" 
+                layout="@layout/divider_horizontal" />
 
             <include layout="@layout/fragment_audiobook_basics" />
 
-            <include layout="@layout/divider_horizontal" />
+            <include 
+                android:id="@+id/div_2"
+                layout="@layout/divider_horizontal" />
 
             <include layout="@layout/fragment_track" />
 

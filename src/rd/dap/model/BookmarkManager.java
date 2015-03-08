@@ -47,9 +47,7 @@ public class BookmarkManager{ //Singleton
 					bookmark.setTrackno(trackno);
 					bookmark.setProgress(progress);
 					break;
-				}
-				
-				if(trackno < bookmark.getTrackno()){
+				} else if(trackno < bookmark.getTrackno()){
 					break;
 				} else if(trackno > bookmark.getTrackno()){
 					bookmark.setTrackno(trackno);

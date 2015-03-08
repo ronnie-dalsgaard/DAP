@@ -1,17 +1,22 @@
 package rd.dap.model;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import rd.dap.support.Time;
 
 public class Bookmark implements Comparable<Bookmark>{
 	private String author, album;
 	private int trackno, progress;
 	// trackno is actually position (0-indexed)
+	private LinkedList<BookmarkEvent> events;
 
 	public Bookmark(String author, String album, int trackno, int progress) {
 		this.author = author;
 		this.album = album;
 		this.trackno = trackno;
 		this.progress = progress;
+		this.events = new LinkedList<BookmarkEvent>();
 	}
 
 	public final String getAuthor() { return new String(author); } //return defensive copy
@@ -25,6 +30,21 @@ public class Bookmark implements Comparable<Bookmark>{
 	public final void setTrackno(int trackno) { this.trackno = trackno; }
 	public final int getProgress() { return progress; }
 	public final void setProgress(int progress) { this.progress = progress; }
+	
+	public void addEvent(BookmarkEvent event) {
+		if(events == null) events = new LinkedList<BookmarkEvent>();
+		if(!events.isEmpty() && events.getFirst().getFunction().equals(event.getFunction())){
+			events.removeFirst();
+		}
+		events.addFirst(event);
+	}
+	public ArrayList<BookmarkEvent> getEvents() { 
+		ArrayList<BookmarkEvent> tmp = new ArrayList<>();
+		if(events == null || events.isEmpty()) return tmp;
+		for(BookmarkEvent event : events){ tmp.add(event); }
+		return tmp;
+	}
+	
 	
 	public boolean isSame(Bookmark bookmark){
 		return isSame(bookmark.author, bookmark.album);
