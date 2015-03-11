@@ -1,11 +1,15 @@
 package rd.dap.dialogs;
 
 import static rd.dap.activities.MainActivity.END;
+
+import java.util.LinkedList;
+
 import rd.dap.R;
 import rd.dap.activities.MainActivity;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkEvent;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Callback;
 import android.app.Dialog;
@@ -45,13 +49,13 @@ public class Dialog_import_export {
 		//Upload
 		ImageButton up_btn = (ImageButton) dv.findViewById(R.id.dialog_impexp_upload);
 		up_btn.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				Gson gson = new Gson();
 				String json = "";
 				for(Bookmark bookmark : BookmarkManager.getInstance().getBookmarks()){
-					json += gson.toJson(bookmark) + END + "\n";
+					String line = gson.toJson(bookmark) + END + "\n";
+					json += line;
 				}
 				Log.d(TAG, "onClick - upload: "+json);
 				activity.upload(json, new Callback<String>() {
@@ -67,7 +71,6 @@ public class Dialog_import_export {
 		//Download
 		ImageButton down_btn = (ImageButton) dv.findViewById(R.id.dialog_impexp_download);
 		down_btn.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				activity.download(new Callback<String>() { 
@@ -93,11 +96,15 @@ public class Dialog_import_export {
 								if(fetched.compareTo(exisisting) > 0){
 									exisisting.setTrackno(fetched.getTrackno());
 									exisisting.setProgress(fetched.getProgress());
+									LinkedList<BookmarkEvent> events = new LinkedList<BookmarkEvent>();
+									events.addAll(fetched.getEvents());
+									exisisting.setEvents(events);
+									exisisting.addEvent(new BookmarkEvent(BookmarkEvent.Function.DOWNLOAD, fetched.getTrackno(), fetched.getProgress()));
 									changesHappened = true;
 								}
 							} else if(fetchedAudiobook != null){
 								System.out.println("No bookmark, but matching audiobook exists...");
-								Bookmark b = bm.createOrUpdateBookmark(activity.getFilesDir(), fetched, false);
+								/* Bookmark b = */ bm.createOrUpdateBookmark(activity.getFilesDir(), fetched, false);
 								changesHappened = true;
 							}
 						}

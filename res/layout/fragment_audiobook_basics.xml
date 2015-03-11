@@ -108,8 +108,8 @@
                 android:id="@+id/timer_thumb_back_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|left"
-                android:layout_marginBottom="5dp"
+                android:layout_gravity="top|left"
+                android:layout_marginTop="5dp"
                 android:contentDescription="@string/content_description"
                 android:src="@drawable/timer_thumb_back"
                 android:visibility="gone" />
@@ -119,8 +119,8 @@
             android:id="@+id/timer_thumb_iv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|right"
-            android:layout_marginTop="5dp"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="5dp"
             android:contentDescription="@string/content_description"
             android:src="@drawable/timer_thumb" />
     </FrameLayout>

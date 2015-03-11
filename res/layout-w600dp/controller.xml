@@ -8,7 +8,7 @@
 
     <TextView
         android:id="@+id/controller_beta"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="BETA"
@@ -57,34 +57,64 @@
 
             <include layout="@layout/divider_horizontal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tracks:" />
-
-            <LinearLayout
-                android:id="@+id/controller_tracks_grid"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_height="wrap_content" >
+                
+                <ImageView
+                    android:id="@+id/controller_lock"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="right"
+                    android:contentDescription="@string/content_description"
+                    android:src="@drawable/ic_action_secure" />
 
-            <include layout="@layout/divider_horizontal" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tracks:" />
+                    
+                    <LinearLayout
+                        android:id="@+id/controller_tracks_grid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                    <include layout="@layout/divider_horizontal" />
+
+                </LinearLayout>
+            </FrameLayout>
         </LinearLayout>
     </ScrollView>
     
+    <include 
+        layout="@layout/divider_vertical"
+        android:id="@+id/divider_fragment"
+        android:layout_width="1dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginLeft="1dp"
+		android:layout_height="match_parent"
+        android:layout_toRightOf="@+id/controller_scroller" />
+    
     <fragment 
+        android:id="@+id/controller_audiobooks_fragment"
         android:name="rd.dap.activities.AudiobooksFragment"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@+id/controller_scroller"/>
+        android:layout_toRightOf="@+id/divider_fragment"/>
 
     <TextView
         android:id="@+id/version"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:textColor="#80808080"
-        android:text="?android:attr/versionCode" />
+        android:layout_alignRight="@+id/controller_audiobooks_fragment"
+        android:text="?android:attr/versionCode"
+        android:textColor="#80808080" />
     
 </RelativeLayout>

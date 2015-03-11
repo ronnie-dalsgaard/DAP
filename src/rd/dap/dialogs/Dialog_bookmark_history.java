@@ -128,6 +128,7 @@ public class Dialog_bookmark_history {
 		    	case SEEK_TRACK: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.seek_track)); break;
 		    	case SELECT: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.select_track)); break;
 				case UNDO: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_undo)); break;
+				case DOWNLOAD: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_download)); break;
 		    	}
 		    	holder.progress_tv.setText((event.getTrackno()+1) + " / " + Time.toString(event.getProgress()));
 		    	holder.timestamp_tv.setText("@ " + event.getTimestamp().toString(Time.TimeStamp.DAY_TIME));

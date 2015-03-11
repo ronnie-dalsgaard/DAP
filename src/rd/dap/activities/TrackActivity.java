@@ -11,19 +11,15 @@ import rd.dap.model.Track;
 import rd.dap.support.Time;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 public class TrackActivity extends Activity {
 	private Audiobook audiobook;
 	private int position;
 	private TextView position_tv, title_tv, duration_tv, file_tv;
-	private ImageView cover_iv; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

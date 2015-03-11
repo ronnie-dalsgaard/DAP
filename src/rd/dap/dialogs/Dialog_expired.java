@@ -15,7 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class Dialog_expired {
-	private static final String TAG = "Dialog_expired";
+//	private static final String TAG = "Dialog_expired";
 	private MainActivity activity;
 	private RelativeLayout base;
 

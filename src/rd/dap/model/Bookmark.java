@@ -30,7 +30,14 @@ public class Bookmark implements Comparable<Bookmark>{
 	public final void setTrackno(int trackno) { this.trackno = trackno; }
 	public final int getProgress() { return progress; }
 	public final void setProgress(int progress) { this.progress = progress; }
-	
+	public ArrayList<BookmarkEvent> getEvents() { 
+		ArrayList<BookmarkEvent> tmp = new ArrayList<>();
+		if(events == null || events.isEmpty()) return tmp;
+		for(BookmarkEvent event : events){ tmp.add(event); }
+		return tmp;
+	}
+	public void setEvents(LinkedList<BookmarkEvent> events) { this.events = events; }
+
 	public void addEvent(BookmarkEvent event) {
 		if(events == null) events = new LinkedList<BookmarkEvent>();
 		if(!events.isEmpty() && events.getFirst().getFunction().equals(event.getFunction())){
@@ -38,12 +45,7 @@ public class Bookmark implements Comparable<Bookmark>{
 		}
 		events.addFirst(event);
 	}
-	public ArrayList<BookmarkEvent> getEvents() { 
-		ArrayList<BookmarkEvent> tmp = new ArrayList<>();
-		if(events == null || events.isEmpty()) return tmp;
-		for(BookmarkEvent event : events){ tmp.add(event); }
-		return tmp;
-	}
+	
 	
 	
 	public boolean isSame(Bookmark bookmark){

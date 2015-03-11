@@ -235,7 +235,13 @@ public final class AudiobookManager{
 		}
 		
 		TrackList playlist = new TrackList();
-		//TODO sort by filename
+		Collections.sort(playlist, new Comparator<Track>() {
+			@Override
+			public int compare(Track lhs, Track rhs) {
+				return lhs.getPath().compareToIgnoreCase(rhs.getPath());
+			}
+		});
+		
 		for(File file : filelist){
 			Track track = new Track();
 			track.setPath(file.getAbsolutePath());

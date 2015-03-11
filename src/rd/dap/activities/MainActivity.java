@@ -55,6 +55,7 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.AnalogClock;
 import android.widget.ImageButton;
@@ -74,6 +75,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	private static final int TRACKNO = 1111;
 	private static final int BOOKMARK = 2222;
 	public static final String END = "/END";
+	public static final double ANIMATION_SPEED = 1.5;
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private RelativeLayout base;
 	private static Monitor monitor;
@@ -360,11 +362,11 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
 			if(audiobook == null) break;
 			if(player == null) break;
-			if(!audiobook.equals(player.getAudiobook())) {
+//			if(!audiobook.equals(player.getAudiobook())) {
 				player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 				pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
-			}
+//			}
 			break;
 		case R.id.timer_thumb_iv:
 			timer_panel.setVisibility(View.VISIBLE);
@@ -373,7 +375,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			float fromXDelta = timer_panel.getWidth(); 
 			if(fromXDelta < 1) fromXDelta = 500;
 			Animation show_timer = new TranslateAnimation(fromXDelta, 0, 0, 0);
-			show_timer.setDuration(250);
+			show_timer.setDuration((int)(250*ANIMATION_SPEED));
 			show_timer.setInterpolator(this, android.R.anim.linear_interpolator);
 			show_timer.setAnimationListener(new AnimationListener() {
 				@Override public void onAnimationStart(Animation animation) { }
@@ -381,7 +383,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				@Override public void onAnimationEnd(Animation animation) {
 					timer_thumb_back_iv.setVisibility(View.VISIBLE);
 					Animation show_back = new AlphaAnimation(0f, 1f);
-					show_back.setDuration(250);
+					show_back.setDuration((int)(250*ANIMATION_SPEED));
 					show_back.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
 					timer_thumb_back_iv.startAnimation(show_back);
 				}
@@ -403,7 +405,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 					timer_panel.setVisibility(View.GONE);
 					timer_thumb_iv.setVisibility(View.VISIBLE);
 					Animation show_thumb = new AlphaAnimation(0f, 1f);
-					show_thumb.setDuration(250);
+					show_thumb.setDuration((int)(250*ANIMATION_SPEED));
 					show_thumb.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
 					timer_thumb_iv.startAnimation(show_thumb);
 				}
@@ -967,16 +969,27 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				if(locked) break;
 				locked = true;
 
-				Animation translate = new TranslateAnimation(-350, 0, 0, 0); 
+				Animation translate = new TranslateAnimation(-125, 0, 0, 0); 
 				translate.setInterpolator(MainActivity.this, android.R.anim.bounce_interpolator);
+				translate.setDuration((int)(1000*ANIMATION_SPEED));
+				
+				Animation translatey = new TranslateAnimation(0, 0, 40, 0); 
+				translatey.setInterpolator(MainActivity.this, android.R.anim.decelerate_interpolator);
+				translatey.setDuration((int)(250*ANIMATION_SPEED));
 
 				Animation fade = new AlphaAnimation(0, 1);
 				fade.setInterpolator(MainActivity.this, android.R.anim.decelerate_interpolator);
+				fade.setDuration((int)(1000*ANIMATION_SPEED));
+				
+				Animation scale = new ScaleAnimation(5, 1, 5, 1);
+				scale.setInterpolator(MainActivity.this, android.R.anim.bounce_interpolator);
+				scale.setDuration((int)(1000*ANIMATION_SPEED));
 
 				AnimationSet set = new AnimationSet(false);
 				set.addAnimation(translate);
+				set.addAnimation(translatey);
 				set.addAnimation(fade);
-				set.setDuration(1000);
+				set.addAnimation(scale);
 				set.setAnimationListener(new AnimationListener() {
 					@Override public void onAnimationStart(Animation animation) {
 						lock_iv.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_secure));						
@@ -990,16 +1003,20 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				if(!locked) break;
 				locked = false;
 
-				Animation translate = new TranslateAnimation(0, -150, 0, 0); 
+				Animation translate = new TranslateAnimation(0, -125, 0, 40); 
 				translate.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
 
 				Animation fade = new AlphaAnimation(1, 0);
 				fade.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
+				
+				Animation scale = new ScaleAnimation(1, 5, 1, 5);
+				scale.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
 
 				AnimationSet set = new AnimationSet(false);
 				set.addAnimation(translate);
 				set.addAnimation(fade);
-				set.setDuration(600);
+				set.addAnimation(scale);
+				set.setDuration((int)(350*ANIMATION_SPEED));
 				set.setAnimationListener(new AnimationListener() {
 					@Override public void onAnimationStart(Animation animation) { }
 					@Override public void onAnimationRepeat(Animation animation) { }
@@ -1187,7 +1204,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			int progress = player.getCurrentProgress();
 			BookmarkManager bm = BookmarkManager.getInstance();
 			if(trackno > 0 || progress > 0){
-				Bookmark bookmark = bm.createOrUpdateBookmark(getFilesDir(), author, album, trackno, progress, true);
+				Bookmark bookmark = bm.createOrUpdateBookmark(getFilesDir(), author, album, trackno, progress, null, true);
 				BookmarkManager.getInstance().saveBookmarks(getFilesDir());
 				Log.d(TAG, "Bookmark created or updated\n"+bookmark);
 				

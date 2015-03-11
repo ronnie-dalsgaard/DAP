@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import android.content.Context;
 import android.util.Log;
@@ -34,9 +35,10 @@ public class BookmarkManager{ //Singleton
 		String album = bookmark.getAlbum();
 		int trackno = bookmark.getTrackno();
 		int progress = bookmark.getProgress();
-		return createOrUpdateBookmark(filesDir, author, album, trackno, progress, force);
+		ArrayList<BookmarkEvent> events = bookmark.getEvents();
+		return createOrUpdateBookmark(filesDir, author, album, trackno, progress, events, force);
 	}
-	public Bookmark createOrUpdateBookmark(File filesDir, String author, String album, int trackno, int progress, boolean force){
+	public Bookmark createOrUpdateBookmark(File filesDir, String author, String album, int trackno, int progress, ArrayList<BookmarkEvent> events, boolean force){
 		boolean found = false;
 		Bookmark result = null;
 		for(Bookmark bookmark : bookmarks){
@@ -55,11 +57,23 @@ public class BookmarkManager{ //Singleton
 				} else if(progress > bookmark.getProgress()){
 					bookmark.setProgress(progress);
 				}
+				if(events != null){
+					LinkedList<BookmarkEvent> levents = new LinkedList<BookmarkEvent>();
+					levents.addAll(events);
+					bookmark.setEvents(levents);
+				}
+				bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.DOWNLOAD, trackno, progress));
 				break;
 			}
 		}
 		if(!found){
 			Bookmark bookmark = new Bookmark(author, album, trackno, progress);
+			if(events != null){
+				LinkedList<BookmarkEvent> levents = new LinkedList<BookmarkEvent>();
+				levents.addAll(events);
+				bookmark.setEvents(levents);
+			}
+			bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.DOWNLOAD, trackno, progress));
 			bookmarks.add(bookmark);
 			result = bookmark;
 		}

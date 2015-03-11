@@ -52,8 +52,6 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 	private LinearLayout layout;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private static final int REQUEST_SET_HOME_FOLDER = 9003;
-//	public static final int REQUEST_AUDIOBOOK = 8801;
-	private static final int COLUMNS = 3;
 	private OnAudiobookSelectedListener audiobookSelectedListener;
 	
 	public static interface OnAudiobookSelectedListener {

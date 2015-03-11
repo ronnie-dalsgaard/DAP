@@ -4,7 +4,7 @@ import rd.dap.support.Time;
 import rd.dap.support.Time.TimeStamp;
 
 public class BookmarkEvent {
-	public static enum Function {PLAY, NEXT, PREV, FORWARD, REWIND, SEEK_PROGRESS, SEEK_TRACK, SELECT, UNDO};
+	public static enum Function {PLAY, NEXT, PREV, FORWARD, REWIND, SEEK_PROGRESS, SEEK_TRACK, SELECT, UNDO, DOWNLOAD};
 	
 	private Function function;
 	private int trackno;
@@ -17,6 +17,8 @@ public class BookmarkEvent {
 		this.progress = progress;
 		timestamp = Time.getTimestamp();
 	}
+	
+	public BookmarkEvent(){} //Must be bean
 
 	//Getters and Setters
 	public Function getFunction() { return function; }

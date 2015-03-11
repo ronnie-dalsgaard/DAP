@@ -39,8 +39,7 @@ public class Track implements Serializable{
 		String out = ""; 
 		out += " " + title + "\n";
 		out+= "Duration: " + AudiobookSupport.prettyDuration(duration);
-		out += "File: " + path.substring(0, path.length());
-		//TODO use HOME.getAbsolutePath().length as start value in substring, where HOME is Audiobooks-folder 
+		out += "File: " + path.substring(0, path.length()); 
 		return out;
 	}
 }

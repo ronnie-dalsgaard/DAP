@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.widget.Toast;
 
 public class HeadSetReceiver extends BroadcastReceiver {
 	private static final String TAG = "HeadSetReceiver";
@@ -17,6 +15,7 @@ public class HeadSetReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.d(TAG, "onReceive");
+		//TODO finish HeadSetReceiver
 //		if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
 //            KeyEvent event = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
 //            if (KeyEvent.KEYCODE_MEDIA_PLAY == event.getKeyCode()) {
