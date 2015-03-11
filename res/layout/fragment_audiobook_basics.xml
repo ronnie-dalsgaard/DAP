@@ -5,39 +5,6 @@
     android:layout_height="wrap_content"
     tools:ignore="HardcodedText" >
 
-    <AnalogClock
-        android:id="@+id/analogClock"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentRight="true"
-        android:hand_hour="@color/transparent"
-        android:hand_minute="@color/transparent"
-        android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/min_hand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="25dp"
-        android:contentDescription="@string/content_description"
-        android:src="@drawable/min_hand"
-        android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/sec_hand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="25dp"
-        android:contentDescription="@string/content_description"
-        android:src="@drawable/sec_hand"
-        android:visibility="gone" />
-
     <ImageView
         android:id="@+id/audiobook_basics_cover_iv"
         android:layout_width="@dimen/cover_width_big"
@@ -93,15 +60,120 @@
             <LinearLayout
                 android:id="@+id/audiobook_timer"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/dark_slate_blue"
-                android:orientation="vertical"
-                android:visibility="visible" >
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="#DD000000" >
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="TIMER" />
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:visibility="visible" >
+
+                        <AnalogClock
+                            android:id="@+id/analogClock"
+                            android:layout_width="101dp"
+                            android:layout_height="101dp"
+                            android:layout_alignParentLeft="true"
+                            android:layout_marginLeft="35dp"
+                            android:hand_hour="@color/transparent"
+                            android:hand_minute="@color/transparent"
+                            android:visibility="visible" />
+
+                        <ImageView
+                            android:id="@+id/min_hand"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginLeft="85dp"
+                            android:layout_marginTop="50dp"
+                            android:contentDescription="@string/content_description"
+                            android:src="@drawable/min_hand"
+                            android:visibility="visible" />
+
+                        <ImageView
+                            android:id="@+id/sec_hand"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginLeft="85dp"
+                            android:layout_marginTop="50dp"
+                            android:contentDescription="@string/content_description"
+                            android:src="@drawable/sec_hand"
+                            android:visibility="visible" />
+
+                        <TextView
+                            android:id="@+id/digitalClock"
+                            android:layout_width="101dp"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_below="@+id/analogClock"
+                            android:layout_marginLeft="35dp"
+                            android:layout_marginTop="10dp"
+                            android:gravity="center_horizontal"
+                            android:text="00:00" />
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="10dp"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical" >
+
+                        <ImageButton
+                            android:id="@+id/dialog_timer_hour_inc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/black"
+                            android:contentDescription="@string/content_description"
+                            android:padding="5dp"
+                            android:src="@drawable/ic_action_collapse"
+                            android:textColor="@color/white" />
+
+                        <include layout="@layout/divider_horizontal" />
+
+                        <TextView
+                            android:id="@+id/dialog_timer_hour"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:paddingBottom="3dp"
+                            android:paddingTop="3dp"
+                            android:text="00:00"
+                            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                        <include layout="@layout/divider_horizontal" />
+
+                        <ImageButton
+                            android:id="@+id/dialog_timer_hour_dec"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/black"
+                            android:contentDescription="@string/content_description"
+                            android:padding="5dp"
+                            android:src="@drawable/ic_action_expand"
+                            android:textColor="@color/white" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <ImageView

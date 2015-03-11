@@ -211,7 +211,7 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 		} else {
 			trackno++;
 			set(audiobook, trackno, 0);
-			mp.start();
+			PlayerService.mp.start();
 			for(PlayerObserver obs : observers) { obs.onComplete(audiobook, trackno); }
 		}
 	}
