@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/timer_value_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="10dp"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <ImageButton
+        android:id="@+id/timer_value_inc"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/black"
+        android:contentDescription="@string/content_description"
+        android:padding="5dp"
+        android:src="@drawable/ic_action_collapse"
+        android:textColor="@color/white" />
+
+    <include layout="@layout/divider_horizontal" />
+
+    <TextView
+        android:id="@+id/timer_value"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:paddingBottom="3dp"
+        android:paddingTop="3dp"
+        android:text="00:00"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <include layout="@layout/divider_horizontal" />
+
+    <ImageButton
+        android:id="@+id/timer_value_dec"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/black"
+        android:contentDescription="@string/content_description"
+        android:padding="5dp"
+        android:src="@drawable/ic_action_expand"
+        android:textColor="@color/white" />
+
+</LinearLayout>
