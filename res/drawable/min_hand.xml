@@ -4,10 +4,10 @@
     
     <stroke
         android:color="@color/white" 
-        android:width="1dp" />
+        android:width="2px" />
     
     <size 
-        android:width="40dp"
-        android:height="2dp" />
+        android:width="45dp"
+        android:height="3px" />
     
 </shape>

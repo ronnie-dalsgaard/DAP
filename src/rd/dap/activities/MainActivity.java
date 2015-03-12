@@ -11,7 +11,7 @@ import rd.dap.dialogs.Dialog_bookmark_details;
 import rd.dap.dialogs.Dialog_delete_bookmark;
 import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
-import rd.dap.dialogs.Dialog_timer;
+import rd.dap.fragments.TimerFragment.TimerListener;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
@@ -54,10 +54,8 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
-import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
-import android.widget.AnalogClock;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -70,7 +68,7 @@ import android.widget.Toast;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, 
 		ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
-		OnAudiobookSelectedListener {
+		OnAudiobookSelectedListener, TimerListener {
 	private static final String TAG = "MainActivity";
 	private static final int TRACKNO = 1111;
 	private static final int BOOKMARK = 2222;
@@ -79,18 +77,13 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private RelativeLayout base;
 	private static Monitor monitor;
-	private static Timer timer;
-	private static boolean timerOn = false;
 	private PlayerService player;
 	private boolean bound = false;
-	private Menu menu;
-	private int timer_delay = Time.toMillis(15, TimeUnit.MINUTES);
 	private Monitor bookmark_monitor = null;
 	private LinearLayout bookmark_list;
 	private boolean locked = true;
 	private SeekBar progress_seeker, track_seeker;
-	private View timer_panel, timer_thumb_iv, timer_thumb_back_iv, timer_value_inc, timer_value_dec;
-	private TextView timer_value;
+	private View timer_layout, timer_thumb_iv, timer_thumb_back_iv;
 
 	//Activity + Bind to PlayerService
 	@Override
@@ -137,9 +130,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
 		}
 		
-		//Load preferences
-		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-
 		//Set stream for hardware volume buttons
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -198,53 +188,14 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		track_seeker.setEnabled(!locked);
 		track_seeker.setOnSeekBarChangeListener(this);
 		
-		timer_panel = findViewById(R.id.audiobook_timer);
-		timer_panel.setVisibility(View.GONE);
+		timer_layout = findViewById(R.id.timer_layout);
+		timer_layout.setVisibility(View.GONE);
 		
 		timer_thumb_iv = findViewById(R.id.timer_thumb_iv);
 		timer_thumb_iv.setOnClickListener(this);
 
 		timer_thumb_back_iv = findViewById(R.id.timer_thumb_back_iv);
 		timer_thumb_back_iv.setOnClickListener(this);
-		
-		
-		//Timer
-		View timer_value_layout = findViewById(R.id.timer_value_layout);
-		
-		timer_delay = pref.getInt("timer_delay", Time.toMillis(15, TimeUnit.MINUTES));
-		timer_value = (TextView) findViewById(R.id.timer_value);
-		timer_value.setText(Time.toString(timer_delay));
-		
-		timer_value_inc = findViewById(R.id.timer_value_inc);
-		timer_value_inc.setOnClickListener(this);
-		timer_value_dec = findViewById(R.id.timer_value_dec);
-		timer_value_dec.setOnClickListener(this);
-		
-		//Redraw sleep timer if active
-		ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
-		ImageView sec_hand = (ImageView) findViewById(R.id.sec_hand);
-		sec_hand.setPivotX(0);
-		sec_hand.setPivotY(0);
-		min_hand.setPivotX(0);
-		min_hand.setPivotY(0);
-		if(timerOn){
-			sec_hand.setRotation(0);
-			min_hand.setRotation(0);
-			timer.setClock(min_hand, sec_hand);
-			timer_value_layout.setVisibility(View.GONE);
-		} else {
-			int min = (int)Time.toUnits(timer_delay, TimeUnit.MILLISECONDS, TimeUnit.MINUTES);
-			int angle = ((int)(min / 60.0 * 360.0)-90);
-			while(angle >= 360) angle -= 360;
-
-			min_hand.setRotation(angle);
-			sec_hand.setRotation(-90);
-			
-			timer_value_layout.setVisibility(View.VISIBLE);
-		}
-		AnalogClock clock = (AnalogClock) findViewById(R.id.analogClock);
-		clock.setOnClickListener(this);
-		
 		
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
@@ -322,6 +273,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	public void onClick(View v) {
 		Audiobook audiobook;
 		Bookmark bookmark;
+		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 		switch(v.getId()){
 		case R.id.audiobook_basics_btn_cover: 
 			if(player == null) break;
@@ -363,14 +315,13 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			if(audiobook == null) break;
 			if(player == null) break;
 				player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 				pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
 			break;
 		case R.id.timer_thumb_iv:
-			timer_panel.setVisibility(View.VISIBLE);
+			timer_layout.setVisibility(View.VISIBLE);
 			timer_thumb_iv.setVisibility(View.GONE);
 
-			float fromXDelta = timer_panel.getWidth(); 
+			float fromXDelta = timer_layout.getWidth(); 
 			if(fromXDelta < 1) fromXDelta = 500;
 			Animation show_timer = new TranslateAnimation(fromXDelta, 0, 0, 0);
 			show_timer.setDuration((int)(250*ANIMATION_SPEED));
@@ -387,12 +338,12 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				}
 			});
 
-			timer_panel.startAnimation(show_timer);
+			timer_layout.startAnimation(show_timer);
 			break;
 		case R.id.timer_thumb_back_iv:
 			timer_thumb_back_iv.setVisibility(View.GONE);
 
-			float toXDelta = timer_panel.getWidth();
+			float toXDelta = timer_layout.getWidth();
 			Animation hide_timer = new TranslateAnimation(0, toXDelta, 0, 0);
 			hide_timer.setDuration(250);
 			hide_timer.setInterpolator(this, android.R.anim.linear_interpolator);
@@ -400,7 +351,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				@Override public void onAnimationStart(Animation animation) { }
 				@Override public void onAnimationRepeat(Animation animation) { }
 				@Override public void onAnimationEnd(Animation animation) {
-					timer_panel.setVisibility(View.GONE);
+					timer_layout.setVisibility(View.GONE);
 					timer_thumb_iv.setVisibility(View.VISIBLE);
 					Animation show_thumb = new AlphaAnimation(0f, 1f);
 					show_thumb.setDuration((int)(250*ANIMATION_SPEED));
@@ -409,33 +360,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				}
 			});
 
-			timer_panel.startAnimation(hide_timer);
-		case R.id.analogClock:
-			View timer_value_layout = findViewById(R.id.timer_value_layout);
-			if(!timerOn){
-				timer_value_layout.setVisibility(View.GONE);
-				MenuItem menuitem = menu.findItem(R.id.menu_item_countdown);
-				ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
-				ImageView sec_hand = (ImageView) findViewById(R.id.sec_hand);
-				timer = new Timer(timer_delay, menuitem, min_hand, sec_hand);
-				timer.start();
-				timerOn = true;
-			} else {
-				timer_value_layout.setVisibility(View.VISIBLE);
-				timer.kill();
-			}
-			break;
-		case R.id.timer_value_inc:
-			int timer_delay_inc = timer_delay + Time.toMillis(5, TimeUnit.MINUTES);
-			if(timer_delay_inc > Time.toMillis(12, TimeUnit.HOURS)) break;
-			timer_delay = timer_delay_inc;
-			setTimerDelay(timer_delay);
-			break;
-		case R.id.timer_value_dec:
-			int timer_delay_dec = timer_delay - Time.toMillis(5, TimeUnit.MINUTES);
-			if(timer_delay_dec > Time.toMillis(12, TimeUnit.HOURS)) break;
-			timer_delay = timer_delay_dec;
-			setTimerDelay(timer_delay);
+			timer_layout.startAnimation(hide_timer);
 			break;
 		}
 	}
@@ -491,6 +416,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			player.seekTrackTo(trackno);
 		}
 	}
+	
 	
 	//Callbacks from PlayerService
 	@Override
@@ -901,45 +827,13 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	//Menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		this.menu = menu;
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		MenuItem item = menu.findItem(R.id.menu_item_countdown);
-
-		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-		timer_delay = pref.getInt("timer_delay", Time.toMillis(15, TimeUnit.MINUTES));
-
-		item.setTitle(Time.toString(timer_delay));
-		
-		TextView digi = (TextView) findViewById(R.id.digitalClock);
-		digi.setText(Time.toString(timer_delay));
-		
-		if(timerOn){
-			timer.setMenuItem(item);
-		}
-		
 		return true;
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
-		case R.id.menu_item_timer: 
-			if(!timerOn){
-				MenuItem menuitem = menu.findItem(R.id.menu_item_countdown);
-				ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
-				ImageView sec_hand = (ImageView) findViewById(R.id.sec_hand);
-				timer = new Timer(timer_delay, menuitem, min_hand, sec_hand);
-				timer.start();
-				timerOn = true;
-			} else {
-				timer.kill();
-			}
-			break;
-
-		case R.id.menu_item_countdown:
-			new Dialog_timer(this).show();
-			break;
-
 		case R.id.menu_item_audiobooks:
 			Intent intent = new Intent(this, AudiobooksActivity.class);
 			startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
@@ -948,9 +842,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		case R.id.menu_item_import_export:
 			new Dialog_import_export(this).show();
 			break;
-
 		}
-
 		return false;
 	}
 
@@ -971,31 +863,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	}
 
 	public RelativeLayout getBase() { return this.base; }
-	public Menu getMenu() { return this.menu; }
-	public int getDelay() { return this.timer_delay; }
-	public void setTimerDelay(int delay) { 
-		this.timer_delay = delay;
-		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-		pref.edit().putInt("timer_delay", delay).commit();
-		
-		TextView timer_value = (TextView)findViewById(R.id.timer_value);
-		timer_value.setText(Time.toString(timer_delay));
-		
-		//Analog clock
-		ImageView min_hand = (ImageView) findViewById(R.id.min_hand);
-		ImageView sec_hand = (ImageView) findViewById(R.id.sec_hand);
-		
-		int min = (int)Time.toUnits(timer_delay, TimeUnit.MILLISECONDS, TimeUnit.MINUTES);
-		int angle = ((int)(min / 60.0 * 360.0)-90);
-		while(angle >= 360) angle -= 360;
-		
-		min_hand.setRotation(angle);
-		sec_hand.setRotation(-90);
-		
-		//Digital clock
-		TextView digi = (TextView) findViewById(R.id.digitalClock);
-		digi.setText(Time.toString(timer_delay));
-	}
+	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent event){
 		final int MIN_DIST = 200;
@@ -1113,123 +981,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		}
 
 	}
-	class Timer extends Monitor {
-		private long endTime;
-		private MenuItem timer_menuItem;
-		private String _delay;
-		private ImageView min_hand;
-		private ImageView sec_hand;
-		private int timeleft;
-
-		public Timer(final int delay, final MenuItem item, ImageView min_hand, ImageView sec_hand) {
-			super(1, TimeUnit.SECONDS);
-			endTime = System.currentTimeMillis() + delay;
-			this.timer_menuItem = item;
-			this.min_hand = min_hand;
-			this.sec_hand = sec_hand;
-			_delay = Time.toString(delay);
-			timeleft = delay;
-
-			runOnUiThread(new Runnable() { 
-				@Override public void run() {
-					Timer.this.min_hand.setRotation(0);
-					Timer.this.sec_hand.setRotation(0);
-					item.setTitle(_delay); 
-				} 
-			});
-
-			Animation min_hand_anim = createMin_hand_anim(delay);
-			Animation sec_hand_anim = createSec_hand_anim(delay);
-			
-			sec_hand.startAnimation(sec_hand_anim);
-			min_hand.startAnimation(min_hand_anim);
-		}
-
-		@Override
-		public void execute() {
-			timeleft = (int)(endTime - System.currentTimeMillis());
-
-			runOnUiThread(new Runnable() { 
-				@Override public void run() { 
-					timer_menuItem.setTitle(Time.toString(timeleft));
-					
-					TextView digi = (TextView) findViewById(R.id.digitalClock);
-					digi.setText(Time.toString(timeleft));
-				} 
-			});
-
-			if(timeleft <= 0){
-				player.pause();
-				kill();
-			}
-		}
-		public void setMenuItem(MenuItem item) { this.timer_menuItem = item; }
-		public void setClock(ImageView min_hand, ImageView sec_hand){
-			this.min_hand = min_hand;
-			this.sec_hand = sec_hand;
-			
-			Animation min_hand_anim = createMin_hand_anim(timeleft);
-			Animation sec_hand_anim = createSec_hand_anim(timeleft);
-			
-			sec_hand.startAnimation(sec_hand_anim);
-			min_hand.startAnimation(min_hand_anim);
-		}
-		
-		@Override
-		public void kill(){
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					resetClock();
-				}
-			});
-			timerOn = false;
-			super.kill();
-		}
-		
-		public void resetClock(){
-			timer_menuItem.setTitle(_delay);
-			
-			TextView digi = (TextView) findViewById(R.id.digitalClock);
-			digi.setText(_delay);
-			
-			min_hand.clearAnimation();
-			sec_hand.clearAnimation();
-
-			int min = (int)Time.toUnits(timer_delay, TimeUnit.MILLISECONDS, TimeUnit.MINUTES);
-			int angle = ((int)(min / 60.0 * 360.0)-90);
-			while(angle >= 360) angle -= 360;
-			
-			min_hand.setRotation(angle);
-			sec_hand.setRotation(-90);
-		}
 	
-		public int getTimeleft() { return timeleft; }
-		public Animation createMin_hand_anim(int delay){
-			double mins = Time.toUnits(delay, TimeUnit.MILLISECONDS, TimeUnit.MINUTES);
-			int min = (int)mins;
-			int diffDegrees = (int)(min / 60.0 * 360.0);
-			
-			int toDegrees = -90;
-			int fromDegrees = diffDegrees + toDegrees;
-			Animation min_hand_anim = new RotateAnimation(fromDegrees, toDegrees, 0, 1);
-			min_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
-			min_hand_anim.setDuration(delay+5);
-			return min_hand_anim;
-		}
-		public Animation createSec_hand_anim(int delay){
-			double d_sec = Time.toUnits(delay, TimeUnit.MILLISECONDS, TimeUnit.SECONDS);
-			int sec = (int)d_sec;
-			int diffDegrees = (int)(sec / 60.0 * 360.0);
-			
-			int toDegrees = -90;
-			int fromDegrees = diffDegrees + toDegrees;
-			Animation sec_hand_anim = new RotateAnimation(fromDegrees, toDegrees, 0, 1);
-			sec_hand_anim.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
-			sec_hand_anim.setDuration(delay+5);
-			return sec_hand_anim;
-		}
-	}
 	class BookmarkMonitor extends Monitor {
 		private static final String TAG = "Monitor_bookmarks";
 		private boolean go_again = true;
@@ -1277,8 +1029,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	public void onAudiobookSelected(Audiobook audiobook) {
 		selectAudiobook(audiobook);
 	}
-	
 
-	
-	
+
+	@Override
+	public void onTimerTerminate() {
+		player.pause();
+	}
 }
