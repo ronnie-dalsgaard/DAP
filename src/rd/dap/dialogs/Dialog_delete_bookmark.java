@@ -3,12 +3,10 @@ package rd.dap.dialogs;
 import rd.dap.R;
 import rd.dap.activities.MainActivity;
 import rd.dap.model.Bookmark;
-import android.app.Dialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -28,8 +26,6 @@ public class Dialog_delete_bookmark extends CustomDialog {
 	}
 
 	public void show(){
-		final Dialog dialog = new Dialog(activity);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View dv = inflater.inflate(R.layout.dialog_text_2btn, parent, false);
 

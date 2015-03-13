@@ -2,13 +2,11 @@ package rd.dap.dialogs;
 
 import rd.dap.R;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -20,8 +18,6 @@ public class Dialog_expired extends CustomDialog {
 	}
 
 	public void show(){
-		final Dialog dialog = new Dialog(activity);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View dv = inflater.inflate(R.layout.dialog_expired, parent, false);
 

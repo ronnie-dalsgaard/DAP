@@ -8,13 +8,11 @@ import rd.dap.model.BookmarkEvent;
 import rd.dap.support.Time;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -40,8 +38,6 @@ public class Dialog_bookmark_history extends CustomDialog {
 	
 
 	public void show(){
-		final Dialog dialog = new Dialog(activity);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View dv = inflater.inflate(R.layout.dialog_history, parent, false);
 

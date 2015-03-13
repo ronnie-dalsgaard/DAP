@@ -12,13 +12,11 @@ import rd.dap.model.BookmarkEvent;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Callback;
 import android.app.Activity;
-import android.app.Dialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -42,8 +40,6 @@ public class Dialog_import_export extends CustomDialog {
 	}
 	
 	public void show(){
-		final Dialog dialog = new Dialog(activity);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View dv = inflater.inflate(R.layout.dialog_import_export, parent, false);
 
