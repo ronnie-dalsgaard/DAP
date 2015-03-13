@@ -3,6 +3,7 @@ package rd.dap.activities;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
@@ -11,6 +12,7 @@ import rd.dap.dialogs.Dialog_bookmark_details;
 import rd.dap.dialogs.Dialog_delete_bookmark;
 import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
+import rd.dap.dialogs.Dialog_import_export.ImportExportCallback;
 import rd.dap.fragments.TimerFragment.TimerListener;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -18,14 +20,17 @@ import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkEvent;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.Track;
+import rd.dap.monitors.BookmarkMonitor;
+import rd.dap.monitors.BookmarkMonitor.BookmarkMonitorListener;
+import rd.dap.monitors.DisplayMonitor;
+import rd.dap.monitors.DisplayMonitor.DisplayMoniterListener;
+import rd.dap.monitors.Monitor;
 import rd.dap.services.HeadSetReceiver;
 import rd.dap.services.PlayerService;
 import rd.dap.services.PlayerService.DAPBinder;
 import rd.dap.support.MainDriveHandler;
-import rd.dap.support.Monitor;
 import rd.dap.support.Time;
 import rd.dap.tasks.LoadBookmarksTask;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -38,6 +43,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -49,6 +55,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -67,56 +74,36 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, 
-		ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
-		OnAudiobookSelectedListener, TimerListener {
+ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
+OnAudiobookSelectedListener, TimerListener, DisplayMoniterListener, BookmarkMonitorListener,
+ImportExportCallback {
 	private static final String TAG = "MainActivity";
 	private static final int TRACKNO = 1111;
 	private static final int BOOKMARK = 2222;
 	public static final String END = "/END";
 	public static final double ANIMATION_SPEED = 1.5;
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
-	private RelativeLayout base;
-	private static Monitor monitor;
+	private ViewGroup base;
+	private Monitor displayMonitor;
 	private PlayerService player;
-	private boolean bound = false;
+	private boolean bound = false, locked = true;
 	private Monitor bookmark_monitor = null;
 	private LinearLayout bookmark_list;
-	private boolean locked = true;
 	private SeekBar progress_seeker, track_seeker;
 	private View timer_layout, timer_thumb_iv, timer_thumb_back_iv;
+	private CountDownLatch latch;
 
 	//Activity + Bind to PlayerService
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		setContentView(R.layout.controller);
 
-		TextView version_tv = (TextView) findViewById(R.id.version);
-		String versionName;
-		try {
-			versionName = this.getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-		} catch (NameNotFoundException e) { 
-			versionName = "Unknown";
-		}
-		if(version_tv != null) version_tv.setText(versionName);
+		version();
 
-//*******************************// BETA //*****************************************//
-		final boolean BETA = false;
-		TextView beta = (TextView) findViewById(R.id.controller_beta);
-		beta.setVisibility(BETA ? View.VISIBLE : View.GONE);
-		if(BETA){
-			Calendar expiration = Calendar.getInstance(Locale.getDefault());
-			expiration.set(Calendar.YEAR, 2015);
-			expiration.set(Calendar.MONTH, Calendar.APRIL);
-			expiration.set(Calendar.DAY_OF_MONTH, 1);
-			beta.setText("BETA (expires on April 1st 2015)");
-
-			if(System.currentTimeMillis() >= expiration.getTimeInMillis()) {
-				new Dialog_expired(this).show();
-			}
-		}
-//*********************************************************************************//
+		//*******************************// BETA //*****************************************//
+		beta();
+		//*********************************************************************************//
 
 		base = (RelativeLayout) findViewById(R.id.controller_base);
 
@@ -129,99 +116,93 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			drw_play_on_cover = getResources().getDrawable(R.drawable.ic_action_play_over_video);
 			drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
 		}
+
+		audio_properties();
+
+		latch = new CountDownLatch(2);
 		
-		//Set stream for hardware volume buttons
-		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-		// Request audio focus for playback
-		final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		final ComponentName receiver = new ComponentName(getPackageName(), HeadSetReceiver.class.getName());
-
-		final OnAudioFocusChangeListener l = new OnAudioFocusChangeListener() {
-
-			@Override
-			public void onAudioFocusChange(int focusChange) {
-				if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT){
-					// Pause playback
-				} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-					am.registerMediaButtonEventReceiver(receiver);
-					// Resume playback 
-				} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-					am.unregisterMediaButtonEventReceiver(receiver);
-					am.abandonAudioFocus(this);
-					// Stop playback
-				}
-			}
-		};
-		int result = am.requestAudioFocus(l, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-		if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-			throw new RuntimeException("Unable to obtaing audio focus");
-		}
-		Log.d(TAG, "Audio focus gained");
-
 		//Start playerservice
-		Intent serviceIntent = new Intent(this, PlayerService.class);
-		startService(serviceIntent);
+		new AsyncTask<Void, Void, Void>() {
+			@Override protected Void doInBackground(Void... params) {
+				Intent serviceIntent = new Intent(MainActivity.this, PlayerService.class);
+				startService(serviceIntent);
+				return null;
+			}
+		}.execute();
 
 		//Buttons
 		ImageButton btn_cover = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
 		btn_cover.setImageDrawable(null);
 		btn_cover.setOnClickListener(this);
 
-		ImageButton btn_next = (ImageButton) findViewById(R.id.track_btn_next);
-		btn_next.setOnClickListener(this);
+		((ImageButton) findViewById(R.id.track_btn_next)).setOnClickListener(this);
+		((ImageButton) findViewById(R.id.track_btn_previous)).setOnClickListener(this);
+		((ImageButton) findViewById(R.id.seeker_btn_forward)).setOnClickListener(this);
+		((ImageButton) findViewById(R.id.seeker_btn_rewind)).setOnClickListener(this);
 
-		ImageButton btn_prev = (ImageButton) findViewById(R.id.track_btn_previous);
-		btn_prev.setOnClickListener(this);
-
-		ImageButton btn_forward = (ImageButton) findViewById(R.id.seeker_btn_forward);
-		btn_forward.setOnClickListener(this);
-
-		ImageButton btn_rewind = (ImageButton) findViewById(R.id.seeker_btn_rewind);
-		btn_rewind.setOnClickListener(this);
-		
 		progress_seeker = (SeekBar) findViewById(R.id.seeker_progress_seeker);
 		progress_seeker.setEnabled(!locked);
 		progress_seeker.setOnSeekBarChangeListener(this);
-		
+
 		track_seeker = (SeekBar) findViewById(R.id.track_seeker);
 		track_seeker.setEnabled(!locked);
 		track_seeker.setOnSeekBarChangeListener(this);
-		
+
 		timer_layout = findViewById(R.id.timer_layout);
 		timer_layout.setVisibility(View.GONE);
-		
+
 		timer_thumb_iv = findViewById(R.id.timer_thumb_iv);
 		timer_thumb_iv.setOnClickListener(this);
 
 		timer_thumb_back_iv = findViewById(R.id.timer_thumb_back_iv);
 		timer_thumb_back_iv.setOnClickListener(this);
-		
+
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
 		//Start monitor
-		if(monitor != null) monitor.kill();
-		monitor = new displayMonitor(this);
-		monitor.start();
-		
+		if(displayMonitor != null) displayMonitor.kill();
+		displayMonitor = new DisplayMonitor(this, player, this);
+		displayMonitor.start();
+
 		//Load Audiobooks and Bookmarks
-		final Dialog dialog = new Dialog(this);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		final Dialog loading_dialog = new Dialog(this);
+		loading_dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View dv = inflater.inflate(R.layout.loading, base, false);
-		dialog.setContentView(dv);
-		dialog.show();
+		loading_dialog.setContentView(dv);
+		loading_dialog.show();
 
-		new LoadBookmarksTask(this, player, dialog, new LoadBookmarksTask.Callback() {
-			@Override
-			public void displayBookmarks() {
-				MainActivity.this.displayBookmarks();
-			}
+		new LoadBookmarksTask(this, player, new LoadBookmarksTask.Callback() {
+			@Override public void displayBookmarks() { MainActivity.this.displayBookmarks(); }
+			@Override public void complete() { latch.countDown(); System.out.println("Bookmarks latch released"); }
 		}).execute();
+	
+		new AsyncTask<Void, Void, Void>(){
+			@Override protected Void doInBackground(Void... params) {
+				System.out.println("Awaiting latch");
+				try { latch.await(); } 
+				catch (InterruptedException e) { e.printStackTrace(); }
+				
+				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+				String author = pref.getString("author", null);
+				String album = pref.getString("album", null);
+				Bookmark bookmark = BookmarkManager.getInstance().getBookmark(author, album);
+				Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+				player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+				return null;
+			}
+			@Override protected void onPostExecute(Void result){
+				loading_dialog.dismiss();
+			}
+		}.execute();
+		
+		
+		if(bookmark_monitor != null) bookmark_monitor.kill();
+		bookmark_monitor = new BookmarkMonitor(this, player, this);
+		bookmark_monitor.start();
 	}
-	
-	
-	
+
+
 	@Override
 	public void onStart(){
 		Log.d(TAG, "onStart");
@@ -247,21 +228,9 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		player = binder.getPlayerService();
 		bound = true;
 
-		player.addObserver(this);
-
-		Audiobook audiobook = player.getAudiobook();
-		int trackno = player.getTrackno();
-		if(audiobook != null){
-			Track track  = audiobook.getPlaylist().get(trackno);
-			displayInfo(audiobook, track);
-			displayTracks(audiobook, track, trackno);
-			displayTime(track);
-		}
-		displayPlayButton();
-
-		if(bookmark_monitor != null) bookmark_monitor.kill();
-		bookmark_monitor = new BookmarkMonitor();
-		bookmark_monitor.start();
+		player.addObserver(this);		
+		latch.countDown();
+		System.out.println("PlayerService latch released");
 	}
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
@@ -270,109 +239,14 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		if(cover_btn != null) cover_btn.setImageDrawable(null);
 	}
 	@Override
-	public void onClick(View v) {
-		Audiobook audiobook;
-		Bookmark bookmark;
-		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-		switch(v.getId()){
-		case R.id.audiobook_basics_btn_cover: 
-			if(player == null) break;
-			audiobook = player.getAudiobook();
-			bookmark = BookmarkManager.getInstance().getBookmark(audiobook);
-			if(bookmark == null) break;
-			player.toggle();
-			break;
-		case R.id.track_btn_next:
-			if(locked) { emphasizeLock(); break; }
-			if(player == null) break;
-			player.next();
-			break;
-		case R.id.track_btn_previous: 
-			if(locked) { emphasizeLock(); break; }
-			if(player == null) break;
-			player.prev();
-			break;
-		case R.id.seeker_btn_forward: 
-			if(locked) { emphasizeLock(); break; }
-			if(player == null) break;
-			player.forward(Time.toMillis(1, TimeUnit.MINUTES));
-			break;
-		case R.id.seeker_btn_rewind: 
-			if(locked) { emphasizeLock(); break; }
-			if(player == null) break;
-			player.rewind(Time.toMillis(1, TimeUnit.MINUTES));
-			break;
-		case TRACKNO:
-			if(locked) { emphasizeLock(); break; }
-			if(player == null) break;
-			int trackno = (int) v.getTag();
-			player.selectTrack(trackno);
-			break;
-		case BOOKMARK:
-			bookmark = (Bookmark) v.getTag();
-			if(bookmark == null) break;
-			audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-			if(audiobook == null) break;
-			if(player == null) break;
-				player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-				pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
-			break;
-		case R.id.timer_thumb_iv:
-			timer_layout.setVisibility(View.VISIBLE);
-			timer_thumb_iv.setVisibility(View.GONE);
-
-			float fromXDelta = timer_layout.getWidth(); 
-			if(fromXDelta < 1) fromXDelta = 500;
-			Animation show_timer = new TranslateAnimation(fromXDelta, 0, 0, 0);
-			show_timer.setDuration((int)(250*ANIMATION_SPEED));
-			show_timer.setInterpolator(this, android.R.anim.linear_interpolator);
-			show_timer.setAnimationListener(new AnimationListener() {
-				@Override public void onAnimationStart(Animation animation) { }
-				@Override public void onAnimationRepeat(Animation animation) { }
-				@Override public void onAnimationEnd(Animation animation) {
-					timer_thumb_back_iv.setVisibility(View.VISIBLE);
-					Animation show_back = new AlphaAnimation(0f, 1f);
-					show_back.setDuration((int)(250*ANIMATION_SPEED));
-					show_back.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
-					timer_thumb_back_iv.startAnimation(show_back);
-				}
-			});
-
-			timer_layout.startAnimation(show_timer);
-			break;
-		case R.id.timer_thumb_back_iv:
-			timer_thumb_back_iv.setVisibility(View.GONE);
-
-			float toXDelta = timer_layout.getWidth();
-			Animation hide_timer = new TranslateAnimation(0, toXDelta, 0, 0);
-			hide_timer.setDuration(250);
-			hide_timer.setInterpolator(this, android.R.anim.linear_interpolator);
-			hide_timer.setAnimationListener(new AnimationListener() {
-				@Override public void onAnimationStart(Animation animation) { }
-				@Override public void onAnimationRepeat(Animation animation) { }
-				@Override public void onAnimationEnd(Animation animation) {
-					timer_layout.setVisibility(View.GONE);
-					timer_thumb_iv.setVisibility(View.VISIBLE);
-					Animation show_thumb = new AlphaAnimation(0f, 1f);
-					show_thumb.setDuration((int)(250*ANIMATION_SPEED));
-					show_thumb.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
-					timer_thumb_iv.startAnimation(show_thumb);
-				}
-			});
-
-			timer_layout.startAnimation(hide_timer);
-			break;
-		}
-	}
-	@Override
 	public boolean onLongClick(View v) {
 		switch(v.getId()){
 		case BOOKMARK:
 			final Bookmark bookmark = (Bookmark) v.getTag();
 			if(bookmark == null) break;
-			new Dialog_bookmark_details(this, bookmark, new Dialog_bookmark_details.Callback() {
+			new Dialog_bookmark_details(this, base, bookmark, new Dialog_bookmark_details.Callback() {
 				@Override public void onDeleteBookmark() {
-					new Dialog_delete_bookmark(MainActivity.this, bookmark, new Dialog_delete_bookmark.Callback() {
+					new Dialog_delete_bookmark(MainActivity.this, base, bookmark, new Dialog_delete_bookmark.Callback() {
 						@Override
 						public void onDeleteBookmarkConfirmed() {
 							//Remove the bookmark
@@ -384,7 +258,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 							displayNoTime();
 							displayNoPlayButton();
 						}
-						 
+
 					}).show();
 				}
 				@Override
@@ -416,9 +290,105 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			player.seekTrackTo(trackno);
 		}
 	}
-	
-	
-	//Callbacks from PlayerService
+	@Override
+	public void onClick(View v) {
+		if(player == null) return;
+		switch(v.getId()){
+		case R.id.audiobook_basics_btn_cover: click_cover(); break;
+		case R.id.track_btn_next: click_next(); break;
+		case R.id.track_btn_previous: click_prev(); break;
+		case R.id.seeker_btn_forward: click_forward(); break;
+		case R.id.seeker_btn_rewind: click_rewind(); break;
+		case TRACKNO: click_track((int) v.getTag()); break;
+		case BOOKMARK: click_bookmark((Bookmark) v.getTag()); break;
+		case R.id.timer_thumb_iv: click_timer_thumb(); break;
+		case R.id.timer_thumb_back_iv: click_timer_thumb_back(); break;
+		}
+	}
+
+	private void click_bookmark(Bookmark bookmark) {
+		Audiobook audiobook;
+		if(bookmark == null) return;
+		audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+		if(audiobook == null) return;
+		player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+		pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
+	}
+	private void click_cover() {
+		if(player == null) return;
+		Audiobook audiobook = player.getAudiobook();
+		Bookmark bookmark = BookmarkManager.getInstance().getBookmark(audiobook);
+		if(bookmark == null) return;
+		player.toggle();
+	}
+	private void click_next() {
+		if(locked) { emphasizeLock(); return; }
+		player.next();
+	}
+	private void click_prev() {
+		if(locked) { emphasizeLock(); return; }
+		player.prev();
+	}
+	private void click_forward() {
+		if(locked) { emphasizeLock(); return; }
+		player.forward(Time.toMillis(1, TimeUnit.MINUTES));
+	}
+	private void click_rewind() {
+		if(locked) { emphasizeLock(); return; }
+		player.rewind(Time.toMillis(1, TimeUnit.MINUTES));
+	}
+	private void click_track(int trackno) {
+		if(locked) { emphasizeLock(); return; }
+		player.selectTrack(trackno);
+	}
+	private void click_timer_thumb() {
+		timer_layout.setVisibility(View.VISIBLE);
+		timer_thumb_iv.setVisibility(View.GONE);
+
+		float fromXDelta = timer_layout.getWidth(); 
+		if(fromXDelta < 1) fromXDelta = 500;
+		Animation show_timer = new TranslateAnimation(fromXDelta, 0, 0, 0);
+		show_timer.setDuration((int)(250*ANIMATION_SPEED));
+		show_timer.setInterpolator(this, android.R.anim.linear_interpolator);
+		show_timer.setAnimationListener(new AnimationListener() {
+			@Override public void onAnimationStart(Animation animation) { }
+			@Override public void onAnimationRepeat(Animation animation) { }
+			@Override public void onAnimationEnd(Animation animation) {
+				timer_thumb_back_iv.setVisibility(View.VISIBLE);
+				Animation show_back = new AlphaAnimation(0f, 1f);
+				show_back.setDuration((int)(250*ANIMATION_SPEED));
+				show_back.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
+				timer_thumb_back_iv.startAnimation(show_back);
+			}
+		});
+
+		timer_layout.startAnimation(show_timer);
+	}
+	private void click_timer_thumb_back() {
+		timer_thumb_back_iv.setVisibility(View.GONE);
+
+		float toXDelta = timer_layout.getWidth();
+		Animation hide_timer = new TranslateAnimation(0, toXDelta, 0, 0);
+		hide_timer.setDuration(250);
+		hide_timer.setInterpolator(this, android.R.anim.linear_interpolator);
+		hide_timer.setAnimationListener(new AnimationListener() {
+			@Override public void onAnimationStart(Animation animation) { }
+			@Override public void onAnimationRepeat(Animation animation) { }
+			@Override public void onAnimationEnd(Animation animation) {
+				timer_layout.setVisibility(View.GONE);
+				timer_thumb_iv.setVisibility(View.VISIBLE);
+				Animation show_thumb = new AlphaAnimation(0f, 1f);
+				show_thumb.setDuration((int)(250*ANIMATION_SPEED));
+				show_thumb.setInterpolator(MainActivity.this, android.R.anim.linear_interpolator);
+				timer_thumb_iv.startAnimation(show_thumb);
+			}
+		});
+
+		timer_layout.startAnimation(hide_timer);
+	}
+
+	//Callbacks
 	@Override
 	public void onSetAudiobook(final Audiobook audiobook){
 		runOnUiThread(new Runnable() {
@@ -426,9 +396,9 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			public void run() {
 				int trackno = 0;
 				Track track = audiobook.getPlaylist().get(trackno);
-				displayInfo(audiobook, track);
+				displayInfo(audiobook, trackno);
 				displayPlayButton();
-				displayTracks(audiobook, track, trackno);
+				displayTracks(audiobook, trackno);
 				displayTime(track);
 			}
 		});
@@ -439,9 +409,9 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			@Override
 			public void run() {
 				Track track = audiobook.getPlaylist().get(trackno);
-				displayInfo(audiobook, track);
+				displayInfo(audiobook, trackno);
 				displayPlayButton();
-				displayTracks(audiobook, track, trackno);
+				displayTracks(audiobook, trackno);
 				displayTime(track);
 			}
 		});
@@ -481,7 +451,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				displayBookmarks();
 				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
-				displayTracks(audiobook, track, new_trackno);
+				displayTracks(audiobook, new_trackno);
 				displayTime(track);
 			}
 		});
@@ -500,7 +470,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				displayBookmarks();
 				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
-				displayTracks(audiobook, track, new_trackno);
+				displayTracks(audiobook, new_trackno);
 				displayTime(track);
 			}
 		});
@@ -553,7 +523,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				displayBookmarks();
 				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
-				displayTracks(audiobook, track, new_trackno);
+				displayTracks(audiobook, new_trackno);
 				displayTime(track);
 			}
 		});
@@ -590,7 +560,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				displayBookmarks();
 				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
-				displayTracks(audiobook, track, new_trackno);
+				displayTracks(audiobook, new_trackno);
 				displayTime(track);
 			}
 		});
@@ -611,7 +581,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				displayBookmarks();
 				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
-				displayTracks(audiobook, track, new_trackno);
+				displayTracks(audiobook, new_trackno);
 				displayTime(track);
 			}
 		});
@@ -622,17 +592,20 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			@Override public void run() {
 				if(new_trackno == -1) return;
 				Track track = audiobook.getPlaylist().get(new_trackno);
-				displayTracks(audiobook, track, new_trackno);
+				displayTracks(audiobook, new_trackno);
 				displayTime(track);
 			}
 		});
 	}
 	@Override
-	public void onUpdateBookmark(String author, String album, int trackno, int progress){
-
+	public void onAudiobookSelected(Audiobook audiobook) {
+		selectAudiobook(audiobook);
+	}
+	@Override
+	public void onTimerTerminate() {
+		player.pause();
 	}
 
-	
 	//Update views
 	private void displayNoInfo(){
 		//Author
@@ -647,7 +620,9 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		ImageView cover_iv = (ImageView) findViewById(R.id.audiobook_basics_cover_iv);
 		if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 	}
-	private void displayInfo(Audiobook audiobook, Track track){
+	private void displayInfo(Audiobook audiobook, int trackno){
+		Track track = audiobook.getPlaylist().get(trackno);
+		
 		//Author
 		TextView author_tv = (TextView) findViewById(R.id.audiobook_basics_author_tv);
 		if(author_tv != null) author_tv.setText(audiobook.getAuthor());
@@ -672,7 +647,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		LinearLayout tracks_gv = (LinearLayout) findViewById(R.id.controller_tracks_grid);
 		track_seeker.setMax(0);
 		track_seeker.setProgress(0);
-		
+
 		//Title
 		if(title_tv != null) title_tv.setText("");
 
@@ -681,12 +656,13 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			tracks_gv.removeAllViews();
 		}
 	}
-	private void displayTracks(Audiobook audiobook, Track track, int trackno){
+	private void displayTracks(Audiobook audiobook, int trackno){
+		Track track = audiobook.getPlaylist().get(trackno);
 		TextView title_tv = (TextView) findViewById(R.id.track_title);
 		LinearLayout tracks_gv = (LinearLayout) findViewById(R.id.controller_tracks_grid);
 		track_seeker.setMax(audiobook.getPlaylist().size()-1);
 		track_seeker.setProgress(trackno);
-		
+
 		//Title
 		String _trackno = String.format(Locale.US, "%02d", trackno+1);
 		if(title_tv != null) title_tv.setText(_trackno + " " + track.getTitle());
@@ -727,7 +703,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			}
 		}
 	}
-	private void displayNoTime(){
+	@Override
+	public void displayNoTime(){
 		//Progress
 		TextView progress_tv = (TextView) findViewById(R.id.seeker_progress_tv);
 		SeekBar seeker = (SeekBar) findViewById(R.id.seeker_progress_seeker);
@@ -736,11 +713,12 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		seeker.setMax(0);
 		seeker.setProgress(0);
 	}
-	private void displayTime(Track track){
+	@Override
+	public void displayTime(Track track){
 		//Progress
 		TextView progress_tv = (TextView) findViewById(R.id.seeker_progress_tv);
 		SeekBar seeker = (SeekBar) findViewById(R.id.seeker_progress_seeker);
-		
+
 		if(player == null) {
 			progress_tv.setText(Time.toString(0));
 			seeker.setProgress(0);
@@ -809,21 +787,21 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	private void emphasizeLock(){
 		ImageView lock_iv = (ImageView) findViewById(R.id.controller_lock);
 		AnimationSet set = new AnimationSet(false);
-		
+
 		Animation translate = new TranslateAnimation(0, -200, 0, 0);
 		translate.setDuration(500);
 		translate.setInterpolator(this, android.R.anim.decelerate_interpolator);
 		set.addAnimation(translate);
-		
+
 		Animation translateBack = new TranslateAnimation(0, 200, 0, 0);
 		translateBack.setDuration(500);
 		translateBack.setInterpolator(this, android.R.anim.accelerate_interpolator);
 		translateBack.setStartOffset(500);
 		set.addAnimation(translateBack);
-		
+
 		lock_iv.startAnimation(set);
 	}
-	
+
 	//Menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -840,7 +818,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			break;
 
 		case R.id.menu_item_import_export:
-			new Dialog_import_export(this).show();
+			new Dialog_import_export(this, base, this).show();
 			break;
 		}
 		return false;
@@ -854,7 +832,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		if(audiobook == null) return;
 		selectAudiobook(audiobook);
 	}
-	private void selectAudiobook(Audiobook audiobook){
+	public void selectAudiobook(Audiobook audiobook){
 		Bookmark bookmark = new Bookmark(audiobook.getAuthor(), audiobook.getAlbum(), 0, 0);
 		BookmarkManager.getInstance().createOrUpdateBookmark(getFilesDir(), bookmark, true);
 		displayBookmarks();
@@ -862,8 +840,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 	}
 
-	public RelativeLayout getBase() { return this.base; }
-	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent event){
 		final int MIN_DIST = 200;
@@ -886,7 +862,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				Animation translate = new TranslateAnimation(-125, 0, 0, 0); 
 				translate.setInterpolator(MainActivity.this, android.R.anim.bounce_interpolator);
 				translate.setDuration((int)(1000*ANIMATION_SPEED));
-				
+
 				Animation translatey = new TranslateAnimation(0, 0, 40, 0); 
 				translatey.setInterpolator(MainActivity.this, android.R.anim.decelerate_interpolator);
 				translatey.setDuration((int)(250*ANIMATION_SPEED));
@@ -894,7 +870,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 				Animation fade = new AlphaAnimation(0, 1);
 				fade.setInterpolator(MainActivity.this, android.R.anim.decelerate_interpolator);
 				fade.setDuration((int)(1000*ANIMATION_SPEED));
-				
+
 				Animation scale = new ScaleAnimation(5, 1, 5, 1);
 				scale.setInterpolator(MainActivity.this, android.R.anim.bounce_interpolator);
 				scale.setDuration((int)(1000*ANIMATION_SPEED));
@@ -922,7 +898,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 				Animation fade = new AlphaAnimation(1, 0);
 				fade.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
-				
+
 				Animation scale = new ScaleAnimation(1, 5, 1, 5);
 				scale.setInterpolator(MainActivity.this, android.R.anim.accelerate_interpolator);
 
@@ -948,91 +924,57 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		return false;
 	}
 	private float x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-	
-	//Monitors
 
-	class displayMonitor extends Monitor {
-		private Activity activity;
+	private void version() {
+		TextView version_tv = (TextView) findViewById(R.id.version);
+		String versionName;
+		try { versionName = this.getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+		} catch (NameNotFoundException e) { versionName = "Unknown"; }
+		if(version_tv != null) version_tv.setText(versionName);
+	}
+	private void beta() {
+		final boolean BETA = false;
+		TextView beta = (TextView) findViewById(R.id.controller_beta);
+		beta.setVisibility(BETA ? View.VISIBLE : View.GONE);
+		if(BETA){
+			Calendar expiration = Calendar.getInstance(Locale.getDefault());
+			expiration.set(Calendar.YEAR, 2015);
+			expiration.set(Calendar.MONTH, Calendar.APRIL);
+			expiration.set(Calendar.DAY_OF_MONTH, 1);
+			beta.setText("BETA (expires on April 1st 2015)");
 
-		public displayMonitor(Activity activity) {
-			super(1, TimeUnit.SECONDS);
-			this.activity = activity;
+			if(System.currentTimeMillis() >= expiration.getTimeInMillis()) {
+				new Dialog_expired(this, base).show();
+			}
 		}
+	}
+	private void audio_properties() {
+		//Set stream for hardware volume buttons
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-		@Override
-		public void execute() {
-			if(activity == null) return;
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if(player == null) return;
-					Audiobook audiobook = player.getAudiobook();
-					if(audiobook == null) return;
-					int trackno = player.getTrackno();
-					Track track = audiobook.getPlaylist().get(trackno);
-					Bookmark bookmark = BookmarkManager.getInstance().getBookmark(audiobook);
-					if(bookmark != null){
-						displayTime(track);
-					} else {
-						displayNoTime();
-					}
+		// Request audio focus for playback
+		final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		final ComponentName receiver = new ComponentName(getPackageName(), HeadSetReceiver.class.getName());
+
+		final OnAudioFocusChangeListener l = new OnAudioFocusChangeListener() {
+			@Override
+			public void onAudioFocusChange(int focusChange) {
+				if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT){
+					// Pause playback
+				} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+					am.registerMediaButtonEventReceiver(receiver);
+					// Resume playback 
+				} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+					am.unregisterMediaButtonEventReceiver(receiver);
+					am.abandonAudioFocus(this);
+					// Stop playback
 				}
-			});
-		}
-
-	}
-	
-	class BookmarkMonitor extends Monitor {
-		private static final String TAG = "Monitor_bookmarks";
-		private boolean go_again = true;
-
-		public BookmarkMonitor() {
-			super(5, TimeUnit.SECONDS);
-		}
-
-		@Override
-		public void execute() {
-			if(player == null) return;
-
-			if(!go_again && !player.isPlaying()){
-				return;
 			}
-
-			Audiobook audiobook = player.getAudiobook();
-			if(audiobook == null) return;
-
-			String author = audiobook.getAuthor();
-			String album = audiobook.getAlbum();
-			int trackno = player.getTrackno();
-			int progress = player.getCurrentProgress();
-			BookmarkManager bm = BookmarkManager.getInstance();
-			if(trackno > 0 || progress > 0){
-				Bookmark bookmark = bm.createOrUpdateBookmark(getFilesDir(), author, album, trackno, progress, null, true);
-				BookmarkManager.getInstance().saveBookmarks(getFilesDir());
-				Log.d(TAG, "Bookmark created or updated\n"+bookmark);
-				
-				bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.PLAY, trackno, progress));
-
-				//Update view
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						displayBookmarks();
-					}
-				});
-			}
-			go_again = player.isPlaying();
+		};
+		int result = am.requestAudioFocus(l, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+		if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+			throw new RuntimeException("Unable to obtaing audio focus");
 		}
-
-	}
-	@Override
-	public void onAudiobookSelected(Audiobook audiobook) {
-		selectAudiobook(audiobook);
-	}
-
-
-	@Override
-	public void onTimerTerminate() {
-		player.pause();
+		Log.d(TAG, "Audio focus gained");
 	}
 }

@@ -45,7 +45,7 @@
 
             <include layout="@layout/divider_horizontal" />
 
-            <include layout="@layout/fragment_audiobook_basics" />
+            <include layout="@layout/controller_audiobook_basics" />
 
             <include layout="@layout/divider_horizontal" />
 

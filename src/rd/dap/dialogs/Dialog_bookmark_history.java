@@ -3,11 +3,11 @@ package rd.dap.dialogs;
 import java.util.ArrayList;
 
 import rd.dap.R;
-import rd.dap.activities.MainActivity;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkEvent;
 import rd.dap.support.Time;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -22,31 +22,28 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class Dialog_bookmark_history {
-	private MainActivity activity;
-	private RelativeLayout base;
+public class Dialog_bookmark_history extends CustomDialog {
 	private Bookmark bookmark;
 	private Callback callback;
 	
+	public Dialog_bookmark_history(Activity activity, ViewGroup parent, Bookmark bookmark, Callback callback) {
+		super(activity, parent);
+		this.bookmark = bookmark;
+		this.callback = callback;
+	}
+
 	public interface Callback {
 		public void onItemSelected(BookmarkEvent event);
 	}
 	
-	public Dialog_bookmark_history(MainActivity activity, Bookmark bookmark, Callback callback) {
-		this.activity = activity;
-		this.base = activity.getBase();
-		this.bookmark = bookmark;
-		this.callback = callback;
-	}
 
 	public void show(){
 		final Dialog dialog = new Dialog(activity);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(activity);
-		View dv = inflater.inflate(R.layout.dialog_history, base, false);
+		View dv = inflater.inflate(R.layout.dialog_history, parent, false);
 
 		//Title
 		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
@@ -54,13 +51,7 @@ public class Dialog_bookmark_history {
 
 		//Exit button
 		ImageButton exit_btn = (ImageButton) dv.findViewById(R.id.dialog_exit_btn);
-		exit_btn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
+		exit_btn.setOnClickListener(new ExitListener());
 
 		//Cancel button
 		Button left_btn = (Button) dv.findViewById(R.id.dialog_history_btn);

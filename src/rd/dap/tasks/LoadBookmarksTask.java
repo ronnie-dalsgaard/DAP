@@ -6,7 +6,6 @@ import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import rd.dap.services.PlayerService;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -16,17 +15,16 @@ public class LoadBookmarksTask extends AsyncTask<Void, Void, Void> {
 	private static final String TAG = "LoadBookmarksTask";
 	private Activity activity;
 	private PlayerService player;
-	private Dialog dialog;
 	private Callback callback;
 	
 	public interface Callback{
 		public void displayBookmarks();
+		public void complete();
 	}
 	
-	public LoadBookmarksTask(Activity activity, PlayerService player, Dialog dialog, Callback callback){
+	public LoadBookmarksTask(Activity activity, PlayerService player, Callback callback){
 		this.activity = activity;
 		this.player = player;
-		this.dialog = dialog;
 		this.callback = callback;
 	}
 	
@@ -65,11 +63,9 @@ public class LoadBookmarksTask extends AsyncTask<Void, Void, Void> {
 						player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 					}
 				}
-
 				callback.displayBookmarks();
 			}
-
 		});
-		dialog.dismiss();
+		callback.complete();
 	}
 }

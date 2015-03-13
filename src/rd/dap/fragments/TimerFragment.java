@@ -3,7 +3,7 @@ package rd.dap.fragments;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
-import rd.dap.support.Monitor;
+import rd.dap.monitors.Monitor;
 import rd.dap.support.Time;
 import android.app.Activity;
 import android.app.Fragment;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import rd.dap.model.Audiobook;
 import rd.dap.model.Track;
-import rd.dap.support.Monitor;
+import rd.dap.monitors.Monitor;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -43,7 +43,6 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 		public void onSeekTrack(Audiobook audiobook, int new_trackno);
 		public void onUndo(Audiobook audiobook, int new_trackno, int new_progress);
 		public void onComplete(Audiobook audiobook, int new_trackno);
-		public void onUpdateBookmark(String author, String album, int trackno, int progress);
 	}
 	public void addObserver(PlayerObserver observer) { observers.add(observer); }
 

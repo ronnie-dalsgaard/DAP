@@ -48,7 +48,7 @@
                 android:id="@+id/div_1" 
                 layout="@layout/divider_horizontal" />
 
-            <include layout="@layout/fragment_audiobook_basics" />
+            <include layout="@layout/controller_audiobook_basics" />
 
             <include 
                 android:id="@+id/div_2"
