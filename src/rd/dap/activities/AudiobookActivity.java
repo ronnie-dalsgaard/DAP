@@ -8,6 +8,7 @@ import static rd.dap.activities.InputActivity.REQUEST_EDIT_TRACK;
 import java.util.ArrayList;
 import java.util.List;
 
+import rd.dap.FileBrowserActivity;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -127,7 +128,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 			startActivityForResult(intent, REQUEST_EDIT_ALBUM);
 		} else if(position == TYPE_COVER) {
 			Intent intent = new Intent(AudiobookActivity.this, FileBrowserActivity.class);
-			intent.putExtra("type", "image");
+			intent.putExtra("type", FileBrowserActivity.TYPE_IMAGE);
 			intent.putExtra("message", "Select image file");
 			intent.putExtra("requestcode", REQUEST_EDIT_COVER);
 			startActivityForResult(intent, REQUEST_EDIT_COVER);

@@ -10,9 +10,9 @@ import rd.dap.R;
 import rd.dap.activities.AudiobooksFragment.OnAudiobookSelectedListener;
 import rd.dap.dialogs.Dialog_bookmark_details;
 import rd.dap.dialogs.Dialog_delete_bookmark;
+import rd.dap.dialogs.Dialog_disabled_bookmarks;
 import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
-import rd.dap.dialogs.Dialog_import_export.ImportExportCallback;
 import rd.dap.fragments.TimerFragment.TimerListener;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -74,9 +74,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, 
-ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
-OnAudiobookSelectedListener, TimerListener, DisplayMoniterListener, BookmarkMonitorListener,
-ImportExportCallback {
+	ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
+	OnAudiobookSelectedListener, TimerListener, DisplayMoniterListener, BookmarkMonitorListener,
+	Dialog_import_export.Callback {
 	private static final String TAG = "MainActivity";
 	private static final int TRACKNO = 1111;
 	private static final int BOOKMARK = 2222;
@@ -172,9 +172,21 @@ ImportExportCallback {
 		loading_dialog.setContentView(dv);
 		loading_dialog.show();
 
-		new LoadBookmarksTask(this, player, new LoadBookmarksTask.Callback() {
-			@Override public void displayBookmarks() { MainActivity.this.displayBookmarks(); }
-			@Override public void complete() { latch.countDown(); System.out.println("Bookmarks latch released"); }
+		new LoadBookmarksTask(this, new LoadBookmarksTask.Callback() {
+			@Override public void complete() { 
+				MainActivity.this.displayBookmarks();
+				latch.countDown(); 
+				System.out.println("Bookmarks latch released"); }
+			@Override
+			public void noAudiobooks() {
+				Intent intent = new Intent(MainActivity.this, AudiobooksActivity.class);
+				startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
+			}
+			@Override
+			public void noBookmarks() {
+				Intent intent = new Intent(MainActivity.this, AudiobooksActivity.class);
+				startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
+			}
 		}).execute();
 	
 		new AsyncTask<Void, Void, Void>(){
@@ -186,9 +198,13 @@ ImportExportCallback {
 				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 				String author = pref.getString("author", null);
 				String album = pref.getString("album", null);
-				Bookmark bookmark = BookmarkManager.getInstance().getBookmark(author, album);
-				Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-				player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+				BookmarkManager bm = BookmarkManager.getInstance();
+				Bookmark bookmark = bm.getBookmark(author, album);
+				AudiobookManager am = AudiobookManager.getInstance();
+				Audiobook audiobook = am.getAudiobook(bookmark);
+				int trackno = bookmark.getTrackno();
+				int progress = bookmark.getProgress();
+				if(audiobook != null) player.setAudiobook(audiobook, trackno, progress);
 				return null;
 			}
 			@Override protected void onPostExecute(Void result){
@@ -750,6 +766,7 @@ ImportExportCallback {
 		bookmark_list.removeAllViews();
 		LayoutInflater inflater = LayoutInflater.from(this);
 		ArrayList<Bookmark> bookmarks = BookmarkManager.getInstance().getBookmarks();
+		ArrayList<Bookmark> disabledBookmarks = new ArrayList<Bookmark>();
 		for(Bookmark bookmark : bookmarks){
 			View v = inflater.inflate(R.layout.bookmark_item, bookmark_list, false);
 			v.setId(BOOKMARK);
@@ -759,15 +776,15 @@ ImportExportCallback {
 
 			//Cover
 			Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-			if(audiobook != null){
-				ImageView cover_iv = (ImageView) v.findViewById(R.id.bookmark_cover_iv);
-				String cover = audiobook.getCover();
-				if(cover != null) {
-					Bitmap bitmap = BitmapFactory.decodeFile(cover);
-					if(cover_iv != null) cover_iv.setImageBitmap(bitmap);
-				} else {
-					if(cover_iv != null) cover_iv.setImageDrawable(noCover);
-				}
+			if(audiobook == null) { disabledBookmarks.add(bookmark); continue; }
+			
+			ImageView cover_iv = (ImageView) v.findViewById(R.id.bookmark_cover_iv);
+			String cover = audiobook.getCover();
+			if(cover != null) {
+				Bitmap bitmap = BitmapFactory.decodeFile(cover);
+				if(cover_iv != null) cover_iv.setImageBitmap(bitmap);
+			} else {
+				if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 			}
 
 			//Track no
@@ -782,6 +799,21 @@ ImportExportCallback {
 
 			View div = inflater.inflate(R.layout.divider_vertical, bookmark_list, false);
 			bookmark_list.addView(div);
+		}
+		if(!disabledBookmarks.isEmpty()){
+			new Dialog_disabled_bookmarks(this, base, disabledBookmarks, new Dialog_disabled_bookmarks.Callback() {
+				@Override
+				public void onBookmarkDeleted() {
+					displayBookmarks();
+					displayNoInfo();
+					displayNoTracks();
+					displayNoTime();
+					displayNoPlayButton();
+				}
+			}).show();
+			
+			
+			
 		}
 	}
 	private void emphasizeLock(){
@@ -831,6 +863,7 @@ ImportExportCallback {
 		Audiobook audiobook = (Audiobook) data.getSerializableExtra("result");
 		if(audiobook == null) return;
 		selectAudiobook(audiobook);
+		if(latch != null) latch.countDown(); 
 	}
 	public void selectAudiobook(Audiobook audiobook){
 		Bookmark bookmark = new Bookmark(audiobook.getAuthor(), audiobook.getAlbum(), 0, 0);

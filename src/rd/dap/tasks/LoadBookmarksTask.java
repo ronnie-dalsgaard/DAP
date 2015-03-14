@@ -1,10 +1,8 @@
 package rd.dap.tasks;
 
-import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
-import rd.dap.services.PlayerService;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -14,17 +12,16 @@ import android.util.Log;
 public class LoadBookmarksTask extends AsyncTask<Void, Void, Void> {
 	private static final String TAG = "LoadBookmarksTask";
 	private Activity activity;
-	private PlayerService player;
 	private Callback callback;
 	
 	public interface Callback{
-		public void displayBookmarks();
 		public void complete();
+		public void noAudiobooks();
+		public void noBookmarks();
 	}
 	
-	public LoadBookmarksTask(Activity activity, PlayerService player, Callback callback){
+	public LoadBookmarksTask(Activity activity, Callback callback){
 		this.activity = activity;
-		this.player = player;
 		this.callback = callback;
 	}
 	
@@ -37,6 +34,10 @@ public class LoadBookmarksTask extends AsyncTask<Void, Void, Void> {
 	@Override 
 	protected void onPostExecute(Void obj){
 		Log.d(TAG, "onPostExecute - audiobooks loaded");
+		AudiobookManager am = AudiobookManager.getInstance();
+		if(am.getAudiobooks() == null || am.getAudiobooks().isEmpty()) callback.noAudiobooks();
+		BookmarkManager bm = BookmarkManager.getInstance();
+		if(bm.getBookmarks() == null || bm.getBookmarks().isEmpty()) callback.noBookmarks();
 
 		activity.runOnUiThread(new Runnable() {
 
@@ -56,14 +57,6 @@ public class LoadBookmarksTask extends AsyncTask<Void, Void, Void> {
 					bookmark = BookmarkManager.getInstance().getBookmarks().get(0);
 					pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
 				}
-
-				if(player != null && player.getAudiobook() == null) {
-					Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
-					if(audiobook != null) {
-						player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
-					}
-				}
-				callback.displayBookmarks();
 			}
 		});
 		callback.complete();

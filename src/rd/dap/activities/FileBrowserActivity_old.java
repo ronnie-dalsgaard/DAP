@@ -26,7 +26,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class FileBrowserActivity extends Activity implements OnItemClickListener, OnItemLongClickListener {
+public class FileBrowserActivity_old extends Activity implements OnItemClickListener, OnItemLongClickListener {
 	private static final String TAG = "FileBrowserActivity";
 	private static final String[] TYPE_IMAGE = {".jpg", ".png"};
 	private static final String[] TYPE_AUDIO = {".mp3"};
@@ -41,7 +41,6 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 		super.onCreate(savedInstanceState);
 		ListView listview = new ListView(this);
 		setContentView(listview);
-//		setContentView(R.layout.activity_list_with_miniplayer);
 		Log.d(TAG, "onCreate");
 
 		type = getIntent().getStringExtra("type");
@@ -63,12 +62,11 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 			list.add(f);
 		}
 
-//		ListView listview = (ListView) findViewById(R.id.list_layout_lv);
 		LayoutInflater inflater = LayoutInflater.from(this);
 		TextView v = (TextView) inflater.inflate(R.layout.file_browser_message, listview, false);
 		v.setText(message);
 		listview.addHeaderView(v);
-		adapter = new FileAdapter(this, R.layout.file_browser_file_item, list);
+		adapter = new FileAdapter(this, R.layout.file_browser_file_item_old, list);
 		adapter.setRoot(root);
 		adapter.setCurent(root);
 		listview.setAdapter(adapter);
@@ -119,7 +117,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 		position -= 1; //compensate for header
-		Toast.makeText(FileBrowserActivity.this, "LongClick", Toast.LENGTH_SHORT).show();
+		Toast.makeText(FileBrowserActivity_old.this, "LongClick", Toast.LENGTH_SHORT).show();
 		selectFolder(position);
 		return true;
 	}
@@ -156,7 +154,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 			ViewHolder holder;
 			if(convertView == null){
 				LayoutInflater inflater = LayoutInflater.from(getContext());
-				convertView = inflater.inflate(R.layout.file_browser_file_item, parent, false);
+				convertView = inflater.inflate(R.layout.file_browser_file_item_old, parent, false);
 				//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 
 				holder = new ViewHolder();
@@ -213,7 +211,7 @@ public class FileBrowserActivity extends Activity implements OnItemClickListener
 	}
 	static class ViewHolder {
 		public TextView name_tv;
-		public ImageView type_iv;
+		public ImageView type_iv, expand_iv;
 		public CheckBox cb;
 	}
 	

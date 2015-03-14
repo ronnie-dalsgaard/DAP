@@ -1,7 +1,7 @@
 package rd.dap.activities;
 
 import static rd.dap.activities.AudiobookActivity.STATE_EDIT;
-import static rd.dap.activities.FileBrowserActivity.TYPE_FOLDER;
+import static rd.dap.activities.FileBrowserActivity_old.TYPE_FOLDER;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import rd.dap.FileBrowserActivity;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -38,7 +39,11 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -50,6 +55,7 @@ import android.widget.TextView;
 public class AudiobooksFragment extends Fragment implements OnClickListener, OnLongClickListener {
 	private static final String TAG = "AudioboosFragment";
 	private LinearLayout layout;
+	private FrameLayout frame;
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private static final int REQUEST_SET_HOME_FOLDER = 9003;
 	private OnAudiobookSelectedListener audiobookSelectedListener;
@@ -83,7 +89,6 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 		ScrollView scroller = new ScrollView(getActivity());
 		scroller.addView(layout);
 
-//		int width = (int) getResources().getDimension(R.dimen.mini_player_width);
 		int width = LayoutParams.WRAP_CONTENT;
 		int height = LayoutParams.WRAP_CONTENT;
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
@@ -91,6 +96,9 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 
 		RelativeLayout base = new RelativeLayout(getActivity());
 		base.addView(scroller, params);
+		
+		frame = new FrameLayout(getActivity());
+		frame.addView(base);
 		
 		//////////////Delete all audiobooks ///////////////
 //		AudiobookManager.getInstance().removeAllAudiobooks(this);
@@ -102,7 +110,7 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 			displayAudiobooks();
 		}
 		
-		return base;
+		return frame;
 	}
 	
 	public void displayAudiobooks(){
@@ -209,50 +217,7 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 					
 				}
 				layout.addView(table, table_params);
-				
-///////////////////////////////////////////////////////////////////////////////////////////
-
-//				LinearLayout row = null;
-//
-//				for(int i = 0; i < albums_by_author.size(); i++){
-//					Audiobook audiobook = albums_by_author.get(i);
-//					
-//
-//					if(i % COLUMNS == 0){
-//						row = new LinearLayout(getActivity());
-//						row.setOrientation(LinearLayout.HORIZONTAL);
-//						table.addView(row, row_params);
-//					}
-//
-//					ImageView cover_iv = new ImageView(getActivity());
-//					LinearLayout element = new LinearLayout(getActivity());
-//					element.setGravity(Gravity.CENTER_HORIZONTAL);
-//					element.setTag(audiobook);
-//					element.setOnClickListener(this);
-//					element.setOnLongClickListener(this);
-//
-//					if(audiobook.getCover() != null){
-//						String cover = audiobook.getCover();
-//						Bitmap bm = BitmapFactory.decodeFile(cover);
-//						cover_iv.setImageBitmap(bm);
-//					} else {
-//						Drawable drw = getResources().getDrawable(R.drawable.ic_action_help);
-//						cover_iv.setImageDrawable(drw);
-//					}
-//
-//					element.addView(cover_iv, cover_params);
-//					row.addView(element, element_params);
-//				}
-//
-//				int missing = COLUMNS - (albums_by_author.size() % COLUMNS);
-//				if(missing < COLUMNS){
-//					for(int i = 0; i < missing; i++){
-//						View dummy = new View(getActivity());
-//						row.addView(dummy, element_params);
-//					}
-//				}
-//
-//				layout.addView(table, table_params);
+	
 			}
 		}
 	}
@@ -303,8 +268,40 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 	@Override
 	public void onClick(View view) {
 		Log.d(TAG, "onItemClick");
-		Audiobook audiobook = (Audiobook) view.getTag();
-		audiobookSelectedListener.onAudiobookSelected(audiobook);
+		final Audiobook audiobook = (Audiobook) view.getTag();
+
+		//Set animation on cover
+		int width = (int) getResources().getDimension(R.dimen.cover_width_big);
+		int height = (int) getResources().getDimension(R.dimen.cover_height_big);
+		
+		int[] location = new int[2];
+		view.getLocationOnScreen(location);
+		float fromX = location[0];
+		float fromY = location[1] - (height/2);
+		System.out.println("("+fromX+", "+fromY+")");
+		
+		final ImageView cover_iv = new ImageView(getActivity());
+		if(audiobook.getCover() != null){
+			String cover = audiobook.getCover();
+			Bitmap bm = BitmapFactory.decodeFile(cover);
+			cover_iv.setImageBitmap(bm);
+			LayoutParams cover_params = new LayoutParams(width, height);
+			frame.addView(cover_iv, cover_params);
+		}
+		
+		Animation translate = new TranslateAnimation(fromX, -width, fromY, 0);
+		translate.setInterpolator(getActivity(), android.R.anim.accelerate_interpolator);
+		translate.setDuration(500);
+		translate.setAnimationListener(new AnimationListener() {
+			@Override public void onAnimationStart(Animation animation) { }
+			@Override public void onAnimationRepeat(Animation animation) {}
+			@Override public void onAnimationEnd(Animation animation) {
+				cover_iv.setVisibility(View.GONE);
+				audiobookSelectedListener.onAudiobookSelected(audiobook);
+			}
+		});
+		cover_iv.startAnimation(translate);
+		//Animatin on cover end
 	}
 	@Override
 	public boolean onLongClick(View view) {
@@ -538,5 +535,14 @@ public class AudiobooksFragment extends Fragment implements OnClickListener, OnL
 		super.onPause();
 		if(dialog == null) return;
 		dialog.dismiss();
+	}
+
+	private class TagBundle{
+		public Audiobook audiobook;
+		public View parent;
+		public TagBundle(Audiobook audiobook, View parent){
+			this.audiobook = audiobook;
+			this.parent = parent;
+		}
 	}
 }

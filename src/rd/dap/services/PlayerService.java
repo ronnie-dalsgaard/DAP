@@ -87,9 +87,11 @@ public class PlayerService extends Service implements OnErrorListener, OnComplet
 		this.audiobook = audiobook;
 		this.trackno = trackno;
 		Track track = audiobook.getPlaylist().get(trackno);
+		if(track == null) return;
 		
 		if(mp != null){ mp.release(); mp = null; }
 		mp = MediaPlayer.create(this, Uri.fromFile(new File(track.getPath())));
+		if(mp == null) return;
 		track.setDuration(mp.getDuration());
 		mp.seekTo(progress);
 		mp.setOnCompletionListener(this);

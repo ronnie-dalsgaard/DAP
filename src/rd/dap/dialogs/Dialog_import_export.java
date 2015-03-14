@@ -10,7 +10,7 @@ import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkEvent;
 import rd.dap.model.BookmarkManager;
-import rd.dap.model.Callback;
+import rd.dap.model.GenericCallback;
 import android.app.Activity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,15 +26,15 @@ import com.google.gson.Gson;
 
 public class Dialog_import_export extends CustomDialog {
 	private static final String TAG = "Dialog_import_export";
-	private ImportExportCallback callback;
+	private Callback callback;
 	
-	public interface ImportExportCallback {
-		public void download(Callback<String> callback);
-		public void upload(String json, Callback<String> callback);
+	public interface Callback {
+		public void download(GenericCallback<String> callback);
+		public void upload(String json, GenericCallback<String> callback);
 		public void displayBookmarks();
 	}
 
-	public Dialog_import_export(Activity activity, ViewGroup parent, ImportExportCallback callback) {
+	public Dialog_import_export(Activity activity, ViewGroup parent, Callback callback) {
 		super(activity, parent);
 		this.callback = callback;
 	}
@@ -59,7 +59,7 @@ public class Dialog_import_export extends CustomDialog {
 					json += line;
 				}
 				Log.d(TAG, "onClick - upload: "+json);
-				callback.upload(json, new Callback<String>() {
+				callback.upload(json, new GenericCallback<String>() {
 					@Override
 					public void onResult(final String result) {
 						Toast.makeText(activity, result, Toast.LENGTH_SHORT).show();
@@ -74,7 +74,7 @@ public class Dialog_import_export extends CustomDialog {
 		down_btn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				callback.download(new Callback<String>() { 
+				callback.download(new GenericCallback<String>() { 
 					@Override public void onResult(String result) {
 						System.out.println("----- DOWNLOAD COMPLETE -----");
 						Log.d(TAG, "onClick - download: "+result);

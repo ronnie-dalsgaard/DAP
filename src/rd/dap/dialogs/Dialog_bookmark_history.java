@@ -26,20 +26,19 @@ public class Dialog_bookmark_history extends CustomDialog {
 	private Bookmark bookmark;
 	private Callback callback;
 	
+	public interface Callback {
+		public void onItemSelected(BookmarkEvent event);
+	}
+	
 	public Dialog_bookmark_history(Activity activity, ViewGroup parent, Bookmark bookmark, Callback callback) {
 		super(activity, parent);
 		this.bookmark = bookmark;
 		this.callback = callback;
 	}
 
-	public interface Callback {
-		public void onItemSelected(BookmarkEvent event);
-	}
-	
-
 	public void show(){
 		LayoutInflater inflater = LayoutInflater.from(activity);
-		View dv = inflater.inflate(R.layout.dialog_history, parent, false);
+		View dv = inflater.inflate(R.layout.dialog_item_list, parent, false);
 
 		//Title
 		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);

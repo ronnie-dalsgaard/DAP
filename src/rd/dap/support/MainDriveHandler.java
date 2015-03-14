@@ -10,7 +10,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import rd.dap.model.Callback;
+import rd.dap.model.GenericCallback;
 import rd.dap.model.DriveHandler;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -65,19 +65,19 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 	private enum Mode {DOWNLOAD, UPLOAD};
 	
 	@Override
-	public void download(Callback<String> resultCallback){
+	public void download(GenericCallback<String> resultCallback){
 		Log.d(TAG, "download");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
 		common_query_file(null, Mode.DOWNLOAD, resultCallback);
 	}
 	@Override
-	public void upload(final String data, Callback<String> resultCallback){
+	public void upload(final String data, GenericCallback<String> resultCallback){
 		Log.d(TAG, "upload");
 		if(client == null) throw new RuntimeException("Not connected to Drive API");
 		common_query_file(data, Mode.UPLOAD, resultCallback);
 	}
 
-	private void common_query_file(final String data, final Mode mode, final Callback<String> resultCallback){
+	private void common_query_file(final String data, final Mode mode, final GenericCallback<String> resultCallback){
 		Query query = new Query.Builder()
 		.addFilter(Filters.eq(SearchableField.TITLE, DH_DRIVE_FILENAME))
 		.addFilter(Filters.eq(SearchableField.MIME_TYPE, "text/plain"))
@@ -106,14 +106,14 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 						
 					} else {
 						switch(mode){
-						case DOWNLOAD: resultCallback.onResult(Callback.NO_FILE); break;
+						case DOWNLOAD: resultCallback.onResult(GenericCallback.NO_FILE); break;
 						case UPLOAD: upload_create_contents(/*folder,*/ data, resultCallback); break; 
 						}
 					}
 					
 				} else {
 					switch(mode){
-					case DOWNLOAD: resultCallback.onResult(Callback.NO_FILE); break;
+					case DOWNLOAD: resultCallback.onResult(GenericCallback.NO_FILE); break;
 					case UPLOAD: upload_create_contents(/*folder,*/ data, resultCallback); break; 
 					}
 				}
@@ -121,7 +121,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 			}
 		});
 	}
-	private void common_read(final DriveFile file, final String newData, final Mode mode, final Callback<String> resultCallback){
+	private void common_read(final DriveFile file, final String newData, final Mode mode, final GenericCallback<String> resultCallback){
 		file.open(client, DriveFile.MODE_READ_ONLY, new DownloadProgressListener() {
 
 			@Override
@@ -166,7 +166,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 		});
 	}
 	
-	private void upload_create_contents(final String data, final Callback<String> resultCallback){
+	private void upload_create_contents(final String data, final GenericCallback<String> resultCallback){
 		Log.d(TAG, "upload_create_contents");
 		Drive.DriveApi.newContents(client)
 			.setResultCallback(new ResultCallback<DriveApi.ContentsResult>() {
@@ -199,7 +199,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 				}
 			});
 	}
-	private void upload_create_file(Contents contents, final Callback<String> resultCallback){
+	private void upload_create_file(Contents contents, final GenericCallback<String> resultCallback){
 		Log.d(TAG, "upload_create_file");
 		//Create metadata
 		MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
@@ -223,7 +223,7 @@ public abstract class MainDriveHandler extends Activity implements ConnectionCal
 				}
 			});
 	}
-	private void upload_write(DriveFile file, final String oldData, final String newData, final Callback<String> resultCallback){	
+	private void upload_write(DriveFile file, final String oldData, final String newData, final GenericCallback<String> resultCallback){	
 		file.open(client, DriveFile.MODE_WRITE_ONLY, new DownloadProgressListener() {
 			
 			@Override

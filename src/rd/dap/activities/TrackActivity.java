@@ -74,7 +74,7 @@ public class TrackActivity extends Activity {
 		file_tv.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(TrackActivity.this, FileBrowserActivity.class);
+				Intent intent = new Intent(TrackActivity.this, FileBrowserActivity_old.class);
 				intent.putExtra("type", "audio");
 				intent.putExtra("message", "Select audio file");
 				intent.putExtra("requestcode", REQUEST_EDIT_TRACK_FILE);

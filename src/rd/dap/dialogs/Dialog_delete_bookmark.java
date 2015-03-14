@@ -1,8 +1,8 @@
 package rd.dap.dialogs;
 
 import rd.dap.R;
-import rd.dap.activities.MainActivity;
 import rd.dap.model.Bookmark;
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,7 +19,7 @@ public class Dialog_delete_bookmark extends CustomDialog {
 		public void onDeleteBookmarkConfirmed();
 	}
 	
-	public Dialog_delete_bookmark(MainActivity activity, ViewGroup parent, Bookmark bookmark, Callback callback) {
+	public Dialog_delete_bookmark(Activity activity, ViewGroup parent, Bookmark bookmark, Callback callback) {
 		super(activity, parent);
 		this.bookmark = bookmark;
 		this.callback = callback;
