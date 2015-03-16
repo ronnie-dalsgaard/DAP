@@ -1,13 +1,13 @@
 package rd.dap.activities;
 
-import rd.dap.fragments.AudiobooksFragment4;
+import rd.dap.fragments.AudiobooksFragment;
 import rd.dap.model.Audiobook;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-public class AudiobooksActivity extends Activity implements AudiobooksFragment4.OnAudiobookSelectedListener{
+public class AudiobooksActivity extends Activity implements AudiobooksFragment.OnAudiobookSelectedListener{
 	private static final String TAG = "AudiobookActivity";
 	public static final int REQUEST_AUDIOBOOK = 8801;
 
@@ -17,7 +17,7 @@ public class AudiobooksActivity extends Activity implements AudiobooksFragment4.
 		super.onCreate(savedInstanceState);
 
 		if(savedInstanceState == null)
-            getFragmentManager().beginTransaction().add(android.R.id.content, new AudiobooksFragment4()).commit();
+            getFragmentManager().beginTransaction().add(android.R.id.content, new AudiobooksFragment()).commit();
 	}
 
 

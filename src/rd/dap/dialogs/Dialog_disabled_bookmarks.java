@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import rd.dap.R;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
+import rd.dap.support.Time;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -52,6 +53,7 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 
 		//List
 		ListView lv = (ListView) dv.findViewById(R.id.dialog_history_list);
+		lv.setDivider(activity.getResources().getDrawable(R.drawable.horizontal_divider));
 		final DisabledBookmarkAdapter adapter = new DisabledBookmarkAdapter(activity, bookmarks);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(new OnItemClickListener() {
@@ -96,10 +98,12 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 			if (convertView == null) {
 				LayoutInflater inflater;
 				inflater = LayoutInflater.from(getContext());
-				convertView = inflater.inflate(R.layout.audiobook_item, null);
+				convertView = inflater.inflate(R.layout.bookmark_item_full, null);
 				holder = new ViewHolder();
 				holder.author_tv = (TextView) convertView.findViewById(R.id.audiobook_item_author_tv);
 				holder.album_tv = (TextView) convertView.findViewById(R.id.audiobook_item_album_tv);
+				holder.track_tv = (TextView) convertView.findViewById(R.id.audiobook_item_track_tv);
+				holder.progress_tv = (TextView) convertView.findViewById(R.id.audiobook_item_progress_tv);
 				convertView.setTag(holder);		        
 			} else { holder = (ViewHolder) convertView.getTag(); }
 
@@ -107,12 +111,15 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 
 			holder.author_tv.setText(bookmark.getAuthor());
 			holder.album_tv.setText(bookmark.getAlbum());
+			holder.track_tv.setText(bookmark.getTrackno()+1);
+			holder.progress_tv.setText(Time.toString(bookmark.getProgress()));
+			
 
 			return convertView;
 		}
 
 		class ViewHolder {
-			public TextView author_tv, album_tv;
+			public TextView author_tv, album_tv, track_tv, progress_tv;
 		}
 	}
 

@@ -4,10 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import rd.dap.R;
-import rd.dap.R.drawable;
-import rd.dap.R.id;
-import rd.dap.R.layout;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -29,7 +25,7 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 	public static final String TYPE_IMAGE = "image";
 	public static final String TYPE_AUDIO = "audio";
 	private String type, message;
-	private File root;
+	private File rootFolder;
 	private ArrayList<File> list;
 
 	@Override
@@ -53,7 +49,7 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 			throw new RuntimeException("No external storrage!");
 		}
 
-		root = Environment.getExternalStorageDirectory();
+		rootFolder = Environment.getExternalStorageDirectory();
 
 		LayoutInflater inflater = LayoutInflater.from(this);
 		TextView v = (TextView) inflater.inflate(R.layout.file_browser_message, l, false);
@@ -61,7 +57,7 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 		l.addView(v);
 
 		list = new ArrayList<File>();
-		for(File f : root.listFiles()){
+		for(File f : rootFolder.listFiles()){
 			list.add(f);
 		}
 
@@ -72,7 +68,6 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 
 	@SuppressLint("InflateParams")
 	private void addChildren(File file, LinearLayout l){
-		System.out.println("#"+file.getName());
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View item_layout = inflater.inflate(R.layout.file_browser_item, null, false);
 		//Must pass null as parent!

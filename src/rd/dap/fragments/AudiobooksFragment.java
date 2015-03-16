@@ -40,7 +40,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class AudiobooksFragment4 extends Fragment implements OnItemClickListener, OnItemLongClickListener {
+public class AudiobooksFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener {
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private static final int REQUEST_SET_HOME_FOLDER = 9003;
 	private GridView gridview;
@@ -48,7 +48,7 @@ public class AudiobooksFragment4 extends Fragment implements OnItemClickListener
 	private OnAudiobookSelectedListener audiobookSelectedListener;
 	private GridViewAdapter adapter;
 
-	public AudiobooksFragment4(){
+	public AudiobooksFragment(){
 		AudiobookManager am =  AudiobookManager.getInstance();
 		audiobooks = am.getAudiobooks();
 		Collections.sort(audiobooks);

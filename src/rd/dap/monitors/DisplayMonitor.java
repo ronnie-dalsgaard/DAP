@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
-import rd.dap.model.Track;
 import rd.dap.services.PlayerService;
 import android.app.Activity;
 
@@ -15,7 +14,7 @@ public class DisplayMonitor extends Monitor {
 	
 	public interface DisplayMoniterListener {
 		public PlayerService getPlayer();
-		public void displayTime(Track track);
+		public void displayTime(Audiobook audiobook, int trackno);
 		public void displayNoTime();
 	}
 
@@ -36,10 +35,9 @@ public class DisplayMonitor extends Monitor {
 				Audiobook audiobook = player.getAudiobook();
 				if(audiobook == null) return;
 				int trackno = player.getTrackno();
-				Track track = audiobook.getPlaylist().get(trackno);
 				Bookmark bookmark = BookmarkManager.getInstance().getBookmark(audiobook);
 				if(bookmark != null){
-					display_monitor_listener.displayTime(track);
+					display_monitor_listener.displayTime(audiobook, trackno);
 				} else {
 					display_monitor_listener.displayNoTime();
 				}

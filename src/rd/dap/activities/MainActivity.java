@@ -12,8 +12,8 @@ import rd.dap.dialogs.Dialog_delete_bookmark;
 import rd.dap.dialogs.Dialog_disabled_bookmarks;
 import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
-import rd.dap.fragments.AudiobooksFragment4;
-import rd.dap.fragments.AudiobooksFragment4.OnAudiobookSelectedListener;
+import rd.dap.fragments.AudiobooksFragment;
+import rd.dap.fragments.AudiobooksFragment.OnAudiobookSelectedListener;
 import rd.dap.fragments.TimerFragment.TimerListener;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -85,7 +85,7 @@ Dialog_import_export.Callback {
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private ViewGroup base;
 	private Monitor displayMonitor;
-	private PlayerService player;
+	private static PlayerService player;
 	private boolean bound = false, locked = true;
 	private Monitor bookmark_monitor = null;
 	private LinearLayout bookmark_list;
@@ -148,7 +148,6 @@ Dialog_import_export.Callback {
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
 
-
 		latch = new CountDownLatch(2);
 
 		//Display loading dialog
@@ -159,18 +158,24 @@ Dialog_import_export.Callback {
 		loading_dialog.setContentView(dv);
 		loading_dialog.show();
 
-		//Start playerservice
-		new AsyncTask<Void, Void, Void>() {
-			@Override protected Void doInBackground(Void... params) {
-				Intent serviceIntent = new Intent(MainActivity.this, PlayerService.class);
-				startService(serviceIntent);
-				return null;
-			}
-		}.execute();
+		//Bind playerservice
+		if(player == null){
+			new AsyncTask<Void, Void, Void>() {
+				@Override protected Void doInBackground(Void... params) {
+					Intent serviceIntent = new Intent(MainActivity.this, PlayerService.class);
+					startService(serviceIntent);
+					return null;
+				}
+			}.execute();
+		} else {
+			latch.countDown();
+			System.out.println("MainActivity - PlayerService latch released - lazily");
+		}
 
 		System.out.println("MainActivity - savedInstanceState == null:   "+(savedInstanceState == null));
 		if(savedInstanceState != null){ 
 			latch.countDown();
+			System.out.println("MainActivity - Audiobooks/Bookmarks latch released - Lazily");
 			displayBookmarks();
 		} else {
 			//Load Audiobooks and Bookmarks
@@ -178,6 +183,7 @@ Dialog_import_export.Callback {
 				@Override public void complete() { 
 					MainActivity.this.displayBookmarks();
 					latch.countDown(); 
+					System.out.println("MainActivity - Audiobooks/Bookmarks latch released");
 				}
 				@Override
 				public void noAudiobooks() {
@@ -204,15 +210,23 @@ Dialog_import_export.Callback {
 				BookmarkManager bm = BookmarkManager.getInstance();
 				Bookmark bookmark = bm.getBookmark(author, album);
 				AudiobookManager am = AudiobookManager.getInstance();
-				Audiobook audiobook = am.getAudiobook(bookmark);
-				int trackno = bookmark.getTrackno();
+				final Audiobook audiobook = am.getAudiobook(bookmark);
+				final int trackno = bookmark.getTrackno();
 				int progress = bookmark.getProgress();
 				if(audiobook != null) player.setAudiobook(audiobook, trackno, progress);
+				runOnUiThread(new Runnable() {
+					public void run() {
+						displayInfo(audiobook, trackno);
+						displayPlayButton();
+						displayTime(audiobook, trackno);
+						displayTracks(audiobook, trackno);
+					}
+				});
 				return null;
 			}
 			@Override protected void onPostExecute(Void result){
 				loading_dialog.dismiss();
-				AudiobooksFragment4 frag = (AudiobooksFragment4) getFragmentManager().findFragmentById(R.id.controller_audiobooks_fragment);
+				AudiobooksFragment frag = (AudiobooksFragment) getFragmentManager().findFragmentById(R.id.controller_audiobooks_fragment);
 				if(frag != null){ 
 					frag.displayAudiobooks();
 				}
@@ -241,8 +255,10 @@ Dialog_import_export.Callback {
 		Log.d(TAG, "onStart");
 		super.onStart();
 		//Bind to PlayerService
-		Intent intent = new Intent(this, PlayerService.class);
-		bindService(intent, this, Context.BIND_AUTO_CREATE);	
+		if(player == null){
+			Intent intent = new Intent(this, PlayerService.class);
+			bindService(intent, this, Context.BIND_AUTO_CREATE);
+		}
 	}
 	@Override
 	public void onStop(){
@@ -261,9 +277,17 @@ Dialog_import_export.Callback {
 		player = binder.getPlayerService();
 		bound = true;
 
-		player.addObserver(this);		
+		player.addObserver(this);
+		
 		latch.countDown();
 		System.out.println("MainActivity - PlayerService latch released");
+		
+		Audiobook audiobook = player.getAudiobook();
+		int trackno = player.getTrackno();
+		if(audiobook == null) return;
+		displayInfo(audiobook, trackno);
+		displayPlayButton();
+		
 	}
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
@@ -366,8 +390,14 @@ Dialog_import_export.Callback {
 		Audiobook audiobook;
 		if(bookmark == null) return;
 		audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
+		int trackno = bookmark.getTrackno();
+		int progress = bookmark.getProgress();
 		if(audiobook == null) return;
-		player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
+		player.setAudiobook(audiobook, trackno, progress);
+		displayInfo(audiobook, trackno);
+		displayPlayButton();
+		displayTime(audiobook, trackno);
+		displayTracks(audiobook, trackno);
 		SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 		pref.edit().putString("author", bookmark.getAuthor()).putString("album", bookmark.getAlbum()).commit();
 	}
@@ -451,11 +481,10 @@ Dialog_import_export.Callback {
 			@Override
 			public void run() {
 				int trackno = 0;
-				Track track = audiobook.getPlaylist().get(trackno);
 				displayInfo(audiobook, trackno);
 				displayPlayButton();
 				displayTracks(audiobook, trackno);
-				displayTime(track);
+				displayTime(audiobook, trackno);
 			}
 		});
 	}
@@ -464,11 +493,10 @@ Dialog_import_export.Callback {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				Track track = audiobook.getPlaylist().get(trackno);
 				displayInfo(audiobook, trackno);
 				displayPlayButton();
 				displayTracks(audiobook, trackno);
-				displayTime(track);
+				displayTime(audiobook, trackno);
 			}
 		});
 	}
@@ -505,10 +533,9 @@ Dialog_import_export.Callback {
 			@Override
 			public void run() {
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
 				displayTracks(audiobook, new_trackno);
-				displayTime(track);
+				displayTime(audiobook, new_trackno);
 			}
 		});
 	}
@@ -524,10 +551,9 @@ Dialog_import_export.Callback {
 		runOnUiThread(new Runnable() {
 			@Override public void run() { 
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
 				displayTracks(audiobook, new_trackno);
-				displayTime(track);
+				displayTime(audiobook, new_trackno);
 			}
 		});
 	}
@@ -542,8 +568,7 @@ Dialog_import_export.Callback {
 		runOnUiThread(new Runnable() { 
 			@Override public void run() {
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(trackno);
-				displayTime(track);
+				displayTime(audiobook, trackno);
 			} 
 		});
 	}
@@ -558,8 +583,7 @@ Dialog_import_export.Callback {
 		runOnUiThread(new Runnable() { 
 			@Override public void run() {
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(trackno);
-				displayTime(track);
+				displayTime(audiobook, trackno);
 			} 
 		});
 	}
@@ -576,10 +600,9 @@ Dialog_import_export.Callback {
 			@Override
 			public void run() {
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
 				displayTracks(audiobook, new_trackno);
-				displayTime(track);
+				displayTime(audiobook, new_trackno);
 			}
 		});
 	}
@@ -595,8 +618,7 @@ Dialog_import_export.Callback {
 		runOnUiThread(new Runnable() { 
 			@Override public void run() { 
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(trackno);
-				displayTime(track); 
+				displayTime(audiobook, trackno); 
 			} 
 		});  
 	}
@@ -613,10 +635,9 @@ Dialog_import_export.Callback {
 			@Override
 			public void run() {
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
 				displayTracks(audiobook, new_trackno);
-				displayTime(track);
+				displayTime(audiobook, new_trackno);
 			}
 		});
 	}
@@ -634,10 +655,9 @@ Dialog_import_export.Callback {
 			@Override
 			public void run() {
 				displayBookmarks();
-				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayPlayButton();
 				displayTracks(audiobook, new_trackno);
-				displayTime(track);
+				displayTime(audiobook, new_trackno);
 			}
 		});
 	}
@@ -646,9 +666,8 @@ Dialog_import_export.Callback {
 		runOnUiThread(new Runnable() {
 			@Override public void run() {
 				if(new_trackno == -1) return;
-				Track track = audiobook.getPlaylist().get(new_trackno);
 				displayTracks(audiobook, new_trackno);
-				displayTime(track);
+				displayTime(audiobook, new_trackno);
 			}
 		});
 	}
@@ -676,8 +695,7 @@ Dialog_import_export.Callback {
 		if(cover_iv != null) cover_iv.setImageDrawable(noCover);
 	}
 	private void displayInfo(Audiobook audiobook, int trackno){
-		Track track = audiobook.getPlaylist().get(trackno);
-
+		if(audiobook == null) return;
 		//Author
 		TextView author_tv = (TextView) findViewById(R.id.audiobook_basics_author_tv);
 		if(author_tv != null) author_tv.setText(audiobook.getAuthor());
@@ -688,14 +706,10 @@ Dialog_import_export.Callback {
 
 		//Cover
 		ImageView cover_iv = (ImageView) findViewById(R.id.audiobook_basics_cover_iv);
-		String cover = track.getCover();
-		if(cover == null) cover = audiobook.getCover();
-		if(cover != null) {
-			Bitmap bitmap = BitmapFactory.decodeFile(cover);
-			if(cover_iv != null) cover_iv.setImageBitmap(bitmap);
-		} else {
-			if(cover_iv != null) cover_iv.setImageDrawable(noCover);
-		}
+		Bitmap bm = audiobook.getThumbnail();
+		if(cover_iv == null) return;
+		if(bm == null) cover_iv.setImageDrawable(noCover); 
+		else cover_iv.setImageBitmap(bm);
 	}
 	private void displayNoTracks(){
 		TextView title_tv = (TextView) findViewById(R.id.track_title);
@@ -712,6 +726,7 @@ Dialog_import_export.Callback {
 		}
 	}
 	private void displayTracks(Audiobook audiobook, int trackno){
+		if(audiobook == null) return;
 		Track track = audiobook.getPlaylist().get(trackno);
 		TextView title_tv = (TextView) findViewById(R.id.track_title);
 		LinearLayout tracks_gv = (LinearLayout) findViewById(R.id.controller_tracks_grid);
@@ -769,7 +784,9 @@ Dialog_import_export.Callback {
 		seeker.setProgress(0);
 	}
 	@Override
-	public void displayTime(Track track){
+	public void displayTime(Audiobook audiobook, int trackno){
+		if(audiobook == null) return;
+		Track track = audiobook.getPlaylist().get(trackno);
 		//Progress
 		TextView progress_tv = (TextView) findViewById(R.id.seeker_progress_tv);
 		SeekBar seeker = (SeekBar) findViewById(R.id.seeker_progress_seeker);
@@ -818,12 +835,10 @@ Dialog_import_export.Callback {
 			if(audiobook == null) { disabledBookmarks.add(bookmark); continue; }
 
 			ImageView cover_iv = (ImageView) v.findViewById(R.id.bookmark_cover_iv);
-			String cover = audiobook.getCover();
-			if(cover != null) {
-				Bitmap bitmap = BitmapFactory.decodeFile(cover);
-				if(cover_iv != null) cover_iv.setImageBitmap(bitmap);
-			} else {
-				if(cover_iv != null) cover_iv.setImageDrawable(noCover);
+			if(cover_iv != null){
+				Bitmap bm = audiobook.getThumbnail();
+				if(bm == null) cover_iv.setImageDrawable(noCover);
+				else cover_iv.setImageBitmap(bm);
 			}
 
 			//Track no
@@ -903,6 +918,17 @@ Dialog_import_export.Callback {
 		case MotionEvent.ACTION_UP:
 			x2 = event.getX();
 			y2 = event.getY();
+			
+//			if(bookmark_list == null){
+//				if(y1 < 350 || y2 < 350) return false; 
+//			} else {
+//				int[] coords = {0,0};
+//				bookmark_list.getLocationOnScreen(coords);
+////				int absoluteTop = coords[1];
+//				int absoluteBottom = coords[1] + bookmark_list.getHeight();
+//				if(y1 < absoluteBottom || y2 < absoluteBottom) return false; 
+//			}
+			
 			if(Math.abs(x2 - x1) < MIN_DIST) break;
 			if(Math.abs(y2 - y1) > MIN_DIST) break;
 

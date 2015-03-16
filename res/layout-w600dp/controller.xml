@@ -115,7 +115,7 @@
 
     <fragment
         android:id="@+id/controller_audiobooks_fragment"
-        android:name="rd.dap.fragments.AudiobooksFragment4"
+        android:name="rd.dap.fragments.AudiobooksFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="4" />
