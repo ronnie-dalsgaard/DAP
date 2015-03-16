@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class LoadBookmarksTask extends AsyncTask<Void, Void, Void> {
+public class LoadBookmarksAndAudiobooksTask extends AsyncTask<Void, Void, Void> {
 	private static final String TAG = "LoadBookmarksTask";
 	private Activity activity;
 	private Callback callback;
@@ -20,7 +20,7 @@ public class LoadBookmarksTask extends AsyncTask<Void, Void, Void> {
 		public void noBookmarks();
 	}
 	
-	public LoadBookmarksTask(Activity activity, Callback callback){
+	public LoadBookmarksAndAudiobooksTask(Activity activity, Callback callback){
 		this.activity = activity;
 		this.callback = callback;
 	}

@@ -5,7 +5,7 @@
     
     <TextView 
         android:id="@+id/author_item_header_tv"
-        android:layout_width="@dimen/mini_player_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -13,7 +13,7 @@
     
     <GridView 
         android:id="@+id/author_item_grid_gv"
-        android:layout_width="@dimen/mini_player_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/author_item_header_tv"
         android:layout_centerHorizontal="true" >

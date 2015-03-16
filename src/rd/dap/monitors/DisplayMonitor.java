@@ -11,24 +11,24 @@ import android.app.Activity;
 
 public class DisplayMonitor extends Monitor {
 	private Activity activity;
-	private PlayerService player;
-	private DisplayMoniterListener listener;
+	private DisplayMoniterListener display_monitor_listener;
 	
 	public interface DisplayMoniterListener {
+		public PlayerService getPlayer();
 		public void displayTime(Track track);
 		public void displayNoTime();
 	}
 
-	public DisplayMonitor(Activity activity, PlayerService player, DisplayMoniterListener listener) {
+	public DisplayMonitor(Activity activity, DisplayMoniterListener display_monitor_listener) {
 		super(1, TimeUnit.SECONDS);
 		this.activity = activity;
-		this.player = player;
-		this.listener = listener;
+		this.display_monitor_listener = display_monitor_listener;
 	}
 
 	@Override
 	public void execute() {
 		if(activity == null) return;
+		final PlayerService player = display_monitor_listener.getPlayer();
 		activity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -39,9 +39,9 @@ public class DisplayMonitor extends Monitor {
 				Track track = audiobook.getPlaylist().get(trackno);
 				Bookmark bookmark = BookmarkManager.getInstance().getBookmark(audiobook);
 				if(bookmark != null){
-					listener.displayTime(track);
+					display_monitor_listener.displayTime(track);
 				} else {
-					listener.displayNoTime();
+					display_monitor_listener.displayNoTime();
 				}
 			}
 		});

@@ -6,7 +6,7 @@
 
     <ScrollView
         android:id="@+id/scrollView1"
-        android:layout_width="@dimen/mini_player_width"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true" >
 
@@ -20,7 +20,7 @@
 
             <TextView
                 android:id="@+id/track_duration"
-                android:layout_width="@dimen/mini_player_width"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:padding="@dimen/margin_small"

@@ -7,12 +7,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
-import rd.dap.activities.AudiobooksFragment.OnAudiobookSelectedListener;
 import rd.dap.dialogs.Dialog_bookmark_details;
 import rd.dap.dialogs.Dialog_delete_bookmark;
 import rd.dap.dialogs.Dialog_disabled_bookmarks;
 import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
+import rd.dap.fragments.AudiobooksFragment4;
+import rd.dap.fragments.AudiobooksFragment4.OnAudiobookSelectedListener;
 import rd.dap.fragments.TimerFragment.TimerListener;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -30,7 +31,7 @@ import rd.dap.services.PlayerService;
 import rd.dap.services.PlayerService.DAPBinder;
 import rd.dap.support.MainDriveHandler;
 import rd.dap.support.Time;
-import rd.dap.tasks.LoadBookmarksTask;
+import rd.dap.tasks.LoadBookmarksAndAudiobooksTask;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -67,16 +68,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, 
-	ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
-	OnAudiobookSelectedListener, TimerListener, DisplayMoniterListener, BookmarkMonitorListener,
-	Dialog_import_export.Callback {
+ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
+OnAudiobookSelectedListener, TimerListener, DisplayMoniterListener, BookmarkMonitorListener,
+Dialog_import_export.Callback {
 	private static final String TAG = "MainActivity";
 	private static final int TRACKNO = 1111;
 	private static final int BOOKMARK = 2222;
@@ -93,7 +93,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	private View timer_layout, timer_thumb_iv, timer_thumb_back_iv;
 	private CountDownLatch latch;
 
-	//Activity + Bind to PlayerService
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -102,10 +101,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		version();
 
 		//*******************************// BETA //*****************************************//
-		beta();
+		beta(false);
 		//*********************************************************************************//
 
-		base = (RelativeLayout) findViewById(R.id.controller_base);
+		base = (ViewGroup) findViewById(R.id.controller_base);
 
 		//No cover
 		if(noCover == null || drw_play == null || drw_pause == null
@@ -118,17 +117,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		}
 
 		audio_properties();
-
-		latch = new CountDownLatch(2);
-		
-		//Start playerservice
-		new AsyncTask<Void, Void, Void>() {
-			@Override protected Void doInBackground(Void... params) {
-				Intent serviceIntent = new Intent(MainActivity.this, PlayerService.class);
-				startService(serviceIntent);
-				return null;
-			}
-		}.execute();
 
 		//Buttons
 		ImageButton btn_cover = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
@@ -159,12 +147,11 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
 
-		//Start monitor
-		if(displayMonitor != null) displayMonitor.kill();
-		displayMonitor = new DisplayMonitor(this, player, this);
-		displayMonitor.start();
 
-		//Load Audiobooks and Bookmarks
+
+		latch = new CountDownLatch(2);
+
+		//Display loading dialog
 		final Dialog loading_dialog = new Dialog(this);
 		loading_dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater inflater = LayoutInflater.from(this);
@@ -172,29 +159,45 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		loading_dialog.setContentView(dv);
 		loading_dialog.show();
 
-		new LoadBookmarksTask(this, new LoadBookmarksTask.Callback() {
-			@Override public void complete() { 
-				MainActivity.this.displayBookmarks();
-				latch.countDown(); 
-				System.out.println("Bookmarks latch released"); }
-			@Override
-			public void noAudiobooks() {
-				Intent intent = new Intent(MainActivity.this, AudiobooksActivity.class);
-				startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
+		//Start playerservice
+		new AsyncTask<Void, Void, Void>() {
+			@Override protected Void doInBackground(Void... params) {
+				Intent serviceIntent = new Intent(MainActivity.this, PlayerService.class);
+				startService(serviceIntent);
+				return null;
 			}
-			@Override
-			public void noBookmarks() {
-				Intent intent = new Intent(MainActivity.this, AudiobooksActivity.class);
-				startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
-			}
-		}).execute();
-	
+		}.execute();
+
+		System.out.println("MainActivity - savedInstanceState == null:   "+(savedInstanceState == null));
+		if(savedInstanceState != null){ 
+			latch.countDown();
+			displayBookmarks();
+		} else {
+			//Load Audiobooks and Bookmarks
+			new LoadBookmarksAndAudiobooksTask(this, new LoadBookmarksAndAudiobooksTask.Callback() {
+				@Override public void complete() { 
+					MainActivity.this.displayBookmarks();
+					latch.countDown(); 
+				}
+				@Override
+				public void noAudiobooks() {
+					Intent intent = new Intent(MainActivity.this, AudiobooksActivity.class);
+					startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
+				}
+				@Override
+				public void noBookmarks() {
+					Intent intent = new Intent(MainActivity.this, AudiobooksActivity.class);
+					startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
+				}
+			}).execute();
+
+		}
+
 		new AsyncTask<Void, Void, Void>(){
 			@Override protected Void doInBackground(Void... params) {
-				System.out.println("Awaiting latch");
 				try { latch.await(); } 
 				catch (InterruptedException e) { e.printStackTrace(); }
-				
+
 				SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
 				String author = pref.getString("author", null);
 				String album = pref.getString("album", null);
@@ -209,15 +212,29 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			}
 			@Override protected void onPostExecute(Void result){
 				loading_dialog.dismiss();
+				AudiobooksFragment4 frag = (AudiobooksFragment4) getFragmentManager().findFragmentById(R.id.controller_audiobooks_fragment);
+				if(frag != null){ 
+					frag.displayAudiobooks();
+				}
 			}
 		}.execute();
-		
-		
+
+
+		//Start monitor
+		if(displayMonitor != null) displayMonitor.kill();
+		displayMonitor = new DisplayMonitor(this, this);
+		displayMonitor.start();
+
 		if(bookmark_monitor != null) bookmark_monitor.kill();
-		bookmark_monitor = new BookmarkMonitor(this, player, this);
+		bookmark_monitor = new BookmarkMonitor(this, this);
 		bookmark_monitor.start();
 	}
-
+//	@Override
+//	public void onSaveInstanceState(Bundle savedInstanceState) {
+//		savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+//		savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+//		super.onSaveInstanceState(savedInstanceState);
+//	}
 
 	@Override
 	public void onStart(){
@@ -246,50 +263,13 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 		player.addObserver(this);		
 		latch.countDown();
-		System.out.println("PlayerService latch released");
+		System.out.println("MainActivity - PlayerService latch released");
 	}
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		bound = false;
 		ImageButton cover_btn = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
 		if(cover_btn != null) cover_btn.setImageDrawable(null);
-	}
-	@Override
-	public boolean onLongClick(View v) {
-		switch(v.getId()){
-		case BOOKMARK:
-			final Bookmark bookmark = (Bookmark) v.getTag();
-			if(bookmark == null) break;
-			new Dialog_bookmark_details(this, base, bookmark, new Dialog_bookmark_details.Callback() {
-				@Override public void onDeleteBookmark() {
-					new Dialog_delete_bookmark(MainActivity.this, base, bookmark, new Dialog_delete_bookmark.Callback() {
-						@Override
-						public void onDeleteBookmarkConfirmed() {
-							//Remove the bookmark
-							BookmarkManager.getInstance().removeBookmark(MainActivity.this, bookmark);
-
-							displayBookmarks();
-							displayNoInfo();
-							displayNoTracks();
-							displayNoTime();
-							displayNoPlayButton();
-						}
-
-					}).show();
-				}
-				@Override
-				public void onItemSelected(BookmarkEvent event) {
-					if(player == null) {
-						Toast.makeText(MainActivity.this, "Unable to undo - No media player found", Toast.LENGTH_LONG).show();
-						return;
-					}
-					int new_trackno = event.getTrackno();
-					int new_progress = event.getProgress();
-					player.undoTo(new_trackno, new_progress);
-				}
-			}).show();
-		}
-		return true;
 	}
 	@Override 
 	public void onStopTrackingTouch(SeekBar seekBar) { } //Never used
@@ -307,6 +287,45 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		}
 	}
 	@Override
+	public boolean onLongClick(View v) {
+		switch(v.getId()){
+		case BOOKMARK:
+			final Bookmark bookmark = (Bookmark) v.getTag();
+			if(bookmark == null) break;
+			new Dialog_bookmark_details(this, base, bookmark, new Dialog_bookmark_details.Callback() {
+				@Override public void onDeleteBookmark() {
+					new Dialog_delete_bookmark(MainActivity.this, base, bookmark, new Dialog_delete_bookmark.Callback() {
+						@Override
+						public void onDeleteBookmarkConfirmed() {
+							//Remove the bookmark
+							BookmarkManager.getInstance().removeBookmark(MainActivity.this, bookmark);
+							displayBookmarks();
+							if(player == null || 
+									(player.getAudiobook().getAuthor().equals(bookmark.getAuthor())
+									&& player.getAudiobook().getAlbum().equals(bookmark.getAlbum()))){
+								displayNoInfo();
+								displayNoTracks();
+								displayNoTime();
+								displayNoPlayButton();
+							}
+						}
+					}).show();
+				}
+				@Override
+				public void onItemSelected(BookmarkEvent event) {
+					if(player == null) {
+						Toast.makeText(MainActivity.this, "Unable to undo - No media player found", Toast.LENGTH_LONG).show();
+						return;
+					}
+					int new_trackno = event.getTrackno();
+					int new_progress = event.getProgress();
+					player.undoTo(new_trackno, new_progress);
+				}
+			}).show();
+		}
+		return true;
+	}
+	@Override
 	public void onClick(View v) {
 		if(player == null) return;
 		switch(v.getId()){
@@ -320,6 +339,27 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		case R.id.timer_thumb_iv: click_timer_thumb(); break;
 		case R.id.timer_thumb_back_iv: click_timer_thumb_back(); break;
 		}
+	}
+	//Menu
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case R.id.menu_item_audiobooks:
+			Intent intent = new Intent(this, AudiobooksActivity.class);
+			startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
+			break;
+
+		case R.id.menu_item_import_export:
+			new Dialog_import_export(this, base, this).show();
+			break;
+		}
+		return false;
 	}
 
 	private void click_bookmark(Bookmark bookmark) {
@@ -509,7 +549,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	}
 	@Override
 	public void onRewind(final Audiobook audiobook, final int trackno, int new_progress){
-		System.out.println("Rewind - new progress = "+new_progress);
 		Bookmark bookmark = BookmarkManager.getInstance().getBookmark(audiobook);
 		if(bookmark == null) return;
 		bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.REWIND, trackno, new_progress));
@@ -638,7 +677,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 	}
 	private void displayInfo(Audiobook audiobook, int trackno){
 		Track track = audiobook.getPlaylist().get(trackno);
-		
+
 		//Author
 		TextView author_tv = (TextView) findViewById(R.id.audiobook_basics_author_tv);
 		if(author_tv != null) author_tv.setText(audiobook.getAuthor());
@@ -777,7 +816,7 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 			//Cover
 			Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
 			if(audiobook == null) { disabledBookmarks.add(bookmark); continue; }
-			
+
 			ImageView cover_iv = (ImageView) v.findViewById(R.id.bookmark_cover_iv);
 			String cover = audiobook.getCover();
 			if(cover != null) {
@@ -811,9 +850,9 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 					displayNoPlayButton();
 				}
 			}).show();
-			
-			
-			
+
+
+
 		}
 	}
 	private void emphasizeLock(){
@@ -834,28 +873,6 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		lock_iv.startAnimation(set);
 	}
 
-	//Menu
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()){
-		case R.id.menu_item_audiobooks:
-			Intent intent = new Intent(this, AudiobooksActivity.class);
-			startActivityForResult(intent, AudiobooksActivity.REQUEST_AUDIOBOOK);
-			break;
-
-		case R.id.menu_item_import_export:
-			new Dialog_import_export(this, base, this).show();
-			break;
-		}
-		return false;
-	}
-
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data){
 		Log.d(TAG, "onActivityResult");
@@ -872,6 +889,8 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 
 		player.setAudiobook(audiobook, bookmark.getTrackno(), bookmark.getProgress());
 	}
+	@Override 
+	public PlayerService getPlayer() { return player; }
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent event){
@@ -965,11 +984,10 @@ public class MainActivity extends MainDriveHandler implements OnClickListener, O
 		} catch (NameNotFoundException e) { versionName = "Unknown"; }
 		if(version_tv != null) version_tv.setText(versionName);
 	}
-	private void beta() {
-		final boolean BETA = false;
+	private void beta(boolean isBeta) {
 		TextView beta = (TextView) findViewById(R.id.controller_beta);
-		beta.setVisibility(BETA ? View.VISIBLE : View.GONE);
-		if(BETA){
+		beta.setVisibility(isBeta ? View.VISIBLE : View.GONE);
+		if(isBeta){
 			Calendar expiration = Calendar.getInstance(Locale.getDefault());
 			expiration.set(Calendar.YEAR, 2015);
 			expiration.set(Calendar.MONTH, Calendar.APRIL);

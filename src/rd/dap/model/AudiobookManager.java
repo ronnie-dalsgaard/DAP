@@ -20,6 +20,8 @@ import rd.dap.support.AlbumFolderFilter;
 import rd.dap.support.Mp3FileFilter;
 import rd.dap.support.TrackList;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -37,9 +39,9 @@ public final class AudiobookManager{
 	public static AudiobookManager getInstance(){
 		return instance; //Eager singleton
 	}
-	
+
 	private AudiobookManager(){};
-	
+
 	//CRUD Audiobook
 	public void addAudiobook(Context context, Audiobook audiobook){
 		if(audiobooks.contains(audiobook)) return;
@@ -79,17 +81,18 @@ public final class AudiobookManager{
 		for(Audiobook element : getAudiobooks()){
 			if(element.equals(original_audiobook)){
 				element.setAudiobook(audiobook);
-				
+
 				authors.remove(original_audiobook.getAuthor());
 				authors.add(audiobook.getAuthor());
 			}
 		}
 		saveAudiobooks(context);
 	}
-	public void removeAudiobook(Context context, Audiobook audiobook) { 
+	public ArrayList<Audiobook> removeAudiobook(Context context, Audiobook audiobook) { 
 		audiobooks.remove(audiobook);
 		authors.remove(audiobook.getAuthor());
 		saveAudiobooks(context);
+		return audiobooks;
 	}
 	public void removeAllAudiobooks(Context context){
 		ArrayList<Audiobook> trash = new ArrayList<Audiobook>();
@@ -100,13 +103,14 @@ public final class AudiobookManager{
 		}
 		saveAudiobooks(context);
 	}
-	
+
+
 	//Load and save
 	public void saveAudiobooks(Context context){
 		Log.d(TAG, "saveAudiobooks");
 		Gson gson = new Gson();
 		String json = gson.toJson(audiobooks);
-		
+
 		//create a file in internal storage
 		File file = new File(context.getFilesDir(), "audiobooks.dap"); //FIXME filename as constant
 		try {
@@ -118,8 +122,8 @@ public final class AudiobookManager{
 			Toast.makeText(context, "Unable to save audiobooks", Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
-		
-		
+
+
 		//Save authors
 		String authors_json = gson.toJson(authors);
 		File authors_file = new File(context.getFilesDir(), "authors.dap"); //FIXME filename as constant
@@ -132,7 +136,7 @@ public final class AudiobookManager{
 			Toast.makeText(context, "Unable to save authors", Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
-		
+
 		//Save albums
 		String albums_json = gson.toJson(albums);
 		File albums_file = new File(context.getFilesDir(), "albums.dap"); //FIXME filename as constant
@@ -148,7 +152,7 @@ public final class AudiobookManager{
 	}
 	public ArrayList<Audiobook> loadAudiobooks(Context context){
 		Log.d(TAG, "loadAudiobooks");
-		
+
 		//Audiobooks
 		File file = new File(context.getFilesDir(), "audiobooks.dap");
 		try {
@@ -163,7 +167,7 @@ public final class AudiobookManager{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		//Authors
 		File authors_file = new File(context.getFilesDir(), "authors.dap");
 		try {
@@ -178,7 +182,7 @@ public final class AudiobookManager{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		//Albums
 		File albums_file = new File(context.getFilesDir(), "albums.dap");
 		try {
@@ -193,14 +197,14 @@ public final class AudiobookManager{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return audiobooks;
 	}
-	
+
 	//Auto-detect
-	public Audiobook autoCreateAudiobook(File album_folder, File home_folder,  boolean incl_subfolders){
+	private Audiobook autoCreateAudiobook(File album_folder, File home_folder, boolean incl_subfolders){
 		Audiobook audiobook = new Audiobook();
-		
+
 		File folder = album_folder;
 		LinkedList<String> tokens = new LinkedList<String>();
 		while(!folder.getAbsolutePath().equalsIgnoreCase(home_folder.getAbsolutePath())){
@@ -214,10 +218,10 @@ public final class AudiobookManager{
 		}
 		String _album = tokens.removeFirst();
 		while(!tokens.isEmpty()) { _album += " " + tokens.removeFirst(); }
-		
+
 		audiobook.setAuthor(_author);
 		audiobook.setAlbum(_album);
-		
+
 		String cover = null;
 		for(File file : album_folder.listFiles()){
 			if("albumart.jpg".equalsIgnoreCase(file.getName())){
@@ -225,7 +229,22 @@ public final class AudiobookManager{
 				break;
 			}
 		}
-		if(cover != null) { audiobook.setCover(cover); }
+		if(cover != null) { 
+			audiobook.setCover(cover);
+			Bitmap bm = BitmapFactory.decodeFile(cover);
+			float dstWidth = 86f; float dstHeight = 128f;
+			float dstRatio = dstHeight / dstWidth;
+			float ratio = (float)bm.getHeight() / bm.getWidth();
+			if(ratio > dstRatio){ //tall image
+				dstWidth = dstHeight / ratio;
+			} else if(ratio < dstRatio){ //wide image
+				dstHeight = dstWidth * ratio;
+			}
+			bm = Bitmap.createScaledBitmap(bm, (int)dstWidth, (int)dstHeight, true);
+			audiobook.setThumbnail(bm);
+			
+			System.out.println("(AM.245)   "+_author + " ::: " + _album + "("+dstWidth+", "+dstHeight+" ->"+ratio+")");
+		}
 
 		ArrayList<File> filelist;
 		if(incl_subfolders){
@@ -233,7 +252,7 @@ public final class AudiobookManager{
 		} else {
 			filelist = new ArrayList<File>(Arrays.asList(album_folder.listFiles(new Mp3FileFilter())));			
 		}
-		
+
 		TrackList playlist = new TrackList();
 		Collections.sort(playlist, new Comparator<Track>() {
 			@Override
@@ -241,13 +260,13 @@ public final class AudiobookManager{
 				return lhs.getPath().compareToIgnoreCase(rhs.getPath());
 			}
 		});
-		
+
 		for(File file : filelist){
 			Track track = new Track();
 			track.setPath(file.getAbsolutePath());
 			track.setTitle(file.getName().replace(".mp3", ""));
 			if(cover != null) track.setCover(cover);
-			
+
 			playlist.add(track);
 		}
 		audiobook.setPlaylist(playlist);
@@ -267,7 +286,7 @@ public final class AudiobookManager{
 			Audiobook audiobook = autoCreateAudiobook(album_folder, folder, true);
 			list.add(audiobook);
 		}
-		
+
 		return list;
 	}
 	private ArrayList<File> collectFiles(ArrayList<File> list, File folder, FileFilter filter){

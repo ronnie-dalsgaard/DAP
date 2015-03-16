@@ -1,120 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/controller_base"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal" >
+    android:gravity="center_horizontal"
+    android:orientation="horizontal" >
 
-    <TextView
-        android:id="@+id/controller_beta"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="450dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="BETA"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/green" />
+        android:orientation="vertical" >
 
-    <ScrollView
-        android:id="@+id/controller_scroller"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/controller_beta" >
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/controller_beta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:gravity="center"
+            android:text="BETA"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/green" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bookmarks:" />
+        <ScrollView
+            android:id="@+id/controller_scroller"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
-            <HorizontalScrollView
-                android:layout_width="@dimen/mini_player_width"
-                android:layout_height="@dimen/cover_height_medium" >
-
-                <LinearLayout
-                    android:id="@+id/controller_bookmark_list"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/cover_height_medium"
-                    android:orientation="horizontal" >
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <include layout="@layout/divider_horizontal" />
-
-            <include layout="@layout/controller_audiobook_basics" />
-
-            <include layout="@layout/divider_horizontal" />
-
-            <include layout="@layout/fragment_track" />
-
-            <include layout="@layout/divider_horizontal" />
-
-            <include layout="@layout/fragment_seeker" />
-
-            <include layout="@layout/divider_horizontal" />
-
-            <FrameLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-                
-                <ImageView
-                    android:id="@+id/controller_lock"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="right"
-                    android:contentDescription="@string/content_description"
-                    android:src="@drawable/ic_action_secure" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" >
+                    android:text="Bookmarks:" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tracks:" />
-                    
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/cover_height_medium" >
+
                     <LinearLayout
-                        android:id="@+id/controller_tracks_grid"
+                        android:id="@+id/controller_bookmark_list"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/cover_height_medium"
+                        android:orientation="horizontal" >
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+                <include layout="@layout/divider_horizontal" />
+
+                <include layout="@layout/controller_audiobook_basics" />
+
+                <include layout="@layout/divider_horizontal" />
+
+                <include layout="@layout/fragment_track" />
+
+                <include layout="@layout/divider_horizontal" />
+
+                <include layout="@layout/fragment_seeker" />
+
+                <include layout="@layout/divider_horizontal" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <ImageView
+                        android:id="@+id/controller_lock"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="right"
+                        android:contentDescription="@string/content_description"
+                        android:src="@drawable/ic_action_secure" />
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical" />
+                        android:orientation="vertical" >
 
-                    <include layout="@layout/divider_horizontal" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tracks:" />
 
-                </LinearLayout>
-            </FrameLayout>
-        </LinearLayout>
-    </ScrollView>
-    
-    <include 
-        layout="@layout/divider_vertical"
+                        <LinearLayout
+                            android:id="@+id/controller_tracks_grid"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+
+                        <include layout="@layout/divider_horizontal" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/version"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text="?android:attr/versionCode"
+                    android:textColor="#80808080" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <include
         android:id="@+id/divider_fragment"
         android:layout_width="1dp"
-        android:layout_marginRight="1dp"
-        android:layout_marginLeft="1dp"
-		android:layout_height="match_parent"
-        android:layout_toRightOf="@+id/controller_scroller" />
-    
-    <fragment 
-        android:id="@+id/controller_audiobooks_fragment"
-        android:name="rd.dap.activities.AudiobooksFragment"
-        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@+id/divider_fragment"/>
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        layout="@layout/divider_vertical" />
 
-    <TextView
-        android:id="@+id/version"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/controller_audiobooks_fragment"
-        android:text="?android:attr/versionCode"
-        android:textColor="#80808080" />
-    
-</RelativeLayout>
+    <fragment
+        android:id="@+id/controller_audiobooks_fragment"
+        android:name="rd.dap.fragments.AudiobooksFragment4"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4" />
+
+</LinearLayout>

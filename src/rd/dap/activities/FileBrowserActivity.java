@@ -1,7 +1,12 @@
-package rd.dap;
+package rd.dap.activities;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import rd.dap.R;
+import rd.dap.R.drawable;
+import rd.dap.R.id;
+import rd.dap.R.layout;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

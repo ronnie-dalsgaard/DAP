@@ -1458,17 +1458,17 @@ containing a value of this type.
          would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively).
     
          */
-        public static final int activity_horizontal_margin=0x7f080025;
-        public static final int activity_vertical_margin=0x7f080026;
-        public static final int btn_height=0x7f08001a;
-        public static final int cover_height=0x7f080020;
-        public static final int cover_height_big=0x7f080022;
-        public static final int cover_height_medium=0x7f08001e;
-        public static final int cover_height_small=0x7f08001c;
-        public static final int cover_width=0x7f08001f;
-        public static final int cover_width_big=0x7f080021;
-        public static final int cover_width_medium=0x7f08001d;
-        public static final int cover_width_small=0x7f08001b;
+        public static final int activity_horizontal_margin=0x7f080022;
+        public static final int activity_vertical_margin=0x7f080023;
+        public static final int btn_height=0x7f080017;
+        public static final int cover_height=0x7f08001d;
+        public static final int cover_height_big=0x7f08001f;
+        public static final int cover_height_medium=0x7f08001b;
+        public static final int cover_height_small=0x7f080019;
+        public static final int cover_width=0x7f08001c;
+        public static final int cover_width_big=0x7f08001e;
+        public static final int cover_width_medium=0x7f08001a;
+        public static final int cover_width_small=0x7f080018;
         /**  The platform's desired fixed height for a dialog along the major axis
          (the screen is in portrait). This may be either a fraction or a dimension.
  The platform's desired fixed height for a dialog along the major axis
@@ -1501,13 +1501,11 @@ containing a value of this type.
          (the screen is in portrait). This may be either a fraction or a dimension.
          */
         public static final int dialog_fixed_width_minor=0x7f080012;
-        public static final int file_type_height=0x7f080024;
-        public static final int file_type_width=0x7f080023;
-        public static final int margin_big=0x7f080019;
-        public static final int margin_small=0x7f080018;
-        public static final int match_parent=0x7f080015;
-        public static final int mini_player_width=0x7f080017;
-        public static final int wrap_content=0x7f080016;
+        public static final int file_type_height=0x7f080021;
+        public static final int file_type_width=0x7f080020;
+        public static final int margin_big=0x7f080016;
+        public static final int margin_small=0x7f080015;
+        public static final int mini_player_width=0x7f080024;
     }
     public static final class drawable {
         public static final int abc_ab_bottom_solid_dark_holo=0x7f020000;
@@ -1803,10 +1801,10 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050036;
-        public static final int action_settings=0x7f0500c8;
+        public static final int action_settings=0x7f0500cf;
         public static final int activity_chooser_view_content=0x7f050037;
         public static final int always=0x7f05000b;
-        public static final int analogClock=0x7f0500ab;
+        public static final int analogClock=0x7f0500b3;
         public static final int audiobook_basics_album_tv=0x7f050074;
         public static final int audiobook_basics_author_tv=0x7f050073;
         public static final int audiobook_basics_btn_cover=0x7f050078;
@@ -1823,7 +1821,7 @@ containing a value of this type.
         public static final int audiobook_item_cover_layout=0x7f050050;
         public static final int audiobook_item_info_layout=0x7f050052;
         public static final int audiobook_item_trash_iv=0x7f050051;
-        public static final int audiobook_timer=0x7f0500aa;
+        public static final int audiobook_timer=0x7f0500b2;
         public static final int author_item_grid_gv=0x7f050058;
         public static final int author_item_header_tv=0x7f050057;
         public static final int beginning=0x7f050011;
@@ -1851,15 +1849,15 @@ containing a value of this type.
         public static final int controller_bookmark_list=0x7f050067;
         public static final int controller_lock=0x7f05006a;
         public static final int controller_scroller=0x7f050066;
-        public static final int controller_track_row=0x7f0500a5;
+        public static final int controller_track_row=0x7f0500ad;
         public static final int controller_tracks_grid=0x7f05006b;
         public static final int cover_view_cover_iv=0x7f050079;
         public static final int default_activity_button=0x7f05003a;
         public static final int details_item_album_label=0x7f05007a;
         public static final int details_item_album_tv=0x7f05007b;
-        public static final int details_item_audiobook_track_duration=0x7f0500bf;
-        public static final int details_item_audiobook_track_position=0x7f0500bd;
-        public static final int details_item_audiobook_track_title=0x7f0500be;
+        public static final int details_item_audiobook_track_duration=0x7f0500c7;
+        public static final int details_item_audiobook_track_position=0x7f0500c5;
+        public static final int details_item_audiobook_track_title=0x7f0500c6;
         public static final int details_item_author_label=0x7f05007c;
         public static final int details_item_author_tv=0x7f05007d;
         public static final int details_item_cover_iv=0x7f05007e;
@@ -1893,7 +1891,7 @@ containing a value of this type.
         public static final int dialog_timer_sec_dec=0x7f05009c;
         public static final int dialog_timer_sec_inc=0x7f05009a;
         public static final int dialog_title_tv=0x7f050085;
-        public static final int digitalClock=0x7f0500ac;
+        public static final int digitalClock=0x7f0500b4;
         public static final int disableHome=0x7f050008;
         public static final int div_1=0x7f050068;
         public static final int div_2=0x7f050069;
@@ -1910,6 +1908,14 @@ containing a value of this type.
         public static final int file_item_cb=0x7f0500a0;
         public static final int file_item_name_tv=0x7f05009f;
         public static final int file_item_type_iv=0x7f05009e;
+        public static final int fragment_audiobooks_grid=0x7f0500a6;
+        public static final int fragment_audiobooks_grid_item_album_tv=0x7f0500a9;
+        public static final int fragment_audiobooks_grid_item_author_tv=0x7f0500a8;
+        public static final int fragment_audiobooks_grid_item_iv=0x7f0500a7;
+        public static final int fragment_audiobooks_item_iv1=0x7f0500aa;
+        public static final int fragment_audiobooks_item_iv2=0x7f0500ab;
+        public static final int fragment_audiobooks_item_iv3=0x7f0500ac;
+        public static final int fragment_audiobooks_lv=0x7f0500a5;
         public static final int grayscale=0x7f05002a;
         public static final int holo_dark=0x7f05001d;
         public static final int holo_light=0x7f05001e;
@@ -1919,22 +1925,22 @@ containing a value of this type.
         public static final int icon=0x7f05003c;
         public static final int ifRoom=0x7f05000a;
         public static final int image=0x7f050039;
-        public static final int input_btn=0x7f0500ba;
-        public static final int input_et=0x7f0500b9;
-        public static final int input_item_tv=0x7f0500bc;
-        public static final int input_lv=0x7f0500bb;
+        public static final int input_btn=0x7f0500c2;
+        public static final int input_et=0x7f0500c1;
+        public static final int input_item_tv=0x7f0500c4;
+        public static final int input_lv=0x7f0500c3;
         public static final int listMode=0x7f050001;
         public static final int list_item=0x7f05003b;
         public static final int match_parent=0x7f050024;
-        public static final int menu_item_audiobooks=0x7f0500c2;
-        public static final int menu_item_audiobooks_set_home=0x7f0500c3;
-        public static final int menu_item_countdown=0x7f0500c7;
-        public static final int menu_item_download=0x7f0500c5;
-        public static final int menu_item_import_export=0x7f0500c9;
-        public static final int menu_item_timer=0x7f0500c6;
-        public static final int menu_item_upload=0x7f0500c4;
+        public static final int menu_item_audiobooks=0x7f0500d1;
+        public static final int menu_item_audiobooks_set_home=0x7f0500ca;
+        public static final int menu_item_countdown=0x7f0500ce;
+        public static final int menu_item_download=0x7f0500cc;
+        public static final int menu_item_import_export=0x7f0500d0;
+        public static final int menu_item_timer=0x7f0500cd;
+        public static final int menu_item_upload=0x7f0500cb;
         public static final int middle=0x7f050012;
-        public static final int min_hand=0x7f0500ad;
+        public static final int min_hand=0x7f0500b5;
         public static final int monochrome=0x7f05002b;
         public static final int never=0x7f050009;
         public static final int none=0x7f050010;
@@ -1945,7 +1951,7 @@ containing a value of this type.
         public static final int radio=0x7f050041;
         public static final int sandbox=0x7f050020;
         public static final int satellite=0x7f05001a;
-        public static final int scrollView1=0x7f0500c0;
+        public static final int scrollView1=0x7f0500c8;
         public static final int search_badge=0x7f050044;
         public static final int search_bar=0x7f050043;
         public static final int search_button=0x7f050045;
@@ -1956,11 +1962,11 @@ containing a value of this type.
         public static final int search_plate=0x7f050048;
         public static final int search_src_text=0x7f050049;
         public static final int search_voice_btn=0x7f05004d;
-        public static final int sec_hand=0x7f0500ae;
-        public static final int seeker_btn_forward=0x7f0500a9;
-        public static final int seeker_btn_rewind=0x7f0500a6;
-        public static final int seeker_progress_seeker=0x7f0500a8;
-        public static final int seeker_progress_tv=0x7f0500a7;
+        public static final int sec_hand=0x7f0500b6;
+        public static final int seeker_btn_forward=0x7f0500b1;
+        public static final int seeker_btn_rewind=0x7f0500ae;
+        public static final int seeker_progress_seeker=0x7f0500b0;
+        public static final int seeker_progress_tv=0x7f0500af;
         public static final int selectionDetails=0x7f050023;
         public static final int shortcut=0x7f050040;
         public static final int showCustom=0x7f050007;
@@ -1975,20 +1981,20 @@ containing a value of this type.
         public static final int timer_layout=0x7f050075;
         public static final int timer_thumb_back_iv=0x7f050076;
         public static final int timer_thumb_iv=0x7f050077;
-        public static final int timer_value=0x7f0500b1;
-        public static final int timer_value_dec=0x7f0500b2;
-        public static final int timer_value_inc=0x7f0500b0;
-        public static final int timer_value_layout=0x7f0500af;
+        public static final int timer_value=0x7f0500b9;
+        public static final int timer_value_dec=0x7f0500ba;
+        public static final int timer_value_inc=0x7f0500b8;
+        public static final int timer_value_layout=0x7f0500b7;
         public static final int title=0x7f05003d;
         public static final int top_action_bar=0x7f050032;
-        public static final int track_btn_next=0x7f0500b7;
-        public static final int track_btn_previous=0x7f0500b4;
+        public static final int track_btn_next=0x7f0500bf;
+        public static final int track_btn_previous=0x7f0500bc;
         public static final int track_divider=0x7f05009d;
-        public static final int track_duration=0x7f0500c1;
-        public static final int track_row=0x7f0500b3;
-        public static final int track_seeker=0x7f0500b6;
-        public static final int track_title=0x7f0500b5;
-        public static final int tracks_grid=0x7f0500b8;
+        public static final int track_duration=0x7f0500c9;
+        public static final int track_row=0x7f0500bb;
+        public static final int track_seeker=0x7f0500be;
+        public static final int track_title=0x7f0500bd;
+        public static final int tracks_grid=0x7f0500c0;
         public static final int up=0x7f050033;
         public static final int useLogo=0x7f050003;
         public static final int version=0x7f05006c;
@@ -2070,15 +2076,19 @@ containing a value of this type.
         public static final int file_browser_file_item_old=0x7f03002d;
         public static final int file_browser_item=0x7f03002e;
         public static final int file_browser_message=0x7f03002f;
-        public static final int fragment_seeker=0x7f030030;
-        public static final int fragment_timer=0x7f030031;
-        public static final int fragment_track=0x7f030032;
-        public static final int input=0x7f030033;
-        public static final int input_item=0x7f030034;
-        public static final int item_track=0x7f030035;
-        public static final int loading=0x7f030036;
-        public static final int support_simple_spinner_dropdown_item=0x7f030037;
-        public static final int track_details=0x7f030038;
+        public static final int fragment_audiobooks=0x7f030030;
+        public static final int fragment_audiobooks_grid=0x7f030031;
+        public static final int fragment_audiobooks_grid_item=0x7f030032;
+        public static final int fragment_audiobooks_item=0x7f030033;
+        public static final int fragment_seeker=0x7f030034;
+        public static final int fragment_timer=0x7f030035;
+        public static final int fragment_track=0x7f030036;
+        public static final int input=0x7f030037;
+        public static final int input_item=0x7f030038;
+        public static final int item_track=0x7f030039;
+        public static final int loading=0x7f03003a;
+        public static final int support_simple_spinner_dropdown_item=0x7f03003b;
+        public static final int track_details=0x7f03003c;
     }
     public static final class menu {
         public static final int audiobooks=0x7f0c0000;

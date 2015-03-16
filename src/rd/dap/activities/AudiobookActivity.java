@@ -8,7 +8,6 @@ import static rd.dap.activities.InputActivity.REQUEST_EDIT_TRACK;
 import java.util.ArrayList;
 import java.util.List;
 
-import rd.dap.FileBrowserActivity;
 import rd.dap.R;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;

@@ -1,15 +1,19 @@
 package rd.dap.model;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
 import rd.dap.support.TrackList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 public class Audiobook implements Comparable<Audiobook>, Serializable{
 	private static final long serialVersionUID = 6956470301541977175L;
 	private String author, album, series = "";
 	private String cover;
+	private byte[] thumbnail_data = null;
 	private TrackList playlist = new TrackList();
-	
+
 	public Audiobook(){} //default constructor
 	public Audiobook(Audiobook original){ //copy constructor
 		setAudiobook(original);
@@ -19,8 +23,9 @@ public class Audiobook implements Comparable<Audiobook>, Serializable{
 		setAlbum(original.getAlbum() == null ? null : new String(original.getAlbum()));
 		setCover(original.getCover() == null ? null : new String(original.getCover()));
 		setPlaylist(original.getPlaylist());
+		setThumbnail_data(original.getThumbnail_data());
 	}
-	
+
 	/*
 	 * Audiobooks are immutable
 	 */
@@ -34,6 +39,18 @@ public class Audiobook implements Comparable<Audiobook>, Serializable{
 	public void setPlaylist(TrackList playlist) { this.playlist = new TrackList(playlist); }
 	public String getCover() { return cover == null ? null : new String(cover); }
 	public void setCover(String cover) { if(cover != null) this.cover = new String(cover); }
+	public byte[] getThumbnail_data() { return thumbnail_data; }
+	public void setThumbnail_data(byte[] thumbnail_data) { this.thumbnail_data = thumbnail_data; }
+	public void setThumbnail(Bitmap bm){
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+		thumbnail_data = stream.toByteArray();
+	}
+	public Bitmap getThumbnail(){
+		if(thumbnail_data == null || thumbnail_data.length == 0) return null;
+		Bitmap bm = BitmapFactory.decodeByteArray(thumbnail_data, 0, thumbnail_data.length);
+		return bm;
+	}
 	
 	public String toString(){
 		String out = author + " : " + album + (!series.isEmpty() ? "("+series+")" : "");
@@ -69,6 +86,6 @@ public class Audiobook implements Comparable<Audiobook>, Serializable{
 		if(p == 0) p = this.getAlbum().compareTo(other.getAlbum());
 		return p;
 	}
-	
-	
+
+
 }

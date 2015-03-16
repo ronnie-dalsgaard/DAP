@@ -17,7 +17,7 @@
 
     <ScrollView
         android:id="@+id/controller_scroller"
-        android:layout_width="@dimen/mini_player_width"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/controller_beta"
         android:layout_centerHorizontal="true" >
@@ -33,7 +33,7 @@
                 android:text="Bookmarks:" />
 
             <HorizontalScrollView
-                android:layout_width="@dimen/mini_player_width"
+                android:layout_width="match_parent"
                 android:layout_height="@dimen/cover_height_medium" >
 
                 <LinearLayout

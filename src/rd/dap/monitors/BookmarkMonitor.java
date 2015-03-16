@@ -13,23 +13,23 @@ import android.util.Log;
 public class BookmarkMonitor extends Monitor {
 	private static final String TAG = "Monitor_bookmarks";
 	private boolean go_again = true;
-	private PlayerService player;
 	private Activity activity;
-	private BookmarkMonitorListener listener;
+	private BookmarkMonitorListener bookmark_monitor_listener;
 	
 	public interface BookmarkMonitorListener {
+		public PlayerService getPlayer();
 		public void displayBookmarks();
 	}
 
-	public BookmarkMonitor(Activity activity, PlayerService player, BookmarkMonitorListener listener) {
+	public BookmarkMonitor(Activity activity, BookmarkMonitorListener bookmark_listener) {
 		super(5, TimeUnit.SECONDS);
 		this.activity = activity;
-		this.player = player; 
-		this.listener = listener;
+		this.bookmark_monitor_listener = bookmark_listener;
 	}
 
 	@Override
 	public void execute() {
+		PlayerService player = bookmark_monitor_listener.getPlayer();
 		if(player == null) return;
 
 		if(!go_again && !player.isPlaying()){
@@ -50,12 +50,12 @@ public class BookmarkMonitor extends Monitor {
 			Log.d(TAG, "Bookmark created or updated\n"+bookmark);
 			
 			bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.PLAY, trackno, progress));
-
+			
 			//Update view
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.displayBookmarks();
+					bookmark_monitor_listener.displayBookmarks();
 				}
 			});
 		}

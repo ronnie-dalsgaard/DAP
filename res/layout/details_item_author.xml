@@ -13,7 +13,7 @@
 
     <TextView
         android:id="@+id/details_item_author_tv"
-        android:layout_width="@dimen/mini_player_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:paddingBottom="@dimen/margin_big"
