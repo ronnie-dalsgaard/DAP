@@ -64,16 +64,13 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 		setHasOptionsMenu(true);
 	}
 	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		try {
-			audiobookSelectedListener = (OnAudiobookSelectedListener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement OnAudiobookSelectedListener");
-		}
-	}
-	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		try {
+			audiobookSelectedListener = (OnAudiobookSelectedListener) getActivity();
+		} catch (ClassCastException e) {
+			throw new ClassCastException(getActivity().toString() + " must implement OnAudiobookSelectedListener");
+		}
+		
 		gridview = (GridView) inflater.inflate(R.layout.fragment_audiobooks_grid, container, false);
 
 		adapter = new GridViewAdapter(getActivity(), audiobooks);

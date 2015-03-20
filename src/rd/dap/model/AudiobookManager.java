@@ -16,6 +16,9 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import rd.dap.events.AudiobooksLoadedEvent;
+import rd.dap.events.Event;
+import rd.dap.events.EventBus;
 import rd.dap.support.AlbumFolderFilter;
 import rd.dap.support.Mp3FileFilter;
 import rd.dap.support.TrackList;
@@ -164,6 +167,9 @@ public final class AudiobookManager{
 			audiobooks.clear();
 			audiobooks.addAll(list);
 			in.close();
+			
+			Event event = new AudiobooksLoadedEvent(getClass().getSimpleName(), audiobooks);
+			EventBus.fireEvent(event);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

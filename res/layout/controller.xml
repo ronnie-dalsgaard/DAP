@@ -2,9 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/controller_base"
-    android:gravity="center_horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal" >
 
     <TextView
         android:id="@+id/controller_beta"
@@ -45,12 +45,12 @@
             </HorizontalScrollView>
 
             <include
-                android:id="@+id/div_1" 
+                android:id="@+id/div_1"
                 layout="@layout/divider_horizontal" />
 
             <include layout="@layout/controller_audiobook_basics" />
 
-            <include 
+            <include
                 android:id="@+id/div_2"
                 layout="@layout/divider_horizontal" />
 
@@ -61,11 +61,12 @@
             <include layout="@layout/fragment_seeker" />
 
             <include layout="@layout/divider_horizontal" />
-            
+
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-                
+                android:layout_height="0dp"
+                android:layout_weight="1" >
+
                 <ImageView
                     android:id="@+id/controller_lock"
                     android:layout_width="20dp"
@@ -74,27 +75,12 @@
                     android:contentDescription="@string/content_description"
                     android:src="@drawable/ic_action_secure" />
 
-                <LinearLayout
+                <fragment
+                    android:id="@+id/controller_tracks_fragment"
+                    android:name="rd.dap.fragments.TracksFragment"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tracks:" />
-                    
-                    <LinearLayout
-                        android:id="@+id/controller_tracks_grid"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-
-                    <include layout="@layout/divider_horizontal" />
-
-                </LinearLayout>
+                    android:layout_height="match_parent" />
             </FrameLayout>
-
         </LinearLayout>
     </ScrollView>
 
@@ -104,7 +90,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:textColor="#80808080"
-        android:text="?android:attr/versionCode" />
+        android:text="?android:attr/versionCode"
+        android:textColor="#80808080" />
 
 </RelativeLayout>

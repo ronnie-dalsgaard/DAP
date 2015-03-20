@@ -10,6 +10,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import rd.dap.events.BookmarksLoadedEvent;
+import rd.dap.events.Event;
+import rd.dap.events.EventBus;
 import android.content.Context;
 import android.util.Log;
 
@@ -130,6 +133,9 @@ public class BookmarkManager{ //Singleton
 			bookmarks.clear();
 			bookmarks.addAll(list);
 			in.close();
+			
+			Event event = new BookmarksLoadedEvent(getClass().getSimpleName(), bookmarks);
+			EventBus.fireEvent(event);
 			return bookmarks;
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -2,6 +2,7 @@ package rd.dap.monitors;
 
 import java.util.concurrent.TimeUnit;
 
+import rd.dap.activities.PlayerHandler;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkEvent;
@@ -16,8 +17,7 @@ public class BookmarkMonitor extends Monitor {
 	private Activity activity;
 	private BookmarkMonitorListener bookmark_monitor_listener;
 	
-	public interface BookmarkMonitorListener {
-		public PlayerService getPlayer();
+	public interface BookmarkMonitorListener extends PlayerHandler {
 		public void displayBookmarks();
 	}
 

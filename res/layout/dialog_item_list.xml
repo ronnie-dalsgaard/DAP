@@ -1,43 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dialog_base"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginBottom="25dp"
+    android:layout_marginTop="25dp"
     android:background="@drawable/miniplayer_bg" >
 
-    <TextView
-        android:id="@+id/dialog_title_tv"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_big"
-        android:text="Title"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical" >
 
-    <ImageButton
-        android:id="@+id/dialog_exit_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/margin_big"
-        android:background="@color/transparent"
-        android:contentDescription="@string/content_description"
-        android:src="@drawable/ic_action_cancel" />
+        <TextView
+            android:id="@+id/dialog_title_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/margin_big"
+            android:text="Title"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <ImageButton
+            android:id="@+id/dialog_exit_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_big"
+            android:background="@color/transparent"
+            android:contentDescription="@string/content_description"
+            android:src="@drawable/ic_action_cancel" />
+    </LinearLayout>
 
     <include
         android:id="@+id/dialog_divider1"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/dialog_title_tv"
         layout="@layout/divider_horizontal" />
 
     <LinearLayout
         android:id="@+id/dialog_history_layout"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_below="@+id/dialog_divider1"
+        android:layout_height="30dp"
+        android:orientation="vertical"
         android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:orientation="vertical" >
+        android:paddingRight="15dp" >
 
         <ListView
             android:id="@+id/dialog_history_list"
@@ -49,7 +57,6 @@
         android:id="@+id/dialog_divider2"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/dialog_history_layout"
         layout="@layout/divider_horizontal" />
 
     <LinearLayout
@@ -57,7 +64,6 @@
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/dialog_divider2"
         android:divider="@drawable/vertical_divider" >
 
         <Button
@@ -70,4 +76,4 @@
             android:textColor="@color/white" />
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

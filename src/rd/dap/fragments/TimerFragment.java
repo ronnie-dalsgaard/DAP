@@ -3,9 +3,11 @@ package rd.dap.fragments;
 import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
+import rd.dap.events.Event;
+import rd.dap.events.EventBus;
+import rd.dap.events.TimeOutEvent;
 import rd.dap.monitors.Monitor;
 import rd.dap.support.Time;
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,17 +29,12 @@ public class TimerFragment extends Fragment implements OnClickListener {
 	private static final int MAX_VALUE = 12;
 	private static final TimeUnit MAX_UNIT = TimeUnit.HOURS;
 	private TextView digi, timer_value_tv;
-	private TimerListener listener;
 	private ImageView min_hand, sec_hand;
 	private View inc_btn, dec_btn, timer_value_layout;
 	private AnalogClock clock;
 	private Timer timer;
 	private static boolean timerOn = false;
 	private int delay;
-
-	public interface TimerListener {
-		public void onTimerTerminate();
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -73,16 +70,7 @@ public class TimerFragment extends Fragment implements OnClickListener {
 
 		return view;
 	}
-	@Override
-	public void onAttach(Activity activity){
-		super.onAttach(activity);
-		try {
-			listener = (TimerListener)activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement PickerListener");
-		}
-	}
+
 	@Override
 	public void onClick(View v) {
 		SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -102,14 +90,14 @@ public class TimerFragment extends Fragment implements OnClickListener {
 			if(delay_inc > Time.toMillis(MAX_VALUE, MAX_UNIT)) break;
 			delay = delay_inc;
 			pref.edit().putInt("timer_delay", delay).commit();
-			if(listener != null) display(delay);
+			/* if(listener != null) */display(delay);
 			break;
 		case R.id.timer_value_dec:
 			int delay_dec = delay - Time.toMillis(STEP_VALUE, STEP_UNIT);
 			if(delay_dec < Time.toMillis(1, TimeUnit.MINUTES)) break;
 			delay = delay_dec;
 			pref.edit().putInt("timer_delay", delay).commit();
-			if(listener != null) display(delay);
+			/* if(listener != null) */display(delay);
 			break;
 		}
 		timer_value_tv.setText(Time.toString(delay));
@@ -140,8 +128,6 @@ public class TimerFragment extends Fragment implements OnClickListener {
 			endTime = System.currentTimeMillis() + TimerFragment.this.delay;
 			timeleft = delay;
 			
-			System.out.println("DELAY::: "+TimerFragment.this.delay);
-
 			getActivity().runOnUiThread(new Runnable() { 
 				@Override public void run() {
 					TimerFragment.this.min_hand.setRotation(0);
@@ -167,7 +153,10 @@ public class TimerFragment extends Fragment implements OnClickListener {
 			});
 
 			if(timeleft <= 0){
-				listener.onTimerTerminate();
+				String className = this.getClass().getSimpleName();
+				Event event = new TimeOutEvent(className);
+				EventBus.fireEvent(event);
+//				listener.onTimerTerminate();
 				kill();
 			}
 		}

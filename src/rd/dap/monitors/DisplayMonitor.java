@@ -2,6 +2,7 @@ package rd.dap.monitors;
 
 import java.util.concurrent.TimeUnit;
 
+import rd.dap.activities.PlayerHandler;
 import rd.dap.model.Audiobook;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
@@ -12,8 +13,7 @@ public class DisplayMonitor extends Monitor {
 	private Activity activity;
 	private DisplayMoniterListener display_monitor_listener;
 	
-	public interface DisplayMoniterListener {
-		public PlayerService getPlayer();
+	public interface DisplayMoniterListener extends PlayerHandler {
 		public void displayTime(Audiobook audiobook, int trackno);
 		public void displayNoTime();
 	}

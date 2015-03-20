@@ -20,5 +20,6 @@
     <string name="title_activity_change_audiobook_dialog">ChangeAudiobookDialogActivity</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_file_browser">FileBrowserActivity</string>
+    <string name="title_activity_main_activity_new">MainActivity_new</string>
 
 </resources>

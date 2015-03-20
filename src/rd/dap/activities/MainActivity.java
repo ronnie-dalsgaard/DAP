@@ -14,7 +14,7 @@ import rd.dap.dialogs.Dialog_expired;
 import rd.dap.dialogs.Dialog_import_export;
 import rd.dap.fragments.AudiobooksFragment;
 import rd.dap.fragments.AudiobooksFragment.OnAudiobookSelectedListener;
-import rd.dap.fragments.TimerFragment.TimerListener;
+import rd.dap.fragments.TracksFragment;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
@@ -40,7 +40,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
@@ -75,8 +74,8 @@ import android.widget.Toast;
 
 public class MainActivity extends MainDriveHandler implements OnClickListener, OnLongClickListener, 
 ServiceConnection, PlayerService.PlayerObserver, OnSeekBarChangeListener,
-OnAudiobookSelectedListener, TimerListener, DisplayMoniterListener, BookmarkMonitorListener,
-Dialog_import_export.Callback {
+OnAudiobookSelectedListener, /*TimerListener,*/ DisplayMoniterListener, BookmarkMonitorListener,
+Dialog_import_export.Callback, PlayerHandler {
 	private static final String TAG = "MainActivity";
 	private static final int TRACKNO = 1111;
 	private static final int BOOKMARK = 2222;
@@ -92,7 +91,7 @@ Dialog_import_export.Callback {
 	private SeekBar progress_seeker, track_seeker;
 	private View timer_layout, timer_thumb_iv, timer_thumb_back_iv;
 	private CountDownLatch latch;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -117,7 +116,15 @@ Dialog_import_export.Callback {
 		}
 
 		audio_properties();
+		
+		if(savedInstanceState != null){
+			locked = savedInstanceState.getBoolean("locked");
+			System.out.println("locked = "+locked);
+			ImageView lock_iv = (ImageView) findViewById(R.id.controller_lock);
+			lock_iv.setImageDrawable(locked ? getResources().getDrawable(R.drawable.ic_action_secure) : null);
+		}
 
+		
 		//Buttons
 		ImageButton btn_cover = (ImageButton) findViewById(R.id.audiobook_basics_btn_cover);
 		btn_cover.setImageDrawable(null);
@@ -146,6 +153,8 @@ Dialog_import_export.Callback {
 		timer_thumb_back_iv.setOnClickListener(this);
 
 		bookmark_list = (LinearLayout) findViewById(R.id.controller_bookmark_list);
+		
+		
 
 
 		latch = new CountDownLatch(2);
@@ -243,12 +252,12 @@ Dialog_import_export.Callback {
 		bookmark_monitor = new BookmarkMonitor(this, this);
 		bookmark_monitor.start();
 	}
-//	@Override
-//	public void onSaveInstanceState(Bundle savedInstanceState) {
-//		savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
-//		savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
-//		super.onSaveInstanceState(savedInstanceState);
-//	}
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		System.out.println("Saving locked = "+locked);
+		savedInstanceState.putBoolean("locked", locked);
+		super.onSaveInstanceState(savedInstanceState);
+	}
 
 	@Override
 	public void onStart(){
@@ -425,7 +434,10 @@ Dialog_import_export.Callback {
 		player.rewind(Time.toMillis(1, TimeUnit.MINUTES));
 	}
 	private void click_track(int trackno) {
+		System.out.println("on track clicked :: locked = "+locked);
 		if(locked) { emphasizeLock(); return; }
+		System.out.println("selecting track. "+trackno);
+		System.out.println("player is null: "+(player == null));
 		player.selectTrack(trackno);
 	}
 	private void click_timer_thumb() {
@@ -487,6 +499,8 @@ Dialog_import_export.Callback {
 				displayTime(audiobook, trackno);
 			}
 		});
+		TracksFragment frag = (TracksFragment) getFragmentManager().findFragmentById(R.id.controller_tracks_fragment);
+		frag.displayTracks(audiobook.getPlaylist());
 	}
 	@Override
 	public void onSetBookmark(final Audiobook audiobook, final int trackno, int progress){
@@ -596,6 +610,7 @@ Dialog_import_export.Callback {
 		bm.createOrUpdateBookmark(getFilesDir(), bookmark, true);
 		bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.SELECT, new_trackno, 0));
 		BookmarkManager.getInstance().createOrUpdateBookmark(getFilesDir(), bookmark, true);
+		
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -603,6 +618,7 @@ Dialog_import_export.Callback {
 				displayPlayButton();
 				displayTracks(audiobook, new_trackno);
 				displayTime(audiobook, new_trackno);
+				System.out.println("track selected...!");
 			}
 		});
 	}
@@ -675,10 +691,10 @@ Dialog_import_export.Callback {
 	public void onAudiobookSelected(Audiobook audiobook) {
 		selectAudiobook(audiobook);
 	}
-	@Override
-	public void onTimerTerminate() {
-		player.pause();
-	}
+//	@Override
+//	public void onTimerTerminate() {
+//		player.pause();
+//	}
 
 	//Update views
 	private void displayNoInfo(){
@@ -919,18 +935,18 @@ Dialog_import_export.Callback {
 			x2 = event.getX();
 			y2 = event.getY();
 			
-//			if(bookmark_list == null){
-//				if(y1 < 350 || y2 < 350) return false; 
-//			} else {
-//				int[] coords = {0,0};
-//				bookmark_list.getLocationOnScreen(coords);
-////				int absoluteTop = coords[1];
-//				int absoluteBottom = coords[1] + bookmark_list.getHeight();
-//				if(y1 < absoluteBottom || y2 < absoluteBottom) return false; 
-//			}
-			
 			if(Math.abs(x2 - x1) < MIN_DIST) break;
 			if(Math.abs(y2 - y1) > MIN_DIST) break;
+			
+			if(bookmark_list == null){
+				if(y1 < 350 || y2 < 350) break; 
+			} else {
+				int[] coords = {0,0};
+				bookmark_list.getLocationOnScreen(coords);
+//				int absoluteTop = coords[1];
+				int absoluteBottom = coords[1] + bookmark_list.getHeight();
+				if(y1 < absoluteBottom || y2 < absoluteBottom) break; 
+			}
 
 			final ImageView lock_iv = (ImageView) findViewById(R.id.controller_lock);
 			if(x2 > x1){ //Right
@@ -1054,4 +1070,5 @@ Dialog_import_export.Callback {
 		}
 		Log.d(TAG, "Audio focus gained");
 	}
+	
 }
