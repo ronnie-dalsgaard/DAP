@@ -6,7 +6,7 @@
     tools:ignore="HardcodedText" >
 
     <ImageView
-        android:id="@+id/audiobook_basics_cover_iv"
+        android:id="@+id/fragment_player_cover_iv"
         android:layout_width="@dimen/cover_width_big"
         android:layout_height="@dimen/cover_height_big"
         android:layout_marginRight="5dp"
@@ -14,28 +14,28 @@
         android:src="@drawable/ic_action_help" />
 
     <include
-        android:id="@+id/audiobook_basics_divider"
+        android:id="@+id/fragment_player_divider"
         android:layout_width="1dp"
         android:layout_height="@dimen/cover_height_big"
-        android:layout_toRightOf="@+id/audiobook_basics_cover_iv"
+        android:layout_toRightOf="@+id/fragment_player_cover_iv"
         layout="@layout/divider_vertical" />
 
     <FrameLayout
-        android:id="@+id/audiobook_basics_info"
+        android:id="@+id/fragment_player_info"
         android:layout_width="match_parent"
         android:layout_height="@dimen/cover_height_big"
-        android:layout_alignBottom="@+id/audiobook_basics_cover_iv"
-        android:layout_toRightOf="@+id/audiobook_basics_divider" >
+        android:layout_alignBottom="@+id/fragment_player_cover_iv"
+        android:layout_toRightOf="@+id/fragment_player_divider" >
 
         <LinearLayout
-            android:id="@+id/audiobook_basics_info_layout"
+            android:id="@+id/fragment_player_info_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/audiobook_basics_author_tv"
+                android:id="@+id/fragment_player_author_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/margin_small"
@@ -45,7 +45,7 @@
             <include layout="@layout/divider_horizontal" />
 
             <TextView
-                android:id="@+id/audiobook_basics_album_tv"
+                android:id="@+id/fragment_player_album_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/margin_small"
@@ -53,39 +53,16 @@
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </LinearLayout>
 
-        <FrameLayout
+        <fragment
+            android:id="@+id/fragment_player_timer_frag"
+            android:name="rd.dap.fragments.TimerFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-
-            <fragment
-                android:id="@+id/timer_layout"
-                android:name="rd.dap.fragments.TimerFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <ImageView
-                android:id="@+id/timer_thumb_back_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|left"
-                android:layout_marginBottom="5dp"
-                android:contentDescription="@string/content_description"
-                android:src="@drawable/timer_thumb_back"
-                android:visibility="gone" />
-        </FrameLayout>
-
-        <ImageView
-            android:id="@+id/timer_thumb_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
-            android:layout_marginBottom="5dp"
-            android:contentDescription="@string/content_description"
-            android:src="@drawable/timer_thumb" />
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_timer" />
     </FrameLayout>
 
     <ImageButton
-        android:id="@+id/audiobook_basics_btn_cover"
+        android:id="@+id/fragment_player_btn_cover"
         android:layout_width="@dimen/cover_width_big"
         android:layout_height="@dimen/cover_height_big"
         android:layout_alignParentLeft="true"

@@ -1,7 +1,5 @@
 package rd.dap.dialogs;
 
-import static rd.dap.activities.MainActivity.END;
-
 import java.util.LinkedList;
 
 import rd.dap.R;
@@ -12,7 +10,6 @@ import rd.dap.model.BookmarkEvent;
 import rd.dap.model.BookmarkManager;
 import rd.dap.model.GenericCallback;
 import android.app.Activity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,7 +22,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 public class Dialog_import_export extends CustomDialog {
-	private static final String TAG = "Dialog_import_export";
+	public static final String END = "/END";
 	private Callback callback;
 	
 	public interface Callback {
@@ -58,7 +55,6 @@ public class Dialog_import_export extends CustomDialog {
 					String line = gson.toJson(bookmark) + END + "\n";
 					json += line;
 				}
-				Log.d(TAG, "onClick - upload: "+json);
 				callback.upload(json, new GenericCallback<String>() {
 					@Override
 					public void onResult(final String result) {
@@ -77,7 +73,6 @@ public class Dialog_import_export extends CustomDialog {
 				callback.download(new GenericCallback<String>() { 
 					@Override public void onResult(String result) {
 						System.out.println("----- DOWNLOAD COMPLETE -----");
-						Log.d(TAG, "onClick - download: "+result);
 						if(result == null || result.isEmpty() || result.contains(NO_FILE)){
 							Toast.makeText(activity, "Bad result: \"" + result + "\"", Toast.LENGTH_LONG).show();
 							return;

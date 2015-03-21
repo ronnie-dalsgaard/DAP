@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,15 +13,14 @@ import java.util.LinkedList;
 
 import rd.dap.events.BookmarksLoadedEvent;
 import rd.dap.events.Event;
+import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class BookmarkManager{ //Singleton
-	private static final String TAG = "BookmarkManager";
 	private static BookmarkManager instance = new BookmarkManager();
 	private ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
 	
@@ -120,8 +120,7 @@ public class BookmarkManager{ //Singleton
 	}
 	
 	//Load and save bookmarks
-	public ArrayList<Bookmark> loadBookmarks(File filesDir){
-		Log.d(TAG, "loadBookmarks");
+	public void loadBookmarks(File filesDir){
 		File file = new File(filesDir, "bookmarks.dap");
 		try {
 			FileInputStream stream = new FileInputStream(file);
@@ -136,14 +135,14 @@ public class BookmarkManager{ //Singleton
 			
 			Event event = new BookmarksLoadedEvent(getClass().getSimpleName(), bookmarks);
 			EventBus.fireEvent(event);
-			return bookmarks;
+		} catch (FileNotFoundException e){
+			Event event = new Event(getClass().getSimpleName(), Type.NO_BOOKMARKS_FOUND_EVENT);
+			EventBus.fireEvent(event);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return null;
 		}
 	}
 	public boolean saveBookmarks(File filesDir){
-		Log.d(TAG, "saveBookmarks");
 		Gson gson = new Gson();
 		String json = gson.toJson(bookmarks);
 		

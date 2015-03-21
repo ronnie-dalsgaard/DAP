@@ -7,7 +7,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bookmarks:" />
+        android:text="@string/lbl_bookmarks" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -16,20 +16,14 @@
         <ProgressBar
             android:id="@+id/fragment_bookmarks_progress"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_gravity="center" />
 
-        <HorizontalScrollView
+        <rd.dap.support.FlowLayout
+            xmlns:flow="http://schemas.android.com/apk/res/rd.dap.support"
+            android:id="@+id/fragment_bookmarks_flow"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/cover_height_medium" >
-
-            <LinearLayout
-                android:id="@+id/fragment_bookmarks_list"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/cover_height_medium"
-                android:orientation="horizontal" >
-            </LinearLayout>
-        </HorizontalScrollView>
+            android:layout_height="wrap_content" />
     </FrameLayout>
 
 </LinearLayout>

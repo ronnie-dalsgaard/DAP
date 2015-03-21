@@ -18,47 +18,43 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".activities.MainActivity"
+            android:name="rd.dap.activities.MainActivity"
             android:label="@string/app_name" >
-        </activity>
-        <activity
-            android:name=".fragments.BookmarkListFragment"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.AudiobooksActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".fragments.ControllerFragment"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.FileBrowserActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.AudiobookActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.TrackActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.InputActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.NewAudiobookActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name="rd.dap.activities.MainActivity_new"
-            android:label="@string/app_name" >
-             <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="rd.dap.fragments.BookmarkListFragment"
+            android:label="@string/app_name" />
+        <activity
+            android:name="rd.dap.activities.AudiobooksActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="rd.dap.fragments.ControllerFragment"
+            android:label="@string/app_name" />
+        <activity
+            android:name="rd.dap.activities.FileBrowserActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="rd.dap.activities.AudiobookActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="rd.dap.activities.TrackActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="rd.dap.activities.InputActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="rd.dap.activities.NewAudiobookActivity"
+            android:label="@string/app_name" />
 
         <service
-            android:name=".services.PlayerService"
+            android:name="rd.dap.old.services.PlayerService"
             android:exported="true" />
         <service
-            android:name=".services.HeadSetReceiver"
+            android:name="rd.dap.old.services.HeadSetReceiver"
             android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

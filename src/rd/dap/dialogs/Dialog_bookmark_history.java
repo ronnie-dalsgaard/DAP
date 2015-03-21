@@ -3,6 +3,9 @@ package rd.dap.dialogs;
 import java.util.ArrayList;
 
 import rd.dap.R;
+import rd.dap.events.Event.Type;
+import rd.dap.events.EventBus;
+import rd.dap.events.HasBookmarkEvent;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkEvent;
 import rd.dap.support.Time;
@@ -24,22 +27,16 @@ import android.widget.TextView;
 
 public class Dialog_bookmark_history extends CustomDialog {
 	private Bookmark bookmark;
-	private Callback callback;
 	
-	public interface Callback {
-		public void onItemSelected(BookmarkEvent event);
-	}
-	
-	public Dialog_bookmark_history(Activity activity, ViewGroup parent, Bookmark bookmark, Callback callback) {
+	public Dialog_bookmark_history(Activity activity, ViewGroup parent, Bookmark bookmark) {
 		super(activity, parent);
 		this.bookmark = bookmark;
-		this.callback = callback;
 	}
 
 	public void show(){
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View dv = inflater.inflate(R.layout.dialog_item_list, parent, false);
-
+ 
 		//Title
 		TextView title_tv = (TextView) dv.findViewById(R.id.dialog_title_tv);
 		title_tv.setText("Bookmark history");
@@ -66,8 +63,13 @@ public class Dialog_bookmark_history extends CustomDialog {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				dialog.dismiss();
-				BookmarkEvent event = bookmark.getEvents().get(position);
-				callback.onItemSelected(event);
+				BookmarkEvent bevent = bookmark.getEvents().get(position);
+				int trackno = bevent.getTrackno();
+				int progress = bevent.getProgress();
+				bookmark.setTrackno(trackno);
+				bookmark.setProgress(progress);
+				bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.UNDO, trackno, progress));
+				EventBus.fireEvent(new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_UPDATED_EVENT, bookmark));
 			}
 		});
 
@@ -79,7 +81,7 @@ public class Dialog_bookmark_history extends CustomDialog {
 		private ArrayList<BookmarkEvent> list;
 		
 		public BookmarkEventAdapter(Context context, ArrayList<BookmarkEvent> list) {
-			super(context, R.layout.bookmark_history_list_item, list);
+			super(context, R.layout.dialog_bookmark_history_list_item, list);
 			this.list = list;
 		}
 
@@ -94,7 +96,7 @@ public class Dialog_bookmark_history extends CustomDialog {
 		    if (convertView == null) {
 		        LayoutInflater inflater;
 		        inflater = LayoutInflater.from(getContext());
-		        convertView = inflater.inflate(R.layout.bookmark_history_list_item, null);
+		        convertView = inflater.inflate(R.layout.dialog_bookmark_history_list_item, null);
 		        holder = new ViewHolder();
 		        holder.function_iv = (ImageView) convertView.findViewById(R.id.bookmark_history_list_item_function_iv);
 		        holder.progress_tv = (TextView) convertView.findViewById(R.id.bookmark_history_list_item_progress);

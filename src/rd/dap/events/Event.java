@@ -1,36 +1,44 @@
 package rd.dap.events;
 
-public abstract class Event {
-	public static final int EVENT = 5000;
-	public static final int PLAY_PAUSE_EVENT = 5001;
-	public static final int TIME_OUT_EVENT = 5002;
-	public static final int AUDIOBOOKS_LOADED_EVENT = 5003;
-	public static final int BOOKMARKS_LOADED_EVENT = 5004;
+public class Event {
+	public enum Type {
+		PLAY_PAUSE_EVENT,
+		TIME_OUT_EVENT,
+		NO_AUDIOBOOKS_FOUND_EVENT,
+		NO_BOOKMARKS_FOUND_EVENT,
+		FILE_FOUND_EVENT,
+		AUDIOBOOKS_LOADED_EVENT,
+		AUDIOBOOKS_SELECTED_EVENT,
+		BOOKMARKS_LOADED_EVENT,
+		BOOKMARK_SELECTED_EVENT,
+		BOOKMARK_DELETED_EVENT, 
+		BOOKMARK_UPDATED_EVENT
+	}
 	
 	private String sourceName;
-	private int eventID;
+	private Type type;
 
-	public Event(String sourceName, int eventID){
+	public Event(String sourceName, Type type){
 		this.sourceName = sourceName;
-		this.eventID = eventID;
+		this.type = type;
 	}
 	
 	public String getSourceName(){
 		return sourceName;
 	}
 	
-	public int getEventID(){
-		return eventID;
+	public Type getType(){
+		return type;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Event [sourcenName=").append(sourceName)
-				.append("\n\teventID=").append(eventID).append("]")
-				.append("\n\tevent class=").append(getClass().getSimpleName());
+		builder.append("========================================================")
+				.append("\nEvent sourcenName = ").append(sourceName)
+				.append("\n\teventID = ").append(type)
+				.append("\n\tevent class=").append(getClass().getSimpleName())
+				.append("\n========================================================");
 		return builder.toString();
 	}
-	
-	
 }

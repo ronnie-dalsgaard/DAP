@@ -37,7 +37,7 @@ public class InputActivity extends Activity {
 	@Override @SuppressWarnings("unchecked")
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.input);
+		setContentView(R.layout.activity_input);
 		
 		requestCode = getIntent().getIntExtra("requestcode", -1);
 		if(requestCode == -1) throw new RuntimeException("InputActivity - No requestcode supplied");
@@ -51,7 +51,7 @@ public class InputActivity extends Activity {
 		if(value != null && !value.isEmpty())
 			et.setText(value);
 		
-		adapter = new InputAdapter(this, R.id.input_item_tv, list);
+		adapter = new InputAdapter(this, R.layout.activity_input_item, list);
 		
 		ListView lv = (ListView) findViewById(R.id.input_lv);
 		lv.setAdapter(adapter);
@@ -89,7 +89,7 @@ public class InputActivity extends Activity {
 			ViewHolder holder;
 			if(convertView == null){
 				LayoutInflater inflater = LayoutInflater.from(getContext());
-				convertView = inflater.inflate(R.layout.input_item, parent, false);
+				convertView = inflater.inflate(R.layout.activity_input_item, parent, false);
 				//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 				
 				holder = new ViewHolder();

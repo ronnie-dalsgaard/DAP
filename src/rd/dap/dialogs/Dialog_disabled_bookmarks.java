@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import rd.dap.R;
 import rd.dap.model.Bookmark;
-import rd.dap.model.BookmarkManager;
 import rd.dap.support.Time;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -22,16 +21,10 @@ import android.widget.TextView;
 
 public class Dialog_disabled_bookmarks extends CustomDialog {
 	private ArrayList<Bookmark> bookmarks;
-	private Callback callback;
 	
-	public interface Callback {
-		public void onBookmarkDeleted();
-	}
-	
-	public Dialog_disabled_bookmarks(Activity activity, ViewGroup parent, ArrayList<Bookmark> bookmarks, Callback callback) {
+	public Dialog_disabled_bookmarks(Activity activity, ViewGroup parent, ArrayList<Bookmark> bookmarks) {
 		super(activity, parent);
 		this.bookmarks = bookmarks;
-		this.callback = callback;
 	}
 
 	public void show(){
@@ -53,7 +46,7 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 
 		//List
 		ListView lv = (ListView) dv.findViewById(R.id.dialog_history_list);
-		lv.setDivider(activity.getResources().getDrawable(R.drawable.horizontal_divider));
+		lv.setDivider(activity.getResources().getDrawable(R.drawable.divider_horizontal));
 		final DisabledBookmarkAdapter adapter = new DisabledBookmarkAdapter(activity, bookmarks);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(new OnItemClickListener() {
@@ -61,17 +54,7 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				final Bookmark bookmark = bookmarks.get(position);
 				
-				new Dialog_delete_bookmark(activity, parent, bookmark, new Dialog_delete_bookmark.Callback() {
-					@Override
-					public void onDeleteBookmarkConfirmed() {
-						//Remove the bookmark
-						BookmarkManager.getInstance().removeBookmark(activity, bookmark);
-						BookmarkManager bm = BookmarkManager.getInstance();
-						bm.removeBookmark(activity, bookmark);
-						adapter.notifyDataSetChanged();
-						callback.onBookmarkDeleted();
-					}
-				}).show();
+				new Dialog_delete_bookmark(activity, parent, bookmark).show();
 			}
 		});
 
@@ -83,7 +66,7 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 		private ArrayList<Bookmark> list;
 
 		public DisabledBookmarkAdapter(Context context, ArrayList<Bookmark> list) {
-			super(context, R.layout.audiobook_item, list);
+			super(context, R.layout.dialog_disabled_bookmark_item, list);
 			this.list = list;
 		}
 
@@ -98,7 +81,7 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 			if (convertView == null) {
 				LayoutInflater inflater;
 				inflater = LayoutInflater.from(getContext());
-				convertView = inflater.inflate(R.layout.bookmark_item_full, null);
+				convertView = inflater.inflate(R.layout.dialog_disabled_bookmark_item, null);
 				holder = new ViewHolder();
 				holder.author_tv = (TextView) convertView.findViewById(R.id.audiobook_item_author_tv);
 				holder.album_tv = (TextView) convertView.findViewById(R.id.audiobook_item_album_tv);
@@ -111,7 +94,7 @@ public class Dialog_disabled_bookmarks extends CustomDialog {
 
 			holder.author_tv.setText(bookmark.getAuthor());
 			holder.album_tv.setText(bookmark.getAlbum());
-			holder.track_tv.setText(bookmark.getTrackno()+1);
+			holder.track_tv.setText(""+bookmark.getTrackno()+1);
 			holder.progress_tv.setText(Time.toString(bookmark.getProgress()));
 			
 

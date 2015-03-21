@@ -8,7 +8,7 @@ public class BookmarksLoadedEvent extends Event {
 	private ArrayList<Bookmark> bookmarks;
 	
 	public BookmarksLoadedEvent(String sourceName, ArrayList<Bookmark> bookmarks) {
-		super(sourceName, Event.BOOKMARKS_LOADED_EVENT);
+		super(sourceName, Type.BOOKMARKS_LOADED_EVENT);
 		this.bookmarks = bookmarks;
 	}
 

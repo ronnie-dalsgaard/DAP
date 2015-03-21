@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bookmark_layout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_width="120dp"
+    android:layout_height="@dimen/cover_height_medium" >
 
     <RelativeLayout
         android:id="@+id/bookmark_cover_layout"
@@ -15,7 +15,7 @@
             android:layout_width="@dimen/cover_width_medium"
             android:layout_height="@dimen/cover_height_medium"
             android:contentDescription="@string/content_description"
-            android:padding="2sp"
+            android:padding="1dp"
             android:src="@drawable/ic_action_picture" />
     </RelativeLayout>
 
@@ -35,12 +35,12 @@
 
         <TextView
             android:id="@+id/bookmark_track_tv"
-            android:layout_width="56sp"
+            android:layout_width="56dp"
             android:layout_height="16dp"
             android:gravity="center"
             android:layout_toRightOf="@+id/bookmark_track_iv"
             android:maxLines="1"
-            android:text="0" />
+            android:text="@string/g_track" />
 
         <ImageView
             android:id="@+id/bookmark_progress_iv"
@@ -52,13 +52,13 @@
 
         <TextView
             android:id="@+id/bookmark_progress_tv"
-            android:layout_width="56sp"
+            android:layout_width="56dp"
             android:layout_height="16dp"
             android:layout_below="@+id/bookmark_track_tv"
             android:layout_toRightOf="@+id/bookmark_progress_iv"
             android:gravity="center"
             android:maxLines="1"
-            android:text="@string/_progress" />
+            android:text="@string/g_progress" />
     </RelativeLayout>
 
 </RelativeLayout>

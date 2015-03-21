@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_big"
-        android:text="Title"
+        android:text="@string/g_title"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ImageButton
@@ -79,7 +79,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/dialog_divider2"
-        android:divider="@drawable/vertical_divider" >
+        android:divider="@drawable/divider_vertical" >
 
         <Button
             android:id="@+id/dialog_right_btn"
@@ -87,7 +87,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Button 2"
+            android:text="@string/g_btn2"
             android:textColor="@color/white" />
     </LinearLayout>
 

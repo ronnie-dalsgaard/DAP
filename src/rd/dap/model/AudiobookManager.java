@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,9 +17,10 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import rd.dap.events.AudiobooksLoadedEvent;
 import rd.dap.events.Event;
+import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
+import rd.dap.events.HasAudiobooksEvent;
 import rd.dap.support.AlbumFolderFilter;
 import rd.dap.support.Mp3FileFilter;
 import rd.dap.support.TrackList;
@@ -168,7 +170,10 @@ public final class AudiobookManager{
 			audiobooks.addAll(list);
 			in.close();
 			
-			Event event = new AudiobooksLoadedEvent(getClass().getSimpleName(), audiobooks);
+			Event event = new HasAudiobooksEvent(getClass().getSimpleName(), Type.AUDIOBOOKS_LOADED_EVENT, audiobooks);
+			EventBus.fireEvent(event);
+		} catch (FileNotFoundException e) {
+			Event event = new Event(getClass().getSimpleName(), Type.NO_AUDIOBOOKS_FOUND_EVENT);
 			EventBus.fireEvent(event);
 		} catch (IOException e) {
 			e.printStackTrace();

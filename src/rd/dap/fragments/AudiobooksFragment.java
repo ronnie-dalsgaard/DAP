@@ -1,6 +1,5 @@
 package rd.dap.fragments;
 
-import static rd.dap.activities.AudiobookActivity.STATE_EDIT;
 import static rd.dap.activities.FileBrowserActivity.TYPE_FOLDER;
 
 import java.io.File;
@@ -10,6 +9,10 @@ import java.util.Collections;
 import rd.dap.R;
 import rd.dap.activities.AudiobookActivity;
 import rd.dap.activities.FileBrowserActivity;
+import rd.dap.events.Event;
+import rd.dap.events.Event.Type;
+import rd.dap.events.EventBus;
+import rd.dap.events.HasAudiobookEvent;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
@@ -43,19 +46,16 @@ import android.widget.TextView;
 public class AudiobooksFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener {
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private static final int REQUEST_SET_HOME_FOLDER = 9003;
+	public static final int STATE_NEW = 501;
+	public static final int STATE_EDIT = 502;
 	private GridView gridview;
 	private ArrayList<Audiobook> audiobooks;
-	private OnAudiobookSelectedListener audiobookSelectedListener;
 	private GridViewAdapter adapter;
 
 	public AudiobooksFragment(){
 		AudiobookManager am =  AudiobookManager.getInstance();
 		audiobooks = am.getAudiobooks();
 		Collections.sort(audiobooks);
-	}
-
-	public static interface OnAudiobookSelectedListener {
-		public void onAudiobookSelected(Audiobook audiobook);
 	}
 
 	@Override
@@ -65,12 +65,6 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		try {
-			audiobookSelectedListener = (OnAudiobookSelectedListener) getActivity();
-		} catch (ClassCastException e) {
-			throw new ClassCastException(getActivity().toString() + " must implement OnAudiobookSelectedListener");
-		}
-		
 		gridview = (GridView) inflater.inflate(R.layout.fragment_audiobooks_grid, container, false);
 
 		adapter = new GridViewAdapter(getActivity(), audiobooks);
@@ -83,8 +77,10 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 	}
 	@Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-		Audiobook clicked_audiobook = audiobooks.get(position);
-		audiobookSelectedListener.onAudiobookSelected(clicked_audiobook);
+		Audiobook audiobook = audiobooks.get(position);
+		Event event = new HasAudiobookEvent(getClass().getSimpleName(), Type.AUDIOBOOKS_SELECTED_EVENT, audiobook);
+		EventBus.fireEvent(event);
+		getActivity().finish();
 	}
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View v, int position,	long id) {
@@ -119,6 +115,7 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 		switch(requestCode){
 		case REQUEST_EDIT_AUDIOBOOK: adapter.notifyDataSetChanged(); break;
 		case REQUEST_SET_HOME_FOLDER:
+			System.out.println("RESULT");
 			if(data == null) return;
 			String folder_path = data.getStringExtra("result");
 			File folder = new File(folder_path);
@@ -318,4 +315,5 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 	public void displayAudiobooks() {
 		if(adapter != null) adapter.notifyDataSetChanged();
 	}
+
 }

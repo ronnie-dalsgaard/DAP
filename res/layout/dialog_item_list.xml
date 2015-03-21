@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="@dimen/margin_big"
-            android:text="Title"
+            android:text="@string/g_title"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageButton
@@ -42,7 +42,7 @@
     <LinearLayout
         android:id="@+id/dialog_history_layout"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="300dp"
         android:orientation="vertical"
         android:paddingLeft="15dp"
         android:paddingRight="15dp" >
@@ -50,7 +50,7 @@
         <ListView
             android:id="@+id/dialog_history_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="300dp" />
     </LinearLayout>
 
     <include
@@ -64,7 +64,7 @@
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="@drawable/vertical_divider" >
+        android:divider="@drawable/divider_vertical" >
 
         <Button
             android:id="@+id/dialog_history_btn"
@@ -72,7 +72,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Button"
+            android:text="@string/g_btn"
             android:textColor="@color/white" />
     </LinearLayout>
 

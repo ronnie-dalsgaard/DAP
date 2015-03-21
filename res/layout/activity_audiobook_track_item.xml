@@ -13,7 +13,7 @@
         android:layout_marginRight="@dimen/margin_small"
         android:background="@drawable/circle"
         android:gravity="center"
-        android:text="00"
+        android:text="@string/g_track"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/details_item_audiobook_track_position"
         android:maxLines="2"
-        android:text="Title"
+        android:text="@string/g_title"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="Duration: Unknown"
+        android:text="@string/g_duration_unknown"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

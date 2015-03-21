@@ -11,7 +11,7 @@
         android:layout_weight="1"
         android:contentDescription="@string/content_description"
         android:src="@drawable/ic_action_cancel"
-        android:text="Cancel"
+        android:text="@string/lbl_cancel"
         android:textColor="@color/white" />
 
     <ImageButton
@@ -21,7 +21,7 @@
         android:layout_weight="1"
         android:contentDescription="@string/content_description"
         android:src="@drawable/ic_action_save"
-        android:text="Save"
+        android:text="@string/lbl_save"
         android:textColor="@color/white" />
 
 </LinearLayout>

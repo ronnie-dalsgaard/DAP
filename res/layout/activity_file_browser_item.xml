@@ -27,7 +27,7 @@
         android:layout_marginLeft="5dp"
         android:layout_toRightOf="@+id/file_browser_item_icon"
         android:gravity="center_vertical"
-        android:text="Foldername"
+        android:text="@string/g_folder"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
     <LinearLayout

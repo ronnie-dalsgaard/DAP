@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 import rd.dap.R;
 import rd.dap.events.Event;
+import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.TimeOutEvent;
 import rd.dap.monitors.Monitor;
 import rd.dap.support.Time;
 import android.app.Fragment;
@@ -16,14 +16,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AnalogClock;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class TimerFragment extends Fragment implements OnClickListener {
+	private static final double ANIMATION_SPEED = 1.5;
 	private static final int STEP_VALUE = 5;
 	private static final TimeUnit STEP_UNIT = TimeUnit.MINUTES;
 	private static final int MAX_VALUE = 12;
@@ -31,6 +34,7 @@ public class TimerFragment extends Fragment implements OnClickListener {
 	private TextView digi, timer_value_tv;
 	private ImageView min_hand, sec_hand;
 	private View inc_btn, dec_btn, timer_value_layout;
+	private View timer_layout, timer_thumb_iv, timer_thumb_back_iv;
 	private AnalogClock clock;
 	private Timer timer;
 	private static boolean timerOn = false;
@@ -41,7 +45,7 @@ public class TimerFragment extends Fragment implements OnClickListener {
 		SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
 		delay = pref.getInt("timer_delay", Time.toMillis(15, TimeUnit.MINUTES));
 
-		LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
+		ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_timer, container, false);
 		timer_value_tv = (TextView) view.findViewById(R.id.timer_value);
 		min_hand = (ImageView) view.findViewById(R.id.min_hand);
 		sec_hand = (ImageView) view.findViewById(R.id.sec_hand);
@@ -50,6 +54,9 @@ public class TimerFragment extends Fragment implements OnClickListener {
 		inc_btn = view.findViewById(R.id.timer_value_inc);
 		dec_btn = view.findViewById(R.id.timer_value_dec);
 		timer_value_layout = view.findViewById(R.id.timer_value_layout); 
+		timer_layout = view.findViewById(R.id.timer_layout);
+		timer_thumb_iv = view.findViewById(R.id.timer_thumb_iv);
+		timer_thumb_back_iv = view.findViewById(R.id.timer_thumb_back_iv);
 
 		sec_hand.setPivotX(0);
 		sec_hand.setPivotY(1);
@@ -67,6 +74,8 @@ public class TimerFragment extends Fragment implements OnClickListener {
 		clock.setOnClickListener(this);
 		inc_btn.setOnClickListener(this);
 		dec_btn.setOnClickListener(this);
+		timer_thumb_iv.setOnClickListener(this);
+		timer_thumb_back_iv.setOnClickListener(this);
 
 		return view;
 	}
@@ -90,15 +99,17 @@ public class TimerFragment extends Fragment implements OnClickListener {
 			if(delay_inc > Time.toMillis(MAX_VALUE, MAX_UNIT)) break;
 			delay = delay_inc;
 			pref.edit().putInt("timer_delay", delay).commit();
-			/* if(listener != null) */display(delay);
+			display(delay);
 			break;
 		case R.id.timer_value_dec:
 			int delay_dec = delay - Time.toMillis(STEP_VALUE, STEP_UNIT);
 			if(delay_dec < Time.toMillis(1, TimeUnit.MINUTES)) break;
 			delay = delay_dec;
 			pref.edit().putInt("timer_delay", delay).commit();
-			/* if(listener != null) */display(delay);
+			display(delay);
 			break;
+		case R.id.timer_thumb_iv: click_timer_thumb(); break;
+		case R.id.timer_thumb_back_iv: click_timer_thumb_back(); break;
 		}
 		timer_value_tv.setText(Time.toString(delay));
 	}
@@ -119,6 +130,52 @@ public class TimerFragment extends Fragment implements OnClickListener {
 		digi.setText(Time.toString(delay));
 	}
 
+	private void click_timer_thumb() {
+		timer_layout.setVisibility(View.VISIBLE);
+		timer_thumb_iv.setVisibility(View.GONE);
+
+		float fromXDelta = timer_layout.getWidth(); 
+		if(fromXDelta < 1) fromXDelta = 500;
+		Animation show_timer = new TranslateAnimation(fromXDelta, 0, 0, 0);
+		show_timer.setDuration((int)(250*ANIMATION_SPEED));
+		show_timer.setInterpolator(getActivity(), android.R.anim.linear_interpolator);
+		show_timer.setAnimationListener(new AnimationListener() {
+			@Override public void onAnimationStart(Animation animation) { }
+			@Override public void onAnimationRepeat(Animation animation) { }
+			@Override public void onAnimationEnd(Animation animation) {
+				timer_thumb_back_iv.setVisibility(View.VISIBLE);
+				Animation show_back = new AlphaAnimation(0f, 1f);
+				show_back.setDuration((int)(250*ANIMATION_SPEED));
+				show_back.setInterpolator(getActivity(), android.R.anim.linear_interpolator);
+				timer_thumb_back_iv.startAnimation(show_back);
+			}
+		});
+
+		timer_layout.startAnimation(show_timer);
+	}
+	private void click_timer_thumb_back() {
+		timer_thumb_back_iv.setVisibility(View.GONE);
+
+		float toXDelta = timer_layout.getWidth();
+		Animation hide_timer = new TranslateAnimation(0, toXDelta, 0, 0);
+		hide_timer.setDuration(250);
+		hide_timer.setInterpolator(getActivity(), android.R.anim.linear_interpolator);
+		hide_timer.setAnimationListener(new AnimationListener() {
+			@Override public void onAnimationStart(Animation animation) { }
+			@Override public void onAnimationRepeat(Animation animation) { }
+			@Override public void onAnimationEnd(Animation animation) {
+				timer_layout.setVisibility(View.GONE);
+				timer_thumb_iv.setVisibility(View.VISIBLE);
+				Animation show_thumb = new AlphaAnimation(0f, 1f);
+				show_thumb.setDuration((int)(250*ANIMATION_SPEED));
+				show_thumb.setInterpolator(getActivity(), android.R.anim.linear_interpolator);
+				timer_thumb_iv.startAnimation(show_thumb);
+			}
+		});
+
+		timer_layout.startAnimation(hide_timer);
+	}
+	
 	private class Timer extends Monitor {
 		private long endTime;
 		private int timeleft;
@@ -154,9 +211,8 @@ public class TimerFragment extends Fragment implements OnClickListener {
 
 			if(timeleft <= 0){
 				String className = this.getClass().getSimpleName();
-				Event event = new TimeOutEvent(className);
+				Event event = new Event(className, Type.TIME_OUT_EVENT);
 				EventBus.fireEvent(event);
-//				listener.onTimerTerminate();
 				kill();
 			}
 		}

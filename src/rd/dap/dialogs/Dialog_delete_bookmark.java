@@ -1,7 +1,12 @@
 package rd.dap.dialogs;
 
 import rd.dap.R;
+import rd.dap.events.Event;
+import rd.dap.events.EventBus;
+import rd.dap.events.Event.Type;
+import rd.dap.events.HasBookmarkEvent;
 import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkManager;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,16 +18,10 @@ import android.widget.TextView;
 
 public class Dialog_delete_bookmark extends CustomDialog {
 	private Bookmark bookmark;
-	private Callback callback;
 	
-	public interface Callback {
-		public void onDeleteBookmarkConfirmed();
-	}
-	
-	public Dialog_delete_bookmark(Activity activity, ViewGroup parent, Bookmark bookmark, Callback callback) {
+	public Dialog_delete_bookmark(Activity activity, ViewGroup parent, Bookmark bookmark) {
 		super(activity, parent);
 		this.bookmark = bookmark;
-		this.callback = callback;
 	}
 
 	public void show(){
@@ -52,9 +51,13 @@ public class Dialog_delete_bookmark extends CustomDialog {
 		right_btn.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View view) {
 				dialog.dismiss();
-				callback.onDeleteBookmarkConfirmed();
+				BookmarkManager bm = BookmarkManager.getInstance();
+				bm.removeBookmark(activity, bookmark);
+				
+				Event event = new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_DELETED_EVENT, bookmark);
+				EventBus.fireEvent(event);
 			}
 		});
 

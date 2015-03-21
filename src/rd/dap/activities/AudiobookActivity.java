@@ -65,15 +65,15 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 		if(state == 0) throw new RuntimeException("State not provided");
 		
 		//List
-		list.setDivider(getResources().getDrawable(R.drawable.horizontal_divider));
-		adapter = new AudiobookDetailsAdapter(this, R.layout.item_track, audiobook.getPlaylist());
+		list.setDivider(getResources().getDrawable(R.drawable.divider_horizontal));
+		adapter = new AudiobookDetailsAdapter(this, R.layout.activity_audiobook_track_item, audiobook.getPlaylist());
 		adapter.setAudiobook(audiobook);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(this);
 		
 		//Header
 		LayoutInflater inflater = LayoutInflater.from(this);
-		LinearLayout header = (LinearLayout) inflater.inflate(R.layout.audiobook_header_buttons, list, false);
+		LinearLayout header = (LinearLayout) inflater.inflate(R.layout.activity_audiobook_header_buttons, list, false);
 		list.addHeaderView(header);
 
 		//Save button
@@ -193,7 +193,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 				AuthorViewHolder authorHolder;
 				if(convertView == null){
 					authorHolder = new AuthorViewHolder();
-					convertView = inflater.inflate(R.layout.details_item_author, parent, false);
+					convertView = inflater.inflate(R.layout.activity_track_item_author, parent, false);
 					authorHolder.author_item_tv = (TextView) convertView.findViewById(R.id.details_item_author_tv);
 					convertView.setTag(authorHolder);
 				} else {
@@ -206,7 +206,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 				AlbumViewHolder albumHolder;
 				if(convertView == null){
 					albumHolder = new AlbumViewHolder();
-					convertView = inflater.inflate(R.layout.details_item_album, parent, false);
+					convertView = inflater.inflate(R.layout.activity_track_item_album, parent, false);
 					albumHolder.album_item_tv = (TextView) convertView.findViewById(R.id.details_item_album_tv);
 					convertView.setTag(albumHolder);
 				} else {
@@ -219,7 +219,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 				CoverViewHolder coverHolder;
 				if(convertView == null){
 					coverHolder = new CoverViewHolder();
-					convertView = inflater.inflate(R.layout.details_item_cover_large, parent, false);
+					convertView = inflater.inflate(R.layout.activity_track_item_cover_large, parent, false);
 					coverHolder.cover_item_iv = (ImageView) convertView.findViewById(R.id.details_item_cover_iv);
 					convertView.setTag(coverHolder);
 				} else {
@@ -239,7 +239,7 @@ public class AudiobookActivity extends Activity implements OnItemClickListener, 
 				TrackViewHolder trackHolder;
 				if(convertView == null){
 					trackHolder = new TrackViewHolder();
-					convertView = inflater.inflate(R.layout.item_track, parent, false);
+					convertView = inflater.inflate(R.layout.activity_audiobook_track_item, parent, false);
 					//in an arrayAdapter 'attach' should always be false, as the view is attaced later on by the system.
 
 					trackHolder.track_item_title_tv = (TextView) convertView.findViewById(R.id.details_item_audiobook_track_title);

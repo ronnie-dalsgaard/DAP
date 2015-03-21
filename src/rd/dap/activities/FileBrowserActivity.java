@@ -52,7 +52,7 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 		rootFolder = Environment.getExternalStorageDirectory();
 
 		LayoutInflater inflater = LayoutInflater.from(this);
-		TextView v = (TextView) inflater.inflate(R.layout.file_browser_message, l, false);
+		TextView v = (TextView) inflater.inflate(R.layout.activity_file_browser_message, l, false);
 		v.setText(message);
 		l.addView(v);
 
@@ -69,7 +69,7 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 	@SuppressLint("InflateParams")
 	private void addChildren(File file, LinearLayout l){
 		LayoutInflater inflater = LayoutInflater.from(this);
-		View item_layout = inflater.inflate(R.layout.file_browser_item, null, false);
+		View item_layout = inflater.inflate(R.layout.activity_file_browser_item, null, false);
 		//Must pass null as parent!
 
 		//Expand
@@ -133,6 +133,10 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 	
 	private void click_item(View v){
 		File file = (File)v.getTag();
+//		Event event = new FileFoundEvent(getClass().getSimpleName(), FILE_FOUND_EVENT, file);
+//		EventBus.fireEvent(event);
+		
+		
 		int requestcode = getIntent().getIntExtra("requestcode", -1);
 		Intent intent = new Intent();
 		intent.putExtra("result", file.getAbsolutePath());
