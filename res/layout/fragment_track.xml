@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/track_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@drawable/divider_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/margin_small"
+    android:paddingTop="@dimen/margin_small"
+    android:showDividers="middle" >
+
+    <ImageButton
+        android:id="@+id/fragment_track_btn_previous"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/btn_height"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_previous" />
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4" >
+
+        <TextView
+            android:id="@+id/fragment_track_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:maxLines="2"
+            android:paddingLeft="@dimen/margin_small"
+            android:text="@string/g_title"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <SeekBar
+            android:id="@+id/fragment_track_seeker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="false"
+            android:indeterminate="false"
+            android:max="100"
+            android:maxHeight="100dp"
+            android:progress="30"
+            android:progressDrawable="@color/transparent"
+            android:thumb="@drawable/thumb" />
+    </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/fragment_track_btn_next"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/btn_height"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_next" />
+
+</LinearLayout>

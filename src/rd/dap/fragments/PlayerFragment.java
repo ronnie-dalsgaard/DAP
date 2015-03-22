@@ -9,6 +9,7 @@ import rd.dap.events.Subscriber;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
+import rd.dap.model.BookmarkManager;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -26,7 +27,7 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private ImageView cover_iv;
 	private TextView author_tv, album_tv;
-	private Bookmark mBookmark;
+	private Bookmark bookmark;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,9 +47,29 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 		author_tv = (TextView) layout.findViewById(R.id.fragment_player_author_tv);
 		album_tv = (TextView) layout.findViewById(R.id.fragment_player_album_tv);
 		
+		if(savedInstanceState != null){
+			String author = savedInstanceState.getString("author");
+			String album = savedInstanceState.getString("album");
+			BookmarkManager bm = BookmarkManager.getInstance();
+			bookmark = bm.getBookmark(author, album);
+			
+			if(bookmark != null){
+				displayBookmark(bookmark);
+			}
+		}
+		
 		EventBus.addSubsciber(this);
 		
 		return layout;
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if(bookmark != null){
+			outState.putString("author", bookmark.getAuthor());
+			outState.putString("album", bookmark.getAlbum());
+		}
 	}
 
 	@Override
@@ -64,7 +85,7 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 
 
 	private void displayBookmark(Bookmark bookmark){
-		this.mBookmark = bookmark;
+		this.bookmark = bookmark;
 		AudiobookManager am = AudiobookManager.getInstance(); 
 		Audiobook audiobook = am.getAudiobook(bookmark);
 		Bitmap bm = audiobook.getThumbnail();
@@ -88,7 +109,7 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 		case BOOKMARKS_LOADED_EVENT: break;
 		case BOOKMARK_DELETED_EVENT: 
 			bookmark = ((HasBookmarkEvent)event).getBookmark();
-			if(mBookmark != null && mBookmark.equals(bookmark)){
+			if(bookmark != null && bookmark.equals(this.bookmark)){
 				displayNoBookmark();
 			}
 			break;

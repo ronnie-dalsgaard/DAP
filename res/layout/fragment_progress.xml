@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/controller_track_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@drawable/divider_vertical"
+    android:showDividers="middle"
+    android:orientation="horizontal" >
+
+    <ImageButton
+        android:id="@+id/fragment_progress_btn_rewind"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/btn_height"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_rewind" />
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4" >
+
+        <TextView
+            android:id="@+id/fragment_progress_progress_tv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:maxLines="2"
+            android:paddingLeft="@dimen/margin_small"
+            android:text="@string/g_progress"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+        
+        <SeekBar
+            android:id="@+id/fragment_progress_seeker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="false"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="80"
+            android:progressDrawable="@color/transparent"
+            android:maxHeight="100dp"
+            android:thumb="@drawable/thumb" />
+
+    </FrameLayout>
+    
+    <ImageButton
+        android:id="@+id/fragment_progress_btn_forward"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/btn_height"
+        android:layout_weight="1"
+        android:contentDescription="@string/content_description"
+        android:src="@drawable/ic_action_fast_forward" />
+
+</LinearLayout>

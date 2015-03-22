@@ -1,9 +1,9 @@
 package rd.dap.events;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class EventBus {
-	private static ArrayList<Subscriber> subscribers = new ArrayList<Subscriber>(); 
+	private static HashSet<Subscriber> subscribers = new HashSet<Subscriber>(); 
 
 	public static void fireEvent(Event event){
 		for(Subscriber subscriber : subscribers){
@@ -12,6 +12,7 @@ public class EventBus {
 	}
 	
 	public static void addSubsciber(Subscriber subscriber){
+		System.out.println("Subscriber added: "+subscriber.getClass().getSimpleName());
 		subscribers.add(subscriber);
 	}
 }

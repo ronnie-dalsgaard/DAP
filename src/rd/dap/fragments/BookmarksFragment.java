@@ -37,7 +37,8 @@ import android.widget.TextView;
 public class BookmarksFragment extends Fragment implements Subscriber, OnClickListener, OnLongClickListener {
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
 	private LinearLayout layout;
-	private FlowLayout bookmark_flow;
+	private FlowLayout flowview;
+	private ArrayList<Bookmark> bookmarks;
 	private View loading;
 	private Activity activity = null;
 
@@ -50,31 +51,31 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 		if(drw_play_on_cover == null) drw_play_on_cover = getResources().getDrawable(R.drawable.ic_action_play_over_video);
 		if(drw_pause_on_cover == null) drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
 
-		layout = (LinearLayout) inflater.inflate(R.layout.fragment_bookmarks, container, false);
-		bookmark_flow = (FlowLayout) layout.findViewById(R.id.fragment_bookmarks_flow);
+		layout = (LinearLayout) inflater.inflate(R.layout.fragment_bookmarks_flow, container, false);
+		flowview = (FlowLayout) layout.findViewById(R.id.fragment_bookmarks_flow);
 		loading = layout.findViewById(R.id.fragment_bookmarks_progress);
 		
 		EventBus.addSubsciber(this);
 		
 		if(savedInstanceState != null){
 			BookmarkManager bm = BookmarkManager.getInstance();
-			ArrayList<Bookmark> bookmarks = bm.getBookmarks();
-			updateList(bookmarks);
+			bookmarks = bm.getBookmarks();
+			updateFlow();
 			loading.setVisibility(View.GONE);
 		}
 		return layout;
 	}
+	
 	@Override
 	public void onEvent(Event event) {
 		System.out.println(getClass().getSimpleName()+":\n"+event);
 		BookmarkManager bm;
-		ArrayList<Bookmark> bookmarks;
 		switch(event.getType()){
 		case BOOKMARKS_LOADED_EVENT:
 			BookmarksLoadedEvent bookmarks_event = (BookmarksLoadedEvent)event;
 			bookmarks = bookmarks_event.getBookmarks();
 			if(bookmarks == null || bookmarks.isEmpty()) return;
-			updateList(bookmarks);
+			updateFlow();
 			if(activity == null) return;
 			activity.runOnUiThread(new Runnable() {
 				@Override
@@ -104,30 +105,28 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 			ArrayList<BookmarkEvent> events = new ArrayList<BookmarkEvent>();
 			boolean force = false;
 			bm.createOrUpdateBookmark(filesDir, author, album, trackno, progress, events, force);
-			updateList(bm.getBookmarks());
+			updateFlow();
 			break;
 		case BOOKMARK_DELETED_EVENT:
 		case AUDIOBOOKS_LOADED_EVENT:
 			bm = BookmarkManager.getInstance();
 			bookmarks = bm.getBookmarks();
-			updateList(bookmarks);
+			updateFlow();
 			break;
 		default:
 			break;
 		}
 	}
 
-	private void updateList(final ArrayList<Bookmark> bookmarks){
-		Activity activity = getActivity();
-		if(activity == null) return;
+	private void updateFlow(){
+		final LayoutInflater inflater = LayoutInflater.from(activity);
 		activity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				bookmark_flow.removeAllViews();
-				LayoutInflater inflater = LayoutInflater.from(getActivity());
+				flowview.removeAllViews();
 				ArrayList<Bookmark> disabledBookmarks = new ArrayList<Bookmark>();
 				for(Bookmark bookmark : bookmarks){
-					View v = inflater.inflate(R.layout.fragment_bookmark_item, bookmark_flow, false);
+					View v = inflater.inflate(R.layout.fragment_bookmark_flow_item, flowview, false);
 					v.setTag(bookmark);
 					v.setOnClickListener(BookmarksFragment.this);
 					v.setOnLongClickListener(BookmarksFragment.this);
@@ -136,7 +135,7 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 					Audiobook audiobook = AudiobookManager.getInstance().getAudiobook(bookmark);
 					if(audiobook == null) { disabledBookmarks.add(bookmark); continue; }
 
-					ImageView cover_iv = (ImageView) v.findViewById(R.id.bookmark_cover_iv);
+					ImageView cover_iv = (ImageView) v.findViewById(R.id.bookmark_flow_item_cover_iv);
 					if(cover_iv != null){
 						Bitmap bm = audiobook.getThumbnail();
 						if(bm == null) cover_iv.setImageDrawable(noCover);
@@ -144,14 +143,14 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 					}
 
 					//Track no
-					TextView track_tv = (TextView) v.findViewById(R.id.bookmark_track_tv);
+					TextView track_tv = (TextView) v.findViewById(R.id.bookmark_flow_item_track_tv);
 					track_tv.setText(String.format("%02d", bookmark.getTrackno()+1));
 
 					//Progress
-					TextView progress_tv = (TextView) v.findViewById(R.id.bookmark_progress_tv);
+					TextView progress_tv = (TextView) v.findViewById(R.id.bookmark_flow_item_progress_tv);
 					progress_tv.setText(Time.toString(bookmark.getProgress()));
 
-					bookmark_flow.addView(v);
+					flowview.addView(v);
 				}
 				if(!disabledBookmarks.isEmpty()){
 					new Dialog_disabled_bookmarks(getActivity(), layout, disabledBookmarks).show();
@@ -173,12 +172,10 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 		Event event = new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_SELECTED_EVENT, bookmark);
 		EventBus.fireEvent(event);
 	}
+	
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		this.activity = activity;
 	}
-
-	
-
 }
