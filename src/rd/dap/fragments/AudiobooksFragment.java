@@ -12,14 +12,16 @@ import rd.dap.activities.FileBrowserActivity;
 import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.HasAudiobookEvent;
+import rd.dap.events.Subscriber;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
+import rd.dap.model.AudiobookManager.ProgressCallback;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,15 +44,20 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class AudiobooksFragment extends Fragment implements OnItemClickListener, OnItemLongClickListener {
+public class AudiobooksFragment extends Fragment implements Subscriber, OnItemClickListener, OnItemLongClickListener {
 	private static final int REQUEST_EDIT_AUDIOBOOK = 9002;
 	private static final int REQUEST_SET_HOME_FOLDER = 9003;
 	public static final int STATE_NEW = 501;
 	public static final int STATE_EDIT = 502;
+	private ViewGroup layout;
 	private GridView gridview;
+	private View lbl_saving;
 	private ArrayList<Audiobook> audiobooks;
 	private GridViewAdapter adapter;
+	private Activity activity;
+	private static boolean saving = false;
 
 	public AudiobooksFragment(){
 		AudiobookManager am =  AudiobookManager.getInstance();
@@ -62,25 +69,38 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+		EventBus.addSubsciber(this);
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		gridview = (GridView) inflater.inflate(R.layout.fragment_audiobooks_grid, container, false);
+		layout = (ViewGroup) inflater.inflate(R.layout.fragment_audiobooks_grid, container, false);
+		gridview = (GridView) layout.findViewById(R.id.fragment_audiobooks_grid_grid);
+		lbl_saving = layout.findViewById(R.id.fragment_audiobooks_grid_saving);
 
-		adapter = new GridViewAdapter(getActivity(), audiobooks);
+		if(savedInstanceState != null){
+			saving = savedInstanceState.getBoolean("saving");
+		}
+		lbl_saving.setVisibility(saving ? View.VISIBLE : View.GONE);
+		
+		adapter = new GridViewAdapter(activity, audiobooks);
 		gridview.setAdapter(adapter);
 
 		gridview.setOnItemClickListener(this);
 		gridview.setOnItemLongClickListener(this);
 
-		return gridview;
+		return layout;
 	}
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBoolean("saving", saving);
+	}
+
 	@Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 		Audiobook audiobook = audiobooks.get(position);
-		Event event = new HasAudiobookEvent(getClass().getSimpleName(), Type.AUDIOBOOKS_SELECTED_EVENT, audiobook);
-		EventBus.fireEvent(event);
-		getActivity().finish();
+		EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.AUDIOBOOKS_SELECTED_EVENT).setAudiobook(audiobook));
+		activity.finish();
 	}
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View v, int position,	long id) {
@@ -92,15 +112,14 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 	//Menu
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		inflater.inflate(R.menu.audiobooks, menu);
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
 		case R.id.menu_item_audiobooks_set_home:
-			AudiobookManager.getInstance().removeAllAudiobooks(getActivity());
-			Intent intent = new Intent(getActivity(), FileBrowserActivity.class);
+			AudiobookManager.getInstance().removeAllAudiobooks(activity);
+			Intent intent = new Intent(activity, FileBrowserActivity.class);
 			intent.putExtra("type", TYPE_FOLDER);
 			intent.putExtra("message", "Select Home folder");
 			intent.putExtra("requestcode", REQUEST_SET_HOME_FOLDER);
@@ -119,7 +138,7 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 			if(data == null) return;
 			String folder_path = data.getStringExtra("result");
 			File folder = new File(folder_path);
-			SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
+			SharedPreferences pref = activity.getPreferences(Context.MODE_PRIVATE);
 			pref.edit().putString("homefolder", folder.getAbsolutePath()).commit();
 
 			loadAudiobooksDialog(folder);
@@ -127,33 +146,92 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 		}
 	}
 	private void loadAudiobooksDialog(File folder){
-		final Dialog dialog = new Dialog(getActivity());
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		LayoutInflater inflater = LayoutInflater.from(getActivity());
-		View dv = inflater.inflate(R.layout.loading, gridview, false);
-		dialog.setContentView(dv);
-		dialog.show();
-		new AsyncTask<File, Void, Void>() {
+		final String TAG = "show_audibooks_loading_dialog";
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		Fragment prev = getFragmentManager().findFragmentByTag(TAG);
+		if (prev != null) {
+			ft.remove(prev);
+		}
+		ft.addToBackStack(null);
+
+		final LoadAudiobooksDialogFragment newFragment = LoadAudiobooksDialogFragment.newInstance();
+		newFragment.show(ft, TAG);
+
+
+		//Do stuff
+		final AudiobookManager am = AudiobookManager.getInstance();
+		AsyncTask<File, String, Void> autoDetectAudiobooksTask = new AsyncTask<File, String, Void>() {
 			@Override
 			protected Void doInBackground(File... params) {
 				File folder = params[0];
-				AudiobookManager am = AudiobookManager.getInstance();
 				ArrayList<Audiobook> list = new ArrayList<Audiobook>();
-				list.addAll(am.autodetect(folder));
-				am.addAllAudiobooks(getActivity(), list);
+				ProgressCallback pcallback = new ProgressCallback() {
+					@Override
+					public void onProgressChanged(String _progress) {
+						publishProgress(_progress);
+					}
+				};
+				list.addAll(am.autodetect(folder, pcallback));
+				am.addAllAudiobooks(activity, list, pcallback);
 				return null;
 			}
 			@Override
-			protected void onPostExecute(Void result){
-				dialog.dismiss();
-				adapter.notifyDataSetChanged();
+			protected void onProgressUpdate(String... values) {
+				super.onProgressUpdate(values);
+				String _progress = values[0];
+				EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.AUDIOBOOKS_DISCOVER_ELEMENT_EVENT).setString(_progress));
 			}
-		}.execute(folder);
+			@Override
+			protected void onPostExecute(Void result){
+				EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.AUDIOBOOKS_DISCOVERED_EVENT));
+			}
+		};
+		autoDetectAudiobooksTask.execute(folder);
 	}
+	
+	
+	@Override
+	public void onEvent(Event event) {
+		switch(event.getType()){
+		case AUDIOBOOKS_DISCOVERED_EVENT:
+			final AudiobookManager am = AudiobookManager.getInstance();
+			AsyncTask<Void, Void, Void> saveAudiobooksTask = new AsyncTask<Void, Void, Void>() {
+				@Override
+				protected void onPreExecute() {
+					super.onPreExecute();
+					lbl_saving.setVisibility(View.VISIBLE);
+					saving = true;
+				}
+				@Override
+				protected Void doInBackground(Void... params) {
+					am.saveAudiobooks(activity);
+					return null;
+				}
+				@Override
+				protected void onPostExecute(Void result) {
+					super.onPostExecute(result);
+					String src = getClass().getSimpleName();
+					EventBus.fireEvent(new Event(src, Type.AUDIOBOOKS_SAVED_EVENT));
+				}
+			};
+			adapter.notifyDataSetChanged();
+			saveAudiobooksTask.execute();
+			break;
+		case AUDIOBOOKS_SAVED_EVENT:
+			saving = false;
+			lbl_saving.setVisibility(View.GONE);
+			String text = activity.getResources().getString(R.string.saving_complete);
+			Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
+			break;
+		default:
+			break;
+		}
+	}
+
 	private void changeAudiobookDialog(final Audiobook audiobook){
-		final Dialog dialog = new Dialog(getActivity());
+		final Dialog dialog = new Dialog(activity);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		LayoutInflater inflater = LayoutInflater.from(getActivity());
+		LayoutInflater inflater = LayoutInflater.from(activity);
 		View dv = inflater.inflate(R.layout.dialog_text_2btn, gridview, false);
 
 		//Title
@@ -192,7 +270,7 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 			public void onClick(View arg0) {
 				dialog.dismiss();
 
-				Intent intent = new Intent(getActivity(), AudiobookActivity.class);
+				Intent intent = new Intent(activity, AudiobookActivity.class);
 				intent.putExtra("state", STATE_EDIT);
 				intent.putExtra("audiobook", audiobook);
 				startActivityForResult(intent, REQUEST_EDIT_AUDIOBOOK); 
@@ -203,9 +281,9 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 		dialog.show();
 	}
 	private void deleteAudiobookDialog(final Audiobook audiobook){
-		final Dialog dialog = new Dialog(getActivity());
+		final Dialog dialog = new Dialog(activity);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		LayoutInflater inflater = LayoutInflater.from(getActivity());
+		LayoutInflater inflater = LayoutInflater.from(activity);
 		View dv = inflater.inflate(R.layout.dialog_text_2btn, gridview, false);
 
 		//Title
@@ -245,7 +323,6 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 
 				audiobooks.remove(audiobook);
 				adapter.notifyDataSetChanged();
-				System.out.println("Notifying adapter once");
 
 				//Remove the audiobook
 				new AsyncTask<Audiobook, Void, Void>(){
@@ -253,17 +330,17 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 					protected Void doInBackground(Audiobook... params) {
 						Audiobook audiobook = params[0];
 						AudiobookManager am = AudiobookManager.getInstance();
-						audiobooks = am.removeAudiobook(getActivity(), audiobook);
+						audiobooks = am.removeAudiobook(activity, audiobook);
+						am.saveAudiobooks(activity);
 						BookmarkManager bm = BookmarkManager.getInstance();
 						Bookmark bookmark = bm.getBookmark(audiobook);
-						BookmarkManager.getInstance().removeBookmark(getActivity(), bookmark);
+						BookmarkManager.getInstance().removeBookmark(activity, bookmark);
 
-						getActivity().runOnUiThread(new Runnable() {
+						activity.runOnUiThread(new Runnable() {
 							@Override public void run() {
 								adapter.notifyDataSetChanged();
 							}
 						});
-						System.out.println("Notifying adapter twice");
 						return null;
 					}
 				}.execute(audiobook);
@@ -274,6 +351,11 @@ public class AudiobooksFragment extends Fragment implements OnItemClickListener,
 		dialog.show();
 	}
 
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		this.activity = activity;
+	}
 
 	public class GridViewAdapter extends ArrayAdapter<Audiobook> {
 		private Context context;

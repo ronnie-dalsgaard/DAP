@@ -2,14 +2,15 @@ package rd.dap.fragments;
 
 import rd.dap.R;
 import rd.dap.events.Event;
+import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.HasBookmarkEvent;
-import rd.dap.events.PlayPauseEvent;
 import rd.dap.events.Subscriber;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
+import rd.dap.support.Time;
+import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -25,9 +26,12 @@ import android.widget.TextView;
 
 public class PlayerFragment extends Fragment implements OnClickListener, Subscriber {
 	private static Drawable noCover, drw_play, drw_pause, drw_play_on_cover, drw_pause_on_cover;
+	private Activity activity;
 	private ImageView cover_iv;
 	private TextView author_tv, album_tv;
+	private ImageButton play_btn;
 	private Bookmark bookmark;
+	private boolean isPlay = false;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,7 +44,7 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 		if(drw_pause_on_cover == null) drw_pause_on_cover = getResources().getDrawable(R.drawable.ic_action_pause_over_video);
 		
 		//Buttons
-		ImageButton play_btn = (ImageButton) layout.findViewById(R.id.fragment_player_btn_cover);
+		play_btn = (ImageButton) layout.findViewById(R.id.fragment_player_btn_cover);
 		play_btn.setOnClickListener(this);
 
 		cover_iv = (ImageView) layout.findViewById(R.id.fragment_player_cover_iv);
@@ -56,19 +60,29 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 			if(bookmark != null){
 				displayBookmark(bookmark);
 			}
+
+			isPlay = savedInstanceState.getBoolean("isPlay");
+			if(isPlay) setPauseButton();
+			else setPlayButton();
 		}
 		
 		EventBus.addSubsciber(this);
 		
 		return layout;
 	}
-	
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		this.activity = activity;
+	}
+
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if(bookmark != null){
 			outState.putString("author", bookmark.getAuthor());
 			outState.putString("album", bookmark.getAlbum());
+			outState.putBoolean("isPlay", isPlay);
 		}
 	}
 
@@ -76,10 +90,9 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 	public void onClick(View view) {
 		switch(view.getId()){
 		case R.id.fragment_player_btn_cover:
-		String className = this.getClass().getSimpleName();
-		Event event = new PlayPauseEvent(className, true);
-		EventBus.fireEvent(event);
-		break;
+			System.err.println("click -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT));
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_TOGGLE).setBoolean(true));
+			break;
 		}
 	}
 
@@ -91,41 +104,55 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 		Bitmap bm = audiobook.getThumbnail();
 		if(bm == null) cover_iv.setImageDrawable(noCover); 
 		else cover_iv.setImageBitmap(bm);
+		play_btn.setImageDrawable(drw_play_on_cover);
 		author_tv.setText(audiobook.getAuthor());
 		album_tv.setText(audiobook.getAlbum());
 	}
 	private void displayNoBookmark(){
 		cover_iv.setImageDrawable(noCover);
+		play_btn.setImageDrawable(null);
 		author_tv.setText(R.string.g_author);
 		album_tv.setText(R.string.g_album);
 	}
+	private void setPlayButton(){
+		System.err.println("btn update -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT));
+		play_btn.setImageDrawable(drw_play_on_cover);
+		isPlay = false;
+	}
+	private void setPauseButton(){
+		System.err.println("btn update -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT));
+		play_btn.setImageDrawable(drw_pause_on_cover);
+		isPlay = true;
+	}
 	
 	@Override
-	public void onEvent(Event event) {
+	public void onEvent(final Event event) {
 		Bookmark bookmark;
 		switch(event.getType()){
-		case AUDIOBOOKS_LOADED_EVENT: break;
-		case AUDIOBOOKS_SELECTED_EVENT: break;
-		case BOOKMARKS_LOADED_EVENT: break;
 		case BOOKMARK_DELETED_EVENT: 
-			bookmark = ((HasBookmarkEvent)event).getBookmark();
+			bookmark = event.getBookmark();
 			if(bookmark != null && bookmark.equals(this.bookmark)){
 				displayNoBookmark();
 			}
 			break;
 		case BOOKMARK_SELECTED_EVENT:
-			bookmark = ((HasBookmarkEvent)event).getBookmark();
+			bookmark = event.getBookmark();
 			displayBookmark(bookmark);
 			break;
 		case BOOKMARK_UPDATED_EVENT: 
-			bookmark = ((HasBookmarkEvent)event).getBookmark();
-			displayBookmark(bookmark);
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					displayBookmark(event.getBookmark());
+				}
+			});
 			break;
-		case FILE_FOUND_EVENT: break;
-		case NO_AUDIOBOOKS_FOUND_EVENT: break;
-		case NO_BOOKMARKS_FOUND_EVENT: break;
-		case PLAY_PAUSE_EVENT: break;
-		case TIME_OUT_EVENT: break;
+		case ON_PLAY:
+			setPauseButton();
+			break;
+		case ON_PAUSE:
+			setPlayButton();
+			break;
 		default:
 			break;
 		

@@ -22,8 +22,6 @@ public abstract class Monitor extends Thread {
 		case MINUTES: this.delay = delay * MIN; break;
 		case HOURS: this.delay = delay * HOUR; break;
 		case DAYS: this.delay = delay * DAY; break;
-//		case MICROSECONDS: //fall through
-//		case NANOSECONDS: 
 		default: this.delay = DEFAULT_DELAY;
 		}
 	}
@@ -41,8 +39,6 @@ public abstract class Monitor extends Thread {
 		double errorFrequency = 0.0;
 		while(alive){
 			execute();
-			
-
 			//Delay with error handling
 			try {
 				Thread.sleep(delay);

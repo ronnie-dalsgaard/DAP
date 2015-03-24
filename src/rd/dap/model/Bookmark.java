@@ -3,6 +3,7 @@ package rd.dap.model;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import rd.dap.model.BookmarkEvent.Function;
 import rd.dap.support.Time;
 
 public class Bookmark implements Comparable<Bookmark>{
@@ -17,6 +18,7 @@ public class Bookmark implements Comparable<Bookmark>{
 		this.trackno = trackno;
 		this.progress = progress;
 		this.events = new LinkedList<BookmarkEvent>();
+		addEvent(new BookmarkEvent(Function.CREATE, 0, 0));
 	}
 
 	public final String getAuthor() { return new String(author); } //return defensive copy

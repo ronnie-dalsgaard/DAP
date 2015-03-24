@@ -1,15 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fragment_audiobooks_grid"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:columnWidth="@dimen/cover_width_big"
-    android:drawSelectorOnTop="true"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp"
-    android:gravity="center"
-    android:numColumns="auto_fit"
-    android:stretchMode="spacingWidthUniform"
-    android:verticalSpacing="5dp" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-</GridView>
+    <GridView
+        android:id="@+id/fragment_audiobooks_grid_grid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:columnWidth="@dimen/cover_width_big"
+        android:drawSelectorOnTop="true"
+        android:gravity="center"
+        android:numColumns="auto_fit"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        android:stretchMode="spacingWidthUniform"
+        android:verticalSpacing="5dp" >
+    </GridView>
+
+    <LinearLayout
+        android:id="@+id/fragment_audiobooks_grid_saving"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="@string/saving" />
+
+    </LinearLayout>
+
+</LinearLayout>

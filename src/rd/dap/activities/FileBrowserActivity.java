@@ -133,10 +133,6 @@ public class FileBrowserActivity extends Activity implements OnClickListener {
 	
 	private void click_item(View v){
 		File file = (File)v.getTag();
-//		Event event = new FileFoundEvent(getClass().getSimpleName(), FILE_FOUND_EVENT, file);
-//		EventBus.fireEvent(event);
-		
-		
 		int requestcode = getIntent().getIntExtra("requestcode", -1);
 		Intent intent = new Intent();
 		intent.putExtra("result", file.getAbsolutePath());

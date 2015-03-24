@@ -2,9 +2,8 @@ package rd.dap.dialogs;
 
 import rd.dap.R;
 import rd.dap.events.Event;
-import rd.dap.events.EventBus;
 import rd.dap.events.Event.Type;
-import rd.dap.events.HasBookmarkEvent;
+import rd.dap.events.EventBus;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
 import android.app.Activity;
@@ -56,8 +55,7 @@ public class Dialog_delete_bookmark extends CustomDialog {
 				BookmarkManager bm = BookmarkManager.getInstance();
 				bm.removeBookmark(activity, bookmark);
 				
-				Event event = new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_DELETED_EVENT, bookmark);
-				EventBus.fireEvent(event);
+				EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.BOOKMARK_DELETED_EVENT).setBookmark(bookmark));
 			}
 		});
 

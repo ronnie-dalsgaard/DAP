@@ -4,7 +4,11 @@ import rd.dap.support.Time;
 import rd.dap.support.Time.TimeStamp;
 
 public class BookmarkEvent {
-	public static enum Function {PLAY, NEXT, PREV, FORWARD, REWIND, SEEK_PROGRESS, SEEK_TRACK, SELECT, UNDO, DOWNLOAD};
+	public static enum Function {
+		CREATE, PLAY, NEXT, PREV, FORWARD, 
+		REWIND, SEEK_PROGRESS, SEEK_TRACK, 
+		SELECT, UNDO, DOWNLOAD, END
+	};
 	
 	private Function function;
 	private int trackno;

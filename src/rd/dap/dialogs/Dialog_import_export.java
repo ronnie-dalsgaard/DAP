@@ -1,5 +1,8 @@
 package rd.dap.dialogs;
 
+import static rd.dap.model.BookmarkManager.END;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import rd.dap.R;
@@ -22,13 +25,12 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 public class Dialog_import_export extends CustomDialog {
-	public static final String END = "/END";
 	private Callback callback;
 	
 	public interface Callback {
 		public void download(GenericCallback<String> callback);
 		public void upload(String json, GenericCallback<String> callback);
-		public void displayBookmarks();
+		public void displayBookmarks(ArrayList<Bookmark> bookmarks);
 	}
 
 	public Dialog_import_export(Activity activity, ViewGroup parent, Callback callback) {
@@ -105,7 +107,7 @@ public class Dialog_import_export extends CustomDialog {
 							}
 						}
 						if(changesHappened){
-							callback.displayBookmarks();
+							callback.displayBookmarks(bm.getBookmarks());
 						}
 						Toast.makeText(activity, "Download complete", Toast.LENGTH_SHORT).show();
 					}

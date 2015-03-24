@@ -3,9 +3,9 @@ package rd.dap.dialogs;
 import java.util.ArrayList;
 
 import rd.dap.R;
+import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.HasBookmarkEvent;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkEvent;
 import rd.dap.support.Time;
@@ -69,7 +69,7 @@ public class Dialog_bookmark_history extends CustomDialog {
 				bookmark.setTrackno(trackno);
 				bookmark.setProgress(progress);
 				bookmark.addEvent(new BookmarkEvent(BookmarkEvent.Function.UNDO, trackno, progress));
-				EventBus.fireEvent(new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_UPDATED_EVENT, bookmark));
+				EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.BOOKMARK_UPDATED_EVENT).setBookmark(bookmark));
 			}
 		});
 
@@ -107,6 +107,7 @@ public class Dialog_bookmark_history extends CustomDialog {
 		    BookmarkEvent event = list.get(position);
 		    if (event != null) {
 		    	switch(event.getFunction()){
+		    	case CREATE: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_new)); break;
 		    	case PLAY: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_play)); break;
 		    	case NEXT: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_next)); break;
 		    	case PREV: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_previous)); break;
@@ -117,6 +118,7 @@ public class Dialog_bookmark_history extends CustomDialog {
 		    	case SELECT: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.select_track)); break;
 				case UNDO: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_undo)); break;
 				case DOWNLOAD: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_download)); break;
+				case END: holder.function_iv.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_action_cancel)); break;
 		    	}
 		    	holder.progress_tv.setText((event.getTrackno()+1) + " / " + Time.toString(event.getProgress()));
 		    	holder.timestamp_tv.setText("@ " + event.getTimestamp().toString(Time.TimeStamp.DAY_TIME));

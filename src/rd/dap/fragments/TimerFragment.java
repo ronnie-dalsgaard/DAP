@@ -32,15 +32,17 @@ public class TimerFragment extends Fragment implements OnClickListener {
 	private static final TimeUnit STEP_UNIT = TimeUnit.MINUTES;
 	private static final int MAX_VALUE = 12;
 	private static final TimeUnit MAX_UNIT = TimeUnit.HOURS;
+	private Activity activity;
 	private TextView digi, timer_value_tv;
 	private ImageView min_hand, sec_hand;
 	private View inc_btn, dec_btn, timer_value_layout;
 	private View timer_layout, timer_thumb_iv, timer_thumb_back_iv;
 	private AnalogClock clock;
-	private static Timer timer;
-	private static boolean timerOn = false;
+	private Timer timer;
+	private boolean timerOn = false;
 	private int delay;
-	private Activity activity;
+	private int timeleft;
+	private boolean showTimer = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,22 +67,50 @@ public class TimerFragment extends Fragment implements OnClickListener {
 		min_hand.setPivotX(0);
 		min_hand.setPivotY(1);
 
-		if(timerOn){
-			sec_hand.setRotation(0);
-			min_hand.setRotation(0);
-			timer.setClock();
-		} else {
-			display(delay);
-		}
-
 		clock.setOnClickListener(this);
 		inc_btn.setOnClickListener(this);
 		dec_btn.setOnClickListener(this);
 		timer_thumb_iv.setOnClickListener(this);
 		timer_thumb_back_iv.setOnClickListener(this);
+		
+		if(savedInstanceState != null){
+			timerOn = savedInstanceState.getBoolean("timerOn");
+			delay = savedInstanceState.getInt("delay");
+			timeleft = savedInstanceState.getInt("timeleft");
+			showTimer = savedInstanceState.getBoolean("showTimer");
+
+			if(timerOn){
+				timer = new Timer(timeleft);
+				timer.start();
+				timer_value_layout.setVisibility(View.GONE);
+				timer.setClock();
+			} else {
+				display(delay);
+			}
+			
+			timer_layout.setVisibility(showTimer ? View.VISIBLE : View.GONE);
+			timer_thumb_iv.setVisibility(showTimer ? View.GONE : View.VISIBLE);
+			timer_thumb_back_iv.setVisibility(showTimer ? View.VISIBLE : View.GONE);
+			
+		} else {
+			display(delay);
+		}
+
 
 		return view;
 	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBoolean("timerOn", timerOn);
+		outState.putInt("delay", delay);
+		outState.putInt("timeleft", timeleft);
+		outState.putBoolean("showTimer", showTimer);
+	}
+	
+
+
 
 	@Override
 	public void onClick(View v) {
@@ -88,7 +118,7 @@ public class TimerFragment extends Fragment implements OnClickListener {
 		switch(v.getId()){
 		case R.id.analogClock:
 			if(!timerOn){
-				timer = new Timer();
+				timer = new Timer(delay);
 				timer.start();
 				timer_value_layout.setVisibility(View.GONE);
 				timerOn = true;
@@ -133,6 +163,7 @@ public class TimerFragment extends Fragment implements OnClickListener {
 	}
 
 	private void click_timer_thumb() {
+		showTimer = true;
 		timer_layout.setVisibility(View.VISIBLE);
 		timer_thumb_iv.setVisibility(View.GONE);
 
@@ -156,6 +187,7 @@ public class TimerFragment extends Fragment implements OnClickListener {
 		timer_layout.startAnimation(show_timer);
 	}
 	private void click_timer_thumb_back() {
+		showTimer = false;
 		timer_thumb_back_iv.setVisibility(View.GONE);
 
 		float toXDelta = timer_layout.getWidth();
@@ -186,11 +218,10 @@ public class TimerFragment extends Fragment implements OnClickListener {
 
 	private class Timer extends Monitor {
 		private long endTime;
-		private int timeleft;
 
-		public Timer() {
+		public Timer(int delay) {
 			super(1, TimeUnit.SECONDS);
-			endTime = System.currentTimeMillis() + TimerFragment.this.delay;
+			endTime = System.currentTimeMillis() + delay;
 			timeleft = delay;
 			
 			activity.runOnUiThread(new Runnable() { 
@@ -200,8 +231,8 @@ public class TimerFragment extends Fragment implements OnClickListener {
 				} 
 			});
 
-			Animation min_hand_anim = createMin_hand_anim(TimerFragment.this.delay);
-			Animation sec_hand_anim = createSec_hand_anim(TimerFragment.this.delay);
+			Animation min_hand_anim = createMin_hand_anim(delay);
+			Animation sec_hand_anim = createSec_hand_anim(delay);
 			
 			sec_hand.startAnimation(sec_hand_anim);
 			min_hand.startAnimation(min_hand_anim);
@@ -217,10 +248,10 @@ public class TimerFragment extends Fragment implements OnClickListener {
 				} 
 			});
 
+			System.out.println("=> time left: "+timeleft);
 			if(timeleft <= 0){
 				String className = this.getClass().getSimpleName();
-				Event event = new Event(className, Type.TIME_OUT_EVENT);
-				EventBus.fireEvent(event);
+				EventBus.fireEvent(new Event(className, Type.TIME_OUT_EVENT));
 				kill();
 			}
 		}

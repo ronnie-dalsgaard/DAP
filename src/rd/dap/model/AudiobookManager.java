@@ -20,7 +20,6 @@ import java.util.LinkedList;
 import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.HasAudiobooksEvent;
 import rd.dap.support.AlbumFolderFilter;
 import rd.dap.support.Mp3FileFilter;
 import rd.dap.support.TrackList;
@@ -44,6 +43,10 @@ public final class AudiobookManager{
 	public static AudiobookManager getInstance(){
 		return instance; //Eager singleton
 	}
+	
+	public interface ProgressCallback {
+		public void onProgressChanged(String _progress);
+	}
 
 	private AudiobookManager(){};
 
@@ -53,16 +56,19 @@ public final class AudiobookManager{
 		audiobooks.add(audiobook);
 		authors.add(audiobook.getAuthor());
 		albums.add(audiobook.getAlbum());
-		saveAudiobooks(context);
 	}
+	
 	public void addAllAudiobooks(Context context, Collection<Audiobook> collection){
+		addAllAudiobooks(context, collection, null);
+	}
+	public void addAllAudiobooks(Context context, Collection<Audiobook> collection, ProgressCallback callback){
 		for(Audiobook audiobook : collection){
 			if(audiobooks.contains(audiobook)) continue;
+			if(callback != null) callback.onProgressChanged("Added: "+audiobook.getAuthor()+"\n"+audiobook.getAlbum());
 			audiobooks.add(audiobook);
 			authors.add(audiobook.getAuthor());
 			albums.add(audiobook.getAlbum());
 		}
-		saveAudiobooks(context);
 	}
 	public Audiobook getAudiobook(String author, String album){
 		if(author == null) return null;
@@ -86,17 +92,14 @@ public final class AudiobookManager{
 		for(Audiobook element : getAudiobooks()){
 			if(element.equals(original_audiobook)){
 				element.setAudiobook(audiobook);
-
 				authors.remove(original_audiobook.getAuthor());
 				authors.add(audiobook.getAuthor());
 			}
 		}
-		saveAudiobooks(context);
 	}
 	public ArrayList<Audiobook> removeAudiobook(Context context, Audiobook audiobook) { 
 		audiobooks.remove(audiobook);
 		authors.remove(audiobook.getAuthor());
-		saveAudiobooks(context);
 		return audiobooks;
 	}
 	public void removeAllAudiobooks(Context context){
@@ -106,7 +109,6 @@ public final class AudiobookManager{
 			audiobooks.remove(audiobook);
 			authors.remove(audiobook.getAuthor());
 		}
-		saveAudiobooks(context);
 	}
 
 
@@ -128,7 +130,7 @@ public final class AudiobookManager{
 			e.printStackTrace();
 		}
 
-
+		
 		//Save authors
 		String authors_json = gson.toJson(authors);
 		File authors_file = new File(context.getFilesDir(), "authors.dap"); //FIXME filename as constant
@@ -160,21 +162,19 @@ public final class AudiobookManager{
 
 		//Audiobooks
 		File file = new File(context.getFilesDir(), "audiobooks.dap");
+		Gson gson = new Gson();
 		try {
 			FileInputStream stream = new FileInputStream(file);
 			InputStreamReader reader = new InputStreamReader(stream);
 			BufferedReader in = new BufferedReader(reader);
-			Gson gson = new Gson();
 			ArrayList<Audiobook> list = gson.fromJson(in, new TypeToken<ArrayList<Audiobook>>(){}.getType());
 			audiobooks.clear();
 			audiobooks.addAll(list);
 			in.close();
 			
-			Event event = new HasAudiobooksEvent(getClass().getSimpleName(), Type.AUDIOBOOKS_LOADED_EVENT, audiobooks);
-			EventBus.fireEvent(event);
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.AUDIOBOOKS_LOADED_EVENT).setAudiobooks(audiobooks));
 		} catch (FileNotFoundException e) {
-			Event event = new Event(getClass().getSimpleName(), Type.NO_AUDIOBOOKS_FOUND_EVENT);
-			EventBus.fireEvent(event);
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.NO_AUDIOBOOKS_FOUND_EVENT));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -185,7 +185,6 @@ public final class AudiobookManager{
 			FileInputStream stream = new FileInputStream(authors_file);
 			InputStreamReader reader = new InputStreamReader(stream);
 			BufferedReader in = new BufferedReader(reader);
-			Gson gson = new Gson();
 			HashSet<String> set = gson.fromJson(in, new TypeToken<HashSet<String>>(){}.getType());
 			authors.clear();
 			authors.addAll(set);
@@ -200,7 +199,6 @@ public final class AudiobookManager{
 			FileInputStream stream = new FileInputStream(albums_file);
 			InputStreamReader reader = new InputStreamReader(stream);
 			BufferedReader in = new BufferedReader(reader);
-			Gson gson = new Gson();
 			HashSet<String> set = gson.fromJson(in, new TypeToken<HashSet<String>>(){}.getType());
 			albums.clear();
 			albums.addAll(set);
@@ -283,7 +281,11 @@ public final class AudiobookManager{
 		audiobook.setPlaylist(playlist);
 		return audiobook;
 	}
+	
 	public ArrayList<Audiobook> autodetect(File folder){
+		return autodetect(folder, null);
+	}
+	public ArrayList<Audiobook> autodetect(File folder, ProgressCallback callback){
 		ArrayList<Audiobook> list = new ArrayList<Audiobook>();
 
 		String state = Environment.getExternalStorageState();
@@ -295,6 +297,7 @@ public final class AudiobookManager{
 		ArrayList<File> album_folders = collectFiles(new ArrayList<File>(), folder, new AlbumFolderFilter());
 		for(File album_folder : album_folders){
 			Audiobook audiobook = autoCreateAudiobook(album_folder, folder, true);
+			if(callback != null) callback.onProgressChanged("Found: "+audiobook.getAuthor()+"\n"+audiobook.getAlbum());
 			list.add(audiobook);
 		}
 
@@ -314,4 +317,15 @@ public final class AudiobookManager{
 	//Authors & Albums
 	public HashSet<String> getAuthors() { return authors; }
 	public HashSet<String> getAlbums() { return albums; }
+	
+	
+	public static String getTitle(Bookmark bookmark){
+		AudiobookManager am = AudiobookManager.getInstance();
+		Audiobook audiobook = am.getAudiobook(bookmark);
+		TrackList playlist = audiobook.getPlaylist();
+		int trackno = bookmark.getTrackno();
+		Track track = playlist.get(trackno);
+		String title = track.getTitle();
+		return title;
+	}
 }

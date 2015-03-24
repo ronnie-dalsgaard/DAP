@@ -6,12 +6,9 @@ import java.util.ArrayList;
 import rd.dap.R;
 import rd.dap.dialogs.Dialog_bookmark_details;
 import rd.dap.dialogs.Dialog_disabled_bookmarks;
-import rd.dap.events.BookmarksLoadedEvent;
 import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.HasAudiobookEvent;
-import rd.dap.events.HasBookmarkEvent;
 import rd.dap.events.Subscriber;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -68,13 +65,10 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 	
 	@Override
 	public void onEvent(Event event) {
-		System.out.println(getClass().getSimpleName()+":\n"+event);
 		BookmarkManager bm;
 		switch(event.getType()){
 		case BOOKMARKS_LOADED_EVENT:
-			BookmarksLoadedEvent bookmarks_event = (BookmarksLoadedEvent)event;
-			bookmarks = bookmarks_event.getBookmarks();
-			if(bookmarks == null || bookmarks.isEmpty()) return;
+			bookmarks = event.getBookmarks();
 			updateFlow();
 			if(activity == null) return;
 			activity.runOnUiThread(new Runnable() {
@@ -95,7 +89,7 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 			});
 			break;
 		case AUDIOBOOKS_SELECTED_EVENT:
-			Audiobook audiobook = ((HasAudiobookEvent)event).getAudiobook();
+			Audiobook audiobook = event.getAudiobook();
 			bm = BookmarkManager.getInstance();
 			File filesDir = activity.getFilesDir();
 			String author = audiobook.getAuthor();
@@ -113,12 +107,27 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 			bookmarks = bm.getBookmarks();
 			updateFlow();
 			break;
+		case BOOKMARK_UPDATED_EVENT:
+			Bookmark bookmark = event.getBookmark();
+			for(Bookmark b : bookmarks){
+				if(b.getAuthor().equals(bookmark.getAuthor())
+						&& b.getAlbum().equals(bookmark.getAlbum())){
+					b.setTrackno(bookmark.getTrackno());
+					b.setProgress(bookmark.getProgress());
+				}
+			}
+			updateFlow();
+			break;
+		case BOOKMARKS_UPDATED_EVENT:
+			bookmarks = event.getBookmarks();
+			updateFlow();
+			break;
 		default:
 			break;
 		}
 	}
 
-	private void updateFlow(){
+	private synchronized void updateFlow(){
 		final LayoutInflater inflater = LayoutInflater.from(activity);
 		activity.runOnUiThread(new Runnable() {
 			@Override
@@ -169,8 +178,10 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 	@Override
 	public void onClick(View view) {
 		Bookmark bookmark = (Bookmark) view.getTag();
-		Event event = new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_SELECTED_EVENT, bookmark);
-		EventBus.fireEvent(event);
+		String title = AudiobookManager.getTitle(bookmark);
+		
+		String src = getClass().getSimpleName();
+		EventBus.fireEvent(new Event(src, Type.BOOKMARK_SELECTED_EVENT).setBookmark(bookmark).setString(title));
 	}
 	
 	@Override

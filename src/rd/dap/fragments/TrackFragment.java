@@ -4,14 +4,10 @@ import rd.dap.R;
 import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.HasBookmarkEvent;
 import rd.dap.events.Subscriber;
-import rd.dap.model.Audiobook;
-import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
-import rd.dap.model.Track;
-import rd.dap.support.TrackList;
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,9 +21,13 @@ import android.widget.TextView;
 
 
 public class TrackFragment extends Fragment implements Subscriber, OnClickListener, OnSeekBarChangeListener {
+	private Activity activity;
 	private TextView title_tv;
 	private SeekBar seeker;
 	private Bookmark bookmark = null;
+	private int trackno;
+	private int trackcount;
+	private String title;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,17 +47,26 @@ public class TrackFragment extends Fragment implements Subscriber, OnClickListen
 		if(savedInstanceState != null){
 			String author = savedInstanceState.getString("author");
 			String album = savedInstanceState.getString("album");
+			trackcount = savedInstanceState.getInt("trackcount");
+			trackno = savedInstanceState.getInt("trackno");
+			title = savedInstanceState.getString("title");
 			BookmarkManager bm = BookmarkManager.getInstance();
 			bookmark = bm.getBookmark(author, album);
-			
 			if(bookmark != null){
-				displayBookmark(bookmark);
+				seeker.setMax(trackcount);
+				seeker.setProgress(trackno);
+				title_tv.setText(title);
 			}
 		}
 		
 		EventBus.addSubsciber(this);
 		
 		return layout;
+	}
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		this.activity = activity;
 	}
 
 	@Override
@@ -66,6 +75,9 @@ public class TrackFragment extends Fragment implements Subscriber, OnClickListen
 		if(bookmark != null){
 			outState.putString("author", bookmark.getAuthor());
 			outState.putString("album", bookmark.getAlbum());
+			outState.putInt("trackno", trackno);
+			outState.putInt("trackcount", trackcount);
+			outState.putString("title", title);
 		}
 	}
 	
@@ -73,65 +85,49 @@ public class TrackFragment extends Fragment implements Subscriber, OnClickListen
 	public void onEvent(Event event) {
 		switch(event.getType()){
 		case BOOKMARK_SELECTED_EVENT:
-		case BOOKMARK_UPDATED_EVENT:
-			if(event.getSourceName().equals(getClass().getSimpleName())){
-				System.out.println("Ignoring event - thrown by this class");
-				break;
-			}
-			Bookmark bookmark = ((HasBookmarkEvent)event).getBookmark();
-			displayBookmark(bookmark);
+			Bookmark bookmark = event.getBookmark();
+			trackno = bookmark.getTrackno();
+			seeker.setProgress(trackno);
+			title = event.getString();
+			title_tv.setText(title);
+			break;
+		case TRACKCOUNT_SET_EVENT:
+			trackcount = event.getInteger();
+			seeker.setMax(trackcount);
+			break;
+		case ON_TRACK_CHANGED:
+			trackno = event.getInteger();
+			title = event.getString();
+			activity.runOnUiThread(new Runnable() {
+				@Override public void run() {
+					title_tv.setText(title);
+					seeker.setProgress(trackno);
+				}
+			});
 			break;
 		default:
 			break;
 		}
 	}
 
-	private void displayBookmark(Bookmark bookmark) {
-		this.bookmark = bookmark;
-		AudiobookManager am = AudiobookManager.getInstance();
-		Audiobook audiobook = am.getAudiobook(bookmark);
-		int trackno = bookmark.getTrackno();
-		TrackList tracks = audiobook.getPlaylist(); 
-		Track track = tracks.get(trackno);
-		String title = track.getTitle();
-		title_tv.setText(title);
-		seeker.setMax(tracks.size());
-		seeker.setProgress(trackno);
-	}
-
 	@Override
 	public void onClick(View v) {
-		if(bookmark == null) return;
-		int trackno = bookmark.getTrackno();
 		switch(v.getId()){
-		case R.id.fragment_track_btn_previous: trackno--; break;
-		case R.id.fragment_track_btn_next: trackno++; break;
+		case R.id.fragment_track_btn_previous:
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_PREV));
+			break;
+		case R.id.fragment_track_btn_next:
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_NEXT));
+			break;
 		}
-		AudiobookManager am = AudiobookManager.getInstance();
-		Audiobook audiobook = am.getAudiobook(bookmark);
-		TrackList tracks = audiobook.getPlaylist();
-		if(trackno < 0 || trackno >= tracks.size()) return;
-		bookmark.setTrackno(trackno);
-
-		displayBookmark(bookmark);
-		
-		Event event = new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_UPDATED_EVENT, bookmark);
-		EventBus.fireEvent(event);
 	}
-
-
 
 	@Override public void onStopTrackingTouch(SeekBar seekBar) { } //Never used
 	@Override public void onStartTrackingTouch(SeekBar seekBar) { } //Never used
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int trackno, boolean fromUser) {
 		if(!fromUser) return;
-		bookmark.setTrackno(trackno);
-		
-		displayBookmark(bookmark);
-		
-		Event event = new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_UPDATED_EVENT, bookmark);
-		EventBus.fireEvent(event);
+		EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_SEEK_TO_TRACK).setInteger(trackno));
 	}
 
 }

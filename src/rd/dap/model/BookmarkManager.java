@@ -11,16 +11,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import rd.dap.events.BookmarksLoadedEvent;
 import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
+import android.app.Activity;
 import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class BookmarkManager{ //Singleton
+	public static final String END = "/END";
 	private static BookmarkManager instance = new BookmarkManager();
 	private ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
 	
@@ -120,8 +121,8 @@ public class BookmarkManager{ //Singleton
 	}
 	
 	//Load and save bookmarks
-	public void loadBookmarks(File filesDir){
-		File file = new File(filesDir, "bookmarks.dap");
+	public void loadBookmarks(Activity activity){
+		File file = new File(activity.getFilesDir(), "bookmarks.dap");
 		try {
 			FileInputStream stream = new FileInputStream(file);
 			InputStreamReader reader = new InputStreamReader(stream);
@@ -132,12 +133,23 @@ public class BookmarkManager{ //Singleton
 			bookmarks.clear();
 			bookmarks.addAll(list);
 			in.close();
-			
-			Event event = new BookmarksLoadedEvent(getClass().getSimpleName(), bookmarks);
-			EventBus.fireEvent(event);
+			if(bookmarks.size() == 1){
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						Bookmark bookmark = bookmarks.get(0);
+						String title = AudiobookManager.getTitle(bookmark);
+						String src = getClass().getSimpleName();
+						Event event = new Event(src, Type.BOOKMARK_SELECTED_EVENT)
+						.setBookmark(bookmark).setString(title);
+						EventBus.fireEvent(event);
+					}
+				});
+				
+			}
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.BOOKMARKS_LOADED_EVENT).setBookmarks(bookmarks));
 		} catch (FileNotFoundException e){
-			Event event = new Event(getClass().getSimpleName(), Type.NO_BOOKMARKS_FOUND_EVENT);
-			EventBus.fireEvent(event);
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.NO_BOOKMARKS_FOUND_EVENT));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

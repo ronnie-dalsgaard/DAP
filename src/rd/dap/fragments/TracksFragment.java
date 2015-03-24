@@ -4,7 +4,6 @@ import rd.dap.R;
 import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
 import rd.dap.events.EventBus;
-import rd.dap.events.HasBookmarkEvent;
 import rd.dap.events.Subscriber;
 import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
@@ -92,7 +91,7 @@ public class TracksFragment extends Fragment implements Subscriber, OnClickListe
 	@Override
 	public void onClick(View view) {
 		int trackno = (int)view.getTag();
-		bookmark.setTrackno(trackno); 
+//		bookmark.setTrackno(trackno); 
 
 		//Remove cicle from previous
 		View v_prev = flowview.getChildAt(currentTrackno);
@@ -107,22 +106,24 @@ public class TracksFragment extends Fragment implements Subscriber, OnClickListe
 //		updateFlow(); //Also good, but a bit heavy
 		
 		currentTrackno = trackno;
-		Event event = new HasBookmarkEvent(getClass().getSimpleName(), Type.BOOKMARK_UPDATED_EVENT, bookmark);
-		EventBus.fireEvent(event);
+		
+		EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_SEEK_TO_TRACK).setInteger(currentTrackno));
 	}
 
 	@Override
 	public void onEvent(Event event) {
-		System.out.println(getClass().getSimpleName()+":\n"+event);
 		switch(event.getType()){
 		case BOOKMARK_SELECTED_EVENT:
-		case BOOKMARK_UPDATED_EVENT:
-			bookmark = ((HasBookmarkEvent)event).getBookmark();
+			bookmark = event.getBookmark();
 			AudiobookManager am = AudiobookManager.getInstance();
 			Audiobook audiobook = am.getAudiobook(bookmark);
 			tracks.clear();
 			tracks.addAll(audiobook.getPlaylist());
 			currentTrackno = bookmark.getTrackno();
+			updateFlow();
+			break;
+		case ON_TRACK_CHANGED:
+			currentTrackno = event.getInteger();
 			updateFlow();
 			break;
 		default:
