@@ -1,0 +1,75 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:orientation="horizontal" >
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" >
+
+        <LinearLayout
+            android:id="@+id/base"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            tools:context="rd.dap.activities.MainActivity" >
+
+            <fragment
+                android:id="@+id/fragment_bookmarks"
+                android:name="rd.dap.fragments.BookmarksFragment"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/fragment_bookmarks_flow" />
+
+            <include layout="@layout/divider_horizontal" />
+
+            <fragment
+                android:id="@+id/fragment_player"
+                android:name="rd.dap.fragments.PlayerFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/fragment_player" />
+
+            <include layout="@layout/divider_horizontal" />
+
+            <fragment
+                android:id="@+id/fragment_progress"
+                android:name="rd.dap.fragments.ProgressFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/fragment_progress" />
+
+            <include layout="@layout/divider_horizontal" />
+
+            <fragment
+                android:id="@+id/fragment_track"
+                android:name="rd.dap.fragments.TrackFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/fragment_track" />
+
+            <include layout="@layout/divider_horizontal" />
+
+            <fragment
+                android:id="@+id/fragment_tracks"
+                android:name="rd.dap.fragments.TracksFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/fragment_tracks_flow" />
+
+            <include layout="@layout/divider_horizontal" />
+        </LinearLayout>
+    </ScrollView>
+    
+    <include layout="@layout/divider_vertical" />
+
+    <fragment
+        android:id="@+id/fragment_audiobooks"
+        android:name="rd.dap.fragments.AudiobooksFragment"
+        android:layout_width="100dp"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
