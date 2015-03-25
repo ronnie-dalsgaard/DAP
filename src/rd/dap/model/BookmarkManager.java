@@ -155,8 +155,13 @@ public class BookmarkManager{ //Singleton
 		}
 	}
 	public boolean saveBookmarks(File filesDir){
+		ArrayList<Bookmark> savelist = new ArrayList<Bookmark>();
+		for(Bookmark b : bookmarks){
+			Bookmark bookmark = new Bookmark(b);
+			savelist.add(bookmark);
+		}
 		Gson gson = new Gson();
-		String json = gson.toJson(bookmarks);
+		String json = gson.toJson(savelist);
 		
 		//create a file in internal storage
 		File file = new File(filesDir, "bookmarks.dap"); //FIXME filename as constant

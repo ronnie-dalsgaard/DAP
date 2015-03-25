@@ -9,5 +9,7 @@
     <size 
         android:width="50dp"
         android:height="50dp" />
+    
+    <solid android:color="@color/transparent"/>
 
 </shape>

@@ -72,8 +72,7 @@ public class PlayerService extends Service implements Subscriber, OnErrorListene
 			(pmonitor = new ProgressMonitor(this)).start();
 			(bmonitor = new BookmarkMonitor(this)).start();
 			break;
-		case REQUEST_TOGGLE: System.err.println("request received -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT)); 
-			toggle(); break;
+		case REQUEST_TOGGLE: toggle(); break;
 		case REQUEST_PLAY: play(); break;
 		case REQUEST_PAUSE: pause(); break;
 		case REQUEST_PREV: prev(); break;
@@ -125,7 +124,6 @@ public class PlayerService extends Service implements Subscriber, OnErrorListene
 			EventBus.fireEvent(new Event(src, Type.ON_PAUSE));
 			mp.pause();
 		} else {
-			System.err.println("start -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT));
 			EventBus.fireEvent(new Event(src, Type.ON_PLAY));
 			mp.start();
 		}
@@ -225,7 +223,7 @@ public class PlayerService extends Service implements Subscriber, OnErrorListene
 			bookmark.addEvent(new BookmarkEvent(Function.END, trackno, end_progress));
 			set(bookmark);
 		} else {
-			bookmark.setTrackno(trackno++);
+			bookmark.setTrackno(++trackno);
 			bookmark.setProgress(0);
 			bookmark.addEvent(new BookmarkEvent(Function.PLAY, trackno, 0));
 			set(bookmark);

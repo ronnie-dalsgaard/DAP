@@ -8,6 +8,7 @@ import java.util.Collections;
 
 import rd.dap.R;
 import rd.dap.activities.AudiobookActivity;
+import rd.dap.activities.AudiobooksActivity;
 import rd.dap.activities.FileBrowserActivity;
 import rd.dap.events.Event;
 import rd.dap.events.Event.Type;
@@ -100,7 +101,9 @@ public class AudiobooksFragment extends Fragment implements Subscriber, OnItemCl
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 		Audiobook audiobook = audiobooks.get(position);
 		EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.AUDIOBOOKS_SELECTED_EVENT).setAudiobook(audiobook));
-		activity.finish();
+		if(activity.getClass().getSimpleName().equals(AudiobooksActivity.class.getSimpleName())) {
+			activity.finish();
+		}
 	}
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View v, int position,	long id) {

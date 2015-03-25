@@ -20,6 +20,17 @@ public class Bookmark implements Comparable<Bookmark>{
 		this.events = new LinkedList<BookmarkEvent>();
 		addEvent(new BookmarkEvent(Function.CREATE, 0, 0));
 	}
+	public Bookmark(Bookmark bookmark){
+		this.author = bookmark.getAuthor();
+		this.album = bookmark.getAlbum();
+		this.trackno = bookmark.getTrackno();
+		this.progress = bookmark.getProgress();
+		this.events = new LinkedList<BookmarkEvent>();
+		for(BookmarkEvent be : bookmark.getEvents()){
+			BookmarkEvent new_be = new BookmarkEvent(be);
+			addEvent(new_be);
+		}
+	}
 
 	public final String getAuthor() { return new String(author); } //return defensive copy
 	public final String getAlbum() { return new String(album); } //return defensive copy

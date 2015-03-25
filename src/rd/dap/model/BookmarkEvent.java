@@ -19,10 +19,17 @@ public class BookmarkEvent {
 		this.function = function;
 		this.trackno = trackno;
 		this.progress = progress;
-		timestamp = Time.getTimestamp();
+		this.timestamp = Time.getTimestamp();
 	}
 	
 	public BookmarkEvent(){} //Must be bean
+
+	public BookmarkEvent(BookmarkEvent be) {
+		this.function = be.getFunction();
+		this.trackno = be.getTrackno();
+		this.progress = be.getProgress();
+		this.timestamp = Time.getTimeStamp(be.getTimestamp());
+	}
 
 	//Getters and Setters
 	public Function getFunction() { return function; }

@@ -126,7 +126,7 @@ public class ProgressFragment extends Fragment implements Subscriber, OnClickLis
 	public void onClick(View v) {
 		switch(v.getId()){
 		case R.id.fragment_progress_btn_rewind:
-			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_PREV));
+			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_REWIND));
 			break;
 		case R.id.fragment_progress_btn_forward: 
 			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_FORWARD));

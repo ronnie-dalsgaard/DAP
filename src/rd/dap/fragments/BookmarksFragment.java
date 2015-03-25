@@ -98,7 +98,8 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 			int progress = 0;
 			ArrayList<BookmarkEvent> events = new ArrayList<BookmarkEvent>();
 			boolean force = false;
-			bm.createOrUpdateBookmark(filesDir, author, album, trackno, progress, events, force);
+			Bookmark selected_bookmark = bm.createOrUpdateBookmark(filesDir, author, album, trackno, progress, events, force);
+			bookmarks.add(selected_bookmark);
 			updateFlow();
 			break;
 		case BOOKMARK_DELETED_EVENT:
@@ -109,6 +110,7 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 			break;
 		case BOOKMARK_UPDATED_EVENT:
 			Bookmark bookmark = event.getBookmark();
+			if(bookmarks == null) break;
 			for(Bookmark b : bookmarks){
 				if(b.getAuthor().equals(bookmark.getAuthor())
 						&& b.getAlbum().equals(bookmark.getAlbum())){
@@ -134,6 +136,7 @@ public class BookmarksFragment extends Fragment implements Subscriber, OnClickLi
 			public void run() {
 				flowview.removeAllViews();
 				ArrayList<Bookmark> disabledBookmarks = new ArrayList<Bookmark>();
+				
 				for(Bookmark bookmark : bookmarks){
 					View v = inflater.inflate(R.layout.fragment_bookmark_flow_item, flowview, false);
 					v.setTag(bookmark);

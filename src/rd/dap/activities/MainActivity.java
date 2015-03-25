@@ -16,6 +16,8 @@ import rd.dap.services.PlayerService;
 import rd.dap.services.PlayerService.DAPBinder;
 import rd.dap.support.MainDriveHandler;
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,8 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -80,15 +84,27 @@ public class MainActivity extends MainDriveHandler implements Subscriber, Callba
 			Intent intent = new Intent(this, PlayerService.class);
 			bindService(intent, this, Context.BIND_AUTO_CREATE);
 		}
+		closeNotification();
 	}
 	@Override
 	public void onStop(){
 		super.onStop();
 		//Unbind from PlayerService
 		if(bound){
+			if(player.isPlaying()){
+				Bookmark bookmark = player.getBookmark();
+				String title = bookmark.getAuthor();
+				String body = bookmark.getAlbum();
+				showNotification(title, body);
+			}
 			unbindService(this);
 			bound = false;
 		}
+	}
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		closeNotification();
 	}
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
@@ -96,6 +112,7 @@ public class MainActivity extends MainDriveHandler implements Subscriber, Callba
 		player = binder.getPlayerService();
 		bound = true;
 	}
+
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		bound = false;
@@ -141,7 +158,33 @@ public class MainActivity extends MainDriveHandler implements Subscriber, Callba
 		EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.BOOKMARKS_UPDATED_EVENT).setBookmarks(bookmarks));
 	}
 
-	
-	
+	private void showNotification(String title, String body){
+		NotificationCompat.Builder mBuilder =
+		        new NotificationCompat.Builder(this)
+		        .setSmallIcon(R.drawable.red_tape)
+		        .setContentTitle(title)
+		        .setContentText(body);
+
+		Intent resultIntent = new Intent(this, MainActivity.class);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+		stackBuilder.addParentStack(MainActivity.class);
+		stackBuilder.addNextIntent(resultIntent);
+		PendingIntent resultPendingIntent =
+		        stackBuilder.getPendingIntent(
+		            0,
+		            PendingIntent.FLAG_UPDATE_CURRENT
+		        );
+		mBuilder.setContentIntent(resultPendingIntent);
+		NotificationManager mNotificationManager =
+		    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		mNotificationManager.notify("DistributedAudiobookPlayer".hashCode(), mBuilder.build());
+	}
+	private void closeNotification(){
+		NotificationManager mNotificationManager =
+			    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			// mId allows you to update the notification later on.
+		mNotificationManager.cancel("DistributedAudiobookPlayer".hashCode());
+	}
 	
 }

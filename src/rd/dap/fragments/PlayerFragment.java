@@ -9,7 +9,6 @@ import rd.dap.model.Audiobook;
 import rd.dap.model.AudiobookManager;
 import rd.dap.model.Bookmark;
 import rd.dap.model.BookmarkManager;
-import rd.dap.support.Time;
 import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
@@ -75,7 +74,6 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 		super.onAttach(activity);
 		this.activity = activity;
 	}
-
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -90,41 +88,10 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 	public void onClick(View view) {
 		switch(view.getId()){
 		case R.id.fragment_player_btn_cover:
-			System.err.println("click -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT));
 			EventBus.fireEvent(new Event(getClass().getSimpleName(), Type.REQUEST_TOGGLE).setBoolean(true));
 			break;
 		}
 	}
-
-
-	private void displayBookmark(Bookmark bookmark){
-		this.bookmark = bookmark;
-		AudiobookManager am = AudiobookManager.getInstance(); 
-		Audiobook audiobook = am.getAudiobook(bookmark);
-		Bitmap bm = audiobook.getThumbnail();
-		if(bm == null) cover_iv.setImageDrawable(noCover); 
-		else cover_iv.setImageBitmap(bm);
-		play_btn.setImageDrawable(drw_play_on_cover);
-		author_tv.setText(audiobook.getAuthor());
-		album_tv.setText(audiobook.getAlbum());
-	}
-	private void displayNoBookmark(){
-		cover_iv.setImageDrawable(noCover);
-		play_btn.setImageDrawable(null);
-		author_tv.setText(R.string.g_author);
-		album_tv.setText(R.string.g_album);
-	}
-	private void setPlayButton(){
-		System.err.println("btn update -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT));
-		play_btn.setImageDrawable(drw_play_on_cover);
-		isPlay = false;
-	}
-	private void setPauseButton(){
-		System.err.println("btn update -->"+Time.getTimestamp().toString(Time.TimeStamp.TIME_EXACT));
-		play_btn.setImageDrawable(drw_pause_on_cover);
-		isPlay = true;
-	}
-	
 	@Override
 	public void onEvent(final Event event) {
 		Bookmark bookmark;
@@ -157,7 +124,33 @@ public class PlayerFragment extends Fragment implements OnClickListener, Subscri
 			break;
 		
 		}
-		
 	}
-
+	
+	private void displayBookmark(Bookmark bookmark){
+		this.bookmark = bookmark;
+		AudiobookManager am = AudiobookManager.getInstance(); 
+		Audiobook audiobook = am.getAudiobook(bookmark);
+		Bitmap bm = audiobook.getThumbnail();
+		if(bm == null) cover_iv.setImageDrawable(noCover); 
+		else cover_iv.setImageBitmap(bm);
+		if(isPlay) setPauseButton();
+		else setPlayButton();
+		author_tv.setText(audiobook.getAuthor());
+		album_tv.setText(audiobook.getAlbum());
+	}
+	private void displayNoBookmark(){
+		cover_iv.setImageDrawable(noCover);
+		play_btn.setImageDrawable(null);
+		author_tv.setText(R.string.g_author);
+		album_tv.setText(R.string.g_album);
+	}
+	private void setPlayButton(){
+		play_btn.setImageDrawable(drw_play_on_cover);
+		isPlay = false;
+	}
+	private void setPauseButton(){
+		play_btn.setImageDrawable(drw_pause_on_cover);
+		isPlay = true;
+	}
+	
 }

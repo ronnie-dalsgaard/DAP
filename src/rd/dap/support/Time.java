@@ -30,37 +30,54 @@ public class Time {
 		TimeStamp time = new Time().new TimeStamp(milis, sec, min, hour, day, month, year);
 		return time;
 	}
+	public static TimeStamp getTimeStamp(TimeStamp ts){
+		TimeStamp time = new Time().new TimeStamp(ts);
+		return time;
+	}
 	
 	public class TimeStamp{
-		public static final int TIME = 0, TIME_EXACT = 1, DAY = 2, DAY_EXACT = 3, DAY_TIME = 4, DAY_TIME_EXACT = 5, DAY_TIME_VERY_EXACT = 6;
+		public static final int 
+			TIME = 0, 
+			TIME_EXACT = 1, 
+			DAY = 2, 
+			DAY_EXACT = 3, 
+			DAY_TIME = 4, 
+			DAY_TIME_EXACT = 5, 
+			DAY_TIME_VERY_EXACT = 6;
 		private DecimalFormat df = new DecimalFormat("00");
 		private DecimalFormat df3 = new DecimalFormat("000");
-		public String milis, sec, min, hour, day, month, year;
+		public int milis, sec, min, hour, day, month, year;
+		public String _milis, _sec, _min, _hour, _day, _month, _year;
 		public TimeStamp(int milis, int sec, int min, int hour, int day, int month, int year){
-			this.milis = this.df3.format(milis);
-			this.sec   =  this.df.format(sec);
-			this.min   =  this.df.format(min);
-			this.hour  =  this.df.format(hour);
-			this.day   =  this.df.format(day);
-			this.month =  this.df.format(month);
-			this.year  =  this.df.format(year);
+			this.milis = milis; this.sec = sec; this.min = min; this.hour = hour;
+			this.day = day; this.month = month; this.year = year;
+			this._milis = this.df3.format(milis);
+			this._sec   =  this.df.format(sec);
+			this._min   =  this.df.format(min);
+			this._hour  =  this.df.format(hour);
+			this._day   =  this.df.format(day);
+			this._month =  this.df.format(month);
+			this._year  =  this.df.format(year);
+		}
+		public TimeStamp(TimeStamp ts){
+			this(ts.milis, ts.sec, ts.min, ts.hour, ts.day, ts.month, ts.year);
 		}
 		public String toString(int format){
 			switch (format){
-				case TIME: return this.hour + ":" + this.min + ":" + this.sec;
-				case TIME_EXACT: return this.hour + ":" + this.min + ":" + this.sec + ":" + this.milis;
-				case DAY: return this.day + "/" + this.month;
-				case DAY_EXACT: return this.day + "/" + this.month + "-" + this.year;
-				case DAY_TIME: return this.hour + ":" + this.min + " " + this.day + "/" + this.month;
-				case DAY_TIME_EXACT: return this.hour + ":" + this.min + ":" + this.sec + " " + this.day + "/" + this.month + "-" + this.year;
-				case DAY_TIME_VERY_EXACT: return this.hour + ":" + this.min + ":" + this.sec + ":" + this.milis 
-						+ " " + this.day + "/" + this.month + "-" + this.year;
+				case TIME: return this._hour + ":" + this._min + ":" + this._sec;
+				case TIME_EXACT: return this._hour + ":" + this._min + ":" + this._sec + ":" + this._milis;
+				case DAY: return this._day + "/" + this._month;
+				case DAY_EXACT: return this._day + "/" + this._month + "-" + this._year;
+				case DAY_TIME: return this._hour + ":" + this._min + " " + this._day + "/" + this._month;
+				case DAY_TIME_EXACT: return this._hour + ":" + this._min + ":" + this._sec + " " + this._day + "/" + this._month + "-" + this._year;
+				case DAY_TIME_VERY_EXACT: return this._hour + ":" + this._min + ":" + this._sec + ":" + this._milis 
+						+ " " + this._day + "/" + this._month + "-" + this._year;
 				default: return "Bad format";
 			}
 			
 		}
 		@Override public String toString(){
-			return this.hour +":"+ this.min +":"+ this.sec +" "+ this.day +"/"+ this.month +"-"+ this.year;
+			return this._hour +":"+ this._min +":"+ this._sec +" "+ this._day +"/"+ this._month +"-"+ this._year;
 		}
 	}
 	
